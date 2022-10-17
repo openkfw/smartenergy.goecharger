@@ -1,0 +1,8 @@
+"""Constants re-used across different files."""
+DOMAIN = "go_echarger"
+CONF_CHARGERS = "chargers"
+CONF_NAME = "name"
+CONF_API_URL = "api_url"
+CONF_API_TOKEN = "api_token"
+CHARGERS_API = "chargers_api"
+COMMON_STATE = "common"

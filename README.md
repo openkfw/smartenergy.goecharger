@@ -1,2 +1,3 @@
-# homeassistant_goechargerv2
-Home assistant integration for go echarger v2
+# Homeassistant intgration for Go eCharger API v2
+
+This is an integration for home assistant for the go echarger wallbox (API v2).
