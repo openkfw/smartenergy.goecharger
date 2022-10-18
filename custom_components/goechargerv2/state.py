@@ -1,14 +1,15 @@
 """Smart Energy state management"""
 
 import logging
+from homeassistant.const import CONF_NAME
 from .controller import fetch_status
-
 from .const import (
+    INIT_STATE,
     DOMAIN,
     CHARGERS_API,
 )
 
-_LOGGER = logging.getLogger(__name__)
+_LOGGER: logging.Logger = logging.getLogger(__name__)
 
 
 class StateFetcher:
@@ -17,20 +18,21 @@ class StateFetcher:
 
     coordinator = None
 
-    def __init__(self, hass):
+    def __init__(self, hass) -> None:
         self._hass = hass
 
-    async def fetch_states(self):
+    async def fetch_states(self) -> dict:
         """Fetch go-eCharger car status via API."""
 
         _LOGGER.debug("Updating the go-eCharger coordinator data...")
 
-        chargers_api = self._hass.data[DOMAIN][CHARGERS_API]
+        chargers_api = self._hass.data[DOMAIN][INIT_STATE][CHARGERS_API]
         data = self.coordinator.data if self.coordinator.data else {}
         _LOGGER.debug("Current go-eCharger coordinator data=%s", data)
 
-        for charger_api_name in chargers_api.keys():
-            data[charger_api_name] = await fetch_status(self._hass, charger_api_name)
+        for charger_name in chargers_api.keys():
+            data[charger_name] = await fetch_status(self._hass, charger_name)
+            data[charger_name][CONF_NAME] = chargers_api[charger_name][CONF_NAME]
 
         _LOGGER.debug("Updated go-eCharger coordinator data=%s", data)
 
