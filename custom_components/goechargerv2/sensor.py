@@ -77,6 +77,7 @@ CHARGER_SENSORS_CONFIG: dict = {
         "energy_since_car_connected": DEVICE_CLASS_ENERGY,
         "energy_total": DEVICE_CLASS_ENERGY,
         "charging_limit": DEVICE_CLASS_ENERGY,
+        "charging_allowed": "go_echarger__allow_charging",
     },
 }
 
@@ -247,14 +248,6 @@ class ChargerSensor(BaseSensor, CoordinatorEntity, SensorEntity):
     @property
     def state(self) -> str:
         """Return the state of the sensor."""
-        # return custom message in case charging is not allowed
-        # TODO: do via HO translations
-        if (
-            self._attribute == "charging_allowed"
-            and self.coordinator.data[self._device_id][self._attribute] == "off"
-        ):
-            return "Off - Please authenticate your car to allow charging"
-
         # if charging is not allowed, show current as 0
         if (
             self._attribute == "charger_max_current"
