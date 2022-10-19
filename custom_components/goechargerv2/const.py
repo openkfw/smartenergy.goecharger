@@ -1,5 +1,6 @@
-"""Constants re-used across different files."""
-DOMAIN = "go_echarger"
+"""Constants re-used across different files"""
+
+DOMAIN = "goechargerv2"
 CONF_CHARGERS = "chargers"
 CHARGERS_API = "chargers_api"
 API = "api"

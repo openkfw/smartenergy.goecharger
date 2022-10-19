@@ -1,13 +1,11 @@
-"""Smart Energy state management"""
+"""Go-eCharger state (coordinator) management"""
 
 import logging
+
 from homeassistant.const import CONF_NAME
+
+from .const import CHARGERS_API, DOMAIN, INIT_STATE
 from .controller import fetch_status
-from .const import (
-    INIT_STATE,
-    DOMAIN,
-    CHARGERS_API,
-)
 
 _LOGGER: logging.Logger = logging.getLogger(__name__)
 

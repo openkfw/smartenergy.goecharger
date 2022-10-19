@@ -1,29 +1,28 @@
-"""Go-eCharger integration"""
+"""Go-eCharger main integration file"""
 
-import logging
 import asyncio
+import logging
 from datetime import timedelta
-import voluptuous as vol
-import homeassistant.helpers.config_validation as cv
 
-from homeassistant.const import CONF_SCAN_INTERVAL, CONF_NAME, CONF_API_TOKEN, CONF_HOST
+import homeassistant.helpers.config_validation as cv
+import voluptuous as vol
+from goecharger.goecharger import GoeChargerApi
 from homeassistant import core
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import CONF_API_TOKEN, CONF_HOST, CONF_NAME, CONF_SCAN_INTERVAL
 from homeassistant.helpers.discovery import async_load_platform
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
-from homeassistant.config_entries import ConfigEntry
-from goecharger.goecharger import GoeChargerApi
-
 
 from .const import (
-    DOMAIN,
-    CONF_CHARGERS,
+    API,
     CHARGERS_API,
+    CONF_CHARGERS,
+    DOMAIN,
     INIT_STATE,
     UNSUB_OPTIONS_UPDATE_LISTENER,
-    API,
 )
-from .state import StateFetcher
 from .controller import ChargerController
+from .state import StateFetcher
 
 _LOGGER: logging.Logger = logging.getLogger(__name__)
 
@@ -86,7 +85,6 @@ def _setup_apis(config, hass) -> dict:
         _LOGGER.debug("Scan interval set to=%s", scan_interval)
 
         chargers = config[DOMAIN].get(CONF_CHARGERS, [])
-        _LOGGER.debug("Configured chargers=%s", chargers)
 
         for charger in chargers:
             name = charger[0][CONF_NAME]
@@ -117,7 +115,7 @@ async def async_setup_entry(
     data = dict(config_entry.data)
     entry_id = config_entry.entry_id
 
-    _LOGGER.info(
+    _LOGGER.debug(
         "Setting up a dynamic Go-eCharger charger with id=%s, data=%s and options=%s",
         entry_id,
         data,
@@ -139,7 +137,7 @@ async def async_setup_entry(
     await _setup_coordinator(
         StateFetcher,
         scan_interval,
-        entry_id + "_coordinator",
+        f"{entry_id}_coordinator",
         hass,
     ).async_refresh()
 
@@ -156,7 +154,7 @@ async def async_setup_entry(
         entry_id
     ] = unsub_options_update_listener
 
-    _LOGGER.info("Setup for the dynamic Go-eCharger charger completed")
+    _LOGGER.debug("Setup for the dynamic Go-eCharger charger completed")
 
     return True
 
@@ -194,7 +192,7 @@ async def async_unload_entry(
 async def async_setup(hass: core.HomeAssistant, config: dict) -> bool:
     """Set up Go-eCharger platforms and services."""
 
-    _LOGGER.info("Setting up the Go-eCharger integration")
+    _LOGGER.debug("Setting up the Go-eCharger integration")
 
     charger = ChargerController(hass)
 
@@ -205,8 +203,9 @@ async def async_setup(hass: core.HomeAssistant, config: dict) -> bool:
         DOMAIN, "change_charging_power", charger.change_charging_power
     )
     hass.services.async_register(DOMAIN, "set_phase", charger.set_phase)
-    hass.services.async_register(DOMAIN, "set_authentication", charger.set_authentication)
-
+    hass.services.async_register(
+        DOMAIN, "set_authentication", charger.set_authentication
+    )
 
     scan_interval = DEFAULT_UPDATE_INTERVAL
     chargers_api = _setup_apis(config, hass)
@@ -226,7 +225,7 @@ async def async_setup(hass: core.HomeAssistant, config: dict) -> bool:
         await _setup_coordinator(
             StateFetcher,
             scan_interval,
-            charger_name + "_coordinator",
+            f"{charger_name}_coordinator",
             hass,
         ).async_refresh()
 
@@ -243,6 +242,6 @@ async def async_setup(hass: core.HomeAssistant, config: dict) -> bool:
         )
     )
 
-    _LOGGER.info("Setup for the Go-eCharger integration completed")
+    _LOGGER.debug("Setup for the Go-eCharger integration completed")
 
     return True

@@ -1,8 +1,8 @@
-"""API controller configuration for go-eCharger sensor integration."""
+"""API controller configuration for Go-eCharger integration"""
 
 import logging
 
-from .const import DOMAIN, INIT_STATE, CHARGERS_API, API
+from .const import API, CHARGERS_API, DOMAIN, INIT_STATE
 
 _LOGGER: logging.Logger = logging.getLogger(__name__)
 
@@ -26,7 +26,7 @@ class ChargerController:
         """Check if charging is allowed. If not, log an error and return False, other return True"""
 
         if (
-            self._hass.data[DOMAIN][charger_name + "_coordinator"].data[charger_name][
+            self._hass.data[DOMAIN][f"{charger_name}_coordinator"].data[charger_name][
                 "charging_allowed"
             ]
             == "off"
@@ -62,7 +62,7 @@ class ChargerController:
             await self._hass.async_add_executor_job(api.set_max_current, charging_power)
 
         await self._hass.async_add_executor_job(api.set_force_charging, True)
-        await self._hass.data[DOMAIN][charger_name + "_coordinator"].async_refresh()
+        await self._hass.data[DOMAIN][f"{charger_name}_coordinator"].async_refresh()
 
     async def stop_charging(self, call) -> None:
         """Get name and assigned power from the service call and call the API accordingly.
@@ -79,7 +79,7 @@ class ChargerController:
 
         await self._hass.async_add_executor_job(api.set_max_current, 0)
         await self._hass.async_add_executor_job(api.set_force_charging, False)
-        await self._hass.data[DOMAIN][charger_name + "_coordinator"].async_refresh()
+        await self._hass.data[DOMAIN][f"{charger_name}_coordinator"].async_refresh()
 
     async def change_charging_power(self, call) -> None:
         """Get name and power from the service call and call the API accordingly.
@@ -99,7 +99,7 @@ class ChargerController:
         )
 
         await self._hass.async_add_executor_job(api.set_max_current, charging_power)
-        await self._hass.data[DOMAIN][charger_name + "_coordinator"].async_refresh()
+        await self._hass.data[DOMAIN][f"{charger_name}_coordinator"].async_refresh()
 
     async def set_phase(self, call) -> None:
         """Get name and phase from the service call and call the API accordingly.
@@ -121,7 +121,7 @@ class ChargerController:
         )
 
         await self._hass.async_add_executor_job(api.set_phase, phase)
-        await self._hass.data[DOMAIN][charger_name + "_coordinator"].async_refresh()
+        await self._hass.data[DOMAIN][f"{charger_name}_coordinator"].async_refresh()
 
     async def set_authentication(self, call) -> None:
         """Get name and status from the service call and call the API accordingly.
@@ -143,5 +143,4 @@ class ChargerController:
         )
 
         await self._hass.async_add_executor_job(api.set_access_control, status)
-        await self._hass.data[DOMAIN][charger_name + "_coordinator"].async_refresh()
-        
+        await self._hass.data[DOMAIN][f"{charger_name}_coordinator"].async_refresh()

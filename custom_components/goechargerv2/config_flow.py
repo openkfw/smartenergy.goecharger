@@ -1,10 +1,13 @@
-"""Go-eCharger config flow setup"""
+"""Go-eCharger config flow and options flow setup"""
+
 from typing import Any, Literal
+
 import voluptuous as vol
-from homeassistant.config_entries import ConfigEntry, OptionsFlow, ConfigFlow
+from homeassistant.config_entries import ConfigEntry, ConfigFlow, OptionsFlow
+from homeassistant.const import CONF_API_TOKEN, CONF_HOST, CONF_NAME, CONF_SCAN_INTERVAL
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
-from homeassistant.const import CONF_SCAN_INTERVAL, CONF_NAME, CONF_HOST, CONF_API_TOKEN
+
 from .const import DOMAIN
 
 

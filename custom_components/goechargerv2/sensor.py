@@ -1,20 +1,18 @@
-"""Platform for go-eCharger sensor integration."""
+"""Sensor platform configuration for Go-eCharger"""
+
 import logging
-from typing import Literal
 from abc import ABC, abstractmethod
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from typing import Literal
+
 from homeassistant.components.sensor import (
-    STATE_CLASS_TOTAL,
     DEVICE_CLASS_CURRENT,
     DEVICE_CLASS_ENERGY,
+    STATE_CLASS_TOTAL,
     SensorEntity,
 )
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-
-from .const import (
-    CONF_CHARGERS,
-    DOMAIN,
-)
+from .const import CONF_CHARGERS, DOMAIN
 
 MINUTE_IN_MS: Literal[60000] = 60_000
 
@@ -151,7 +149,7 @@ async def async_setup_entry(
         _setup_sensors(
             [entry_id],
             CHARGER_SENSORS_CONFIG,
-            entry_id + "_coordinator",
+            f"{entry_id}_coordinator",
             ChargerSensor,
             hass,
         ),
@@ -175,7 +173,7 @@ async def async_setup_platform(
             _setup_sensors(
                 [charger_name],
                 CHARGER_SENSORS_CONFIG,
-                charger_name + "_coordinator",
+                f"{charger_name}_coordinator",
                 ChargerSensor,
                 hass,
             )
