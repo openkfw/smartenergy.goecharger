@@ -9,6 +9,9 @@
   "dependencies": [],
   "codeowners": [
     "@openkfw"
+  ],
+  "requirements": [
+    "goechargerv2==0.1.1"
   ]
 }
 
