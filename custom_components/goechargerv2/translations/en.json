@@ -1,0 +1,28 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "data": {
+                    "name": "Charger name",
+                    "host": "Go-eCharger cloud API host",
+                    "api_token": "Go-eCharger cloud API token",
+                    "scan_interval": "Scan interval for data updates"
+                },
+                "description": "Configure your go-eCharger car charger."
+            }
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "data": {
+                    "name": "Charger name",
+                    "host": "Go-eCharger cloud API host",
+                    "api_token": "Go-eCharger cloud API token",
+                    "scan_interval": "Scan interval for data updates"
+                },
+                "description": "Configure your go-eCharger car charger."
+            }
+        }
+    }
+}

@@ -1,34 +1,32 @@
-"""Platform for go-eCharger sensor integration."""
-import logging
+"""Sensor platform configuration for Go-eCharger"""
 
+import logging
 from abc import ABC, abstractmethod
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from typing import Literal
+
 from homeassistant.components.sensor import (
-    STATE_CLASS_TOTAL,
     DEVICE_CLASS_CURRENT,
     DEVICE_CLASS_ENERGY,
+    STATE_CLASS_TOTAL,
     SensorEntity,
 )
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
+from .const import CONF_CHARGERS, DOMAIN
 
-from .const import (
-    CONF_CHARGERS,
-    DOMAIN,
-)
-
-MINUTE_IN_MS = 60_000
+MINUTE_IN_MS: Literal[60000] = 60_000
 
 # Reference: https://developers.home-assistant.io/docs/core/entity/sensor/#long-term-statistics
-AMPERE = "A"
-VOLT = "V"
-POWER_WATT = "W"
-WATT_HOUR = "Wh"
-PERCENT = "%"
-TIME_MINUTES = "min"
+AMPERE: Literal["A"] = "A"
+VOLT: Literal["V"] = "V"
+POWER_WATT: Literal["W"] = "W"
+WATT_HOUR: Literal["Wh"] = "Wh"
+PERCENT: Literal["%"] = "%"
+TIME_MINUTES: Literal["min"] = "min"
 
-_LOGGER = logging.getLogger(__name__)
+_LOGGER: logging.Logger = logging.getLogger(__name__)
 
-CHARGER_SENSORS_CONFIG = {
+CHARGER_SENSORS_CONFIG: dict = {
     "sensors": [
         "car_status",
         "serial_number",
@@ -43,7 +41,7 @@ CHARGER_SENSORS_CONFIG = {
         "energy_total",
         "charging_limit",
         "phase_switch_mode",
-        "charger_access"
+        "name",
     ],
     "units": {
         "car_status": {"unit": "", "name": "Car charging status"},
@@ -62,7 +60,7 @@ CHARGER_SENSORS_CONFIG = {
         "energy_total": {"unit": WATT_HOUR, "name": "Energy total"},
         "charging_limit": {"unit": WATT_HOUR, "name": "Charging energy limit"},
         "phase_switch_mode": {"unit": "", "name": "Phase switch mode"},
-        "charger_access": {"unit": "", "name": "Access Control Setting"}
+        "name": {"unit": "", "name": "Friendly car name"},
     },
     "state_classes": {
         "charger_max_current": STATE_CLASS_TOTAL,
@@ -79,11 +77,14 @@ CHARGER_SENSORS_CONFIG = {
         "energy_since_car_connected": DEVICE_CLASS_ENERGY,
         "energy_total": DEVICE_CLASS_ENERGY,
         "charging_limit": DEVICE_CLASS_ENERGY,
+        "charging_allowed": "go_echarger__allow_charging",
     },
 }
 
 
-def _setup_sensors(sensor_ids, sensors_config, coordinator_name, sensor_class, hass):
+def _setup_sensors(
+    sensor_ids, sensors_config, coordinator_name, sensor_class, hass
+) -> list:
     entities = []
 
     for sensor_id in sensor_ids:
@@ -132,8 +133,35 @@ def _setup_sensors(sensor_ids, sensors_config, coordinator_name, sensor_class, h
     return entities
 
 
+async def async_setup_entry(
+    hass,
+    config_entry,
+    async_add_entities,
+) -> None:
+    """Setup sensors from a config entry created in the integrations UI."""
+    entry_id = config_entry.entry_id
+    config = hass.data[DOMAIN][entry_id]
+    _LOGGER.debug("Setting up the go-eCharger sensor for=%s", entry_id)
+
+    if config_entry.options:
+        config.update(config_entry.options)
+
+    async_add_entities(
+        _setup_sensors(
+            [entry_id],
+            CHARGER_SENSORS_CONFIG,
+            f"{entry_id}_coordinator",
+            ChargerSensor,
+            hass,
+        ),
+        update_before_add=True,
+    )
+
+
 # pylint: disable=unused-argument
-async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
+async def async_setup_platform(
+    hass, config, async_add_entities, discovery_info=None
+) -> None:
     """Set up go-eCharger Sensor platform."""
     _LOGGER.debug("Setting up the go-eCharger sensor platform")
 
@@ -146,7 +174,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
             _setup_sensors(
                 [charger_name],
                 CHARGER_SENSORS_CONFIG,
-                charger_name + "_coordinator",
+                f"{charger_name}_coordinator",
                 ChargerSensor,
                 hass,
             )
@@ -167,7 +195,7 @@ class BaseSensor(ABC):
         unit,
         state_class,
         device_class,
-    ):
+    ) -> None:
         """Initialize the Base sensor."""
 
         super().__init__(coordinator)
@@ -181,26 +209,26 @@ class BaseSensor(ABC):
 
     @property
     @abstractmethod
-    def device_info(self):
+    def device_info(self) -> None:
         """Return the info about the device."""
 
     @property
-    def name(self):
+    def name(self) -> str:
         """Return the name of the sensor."""
         return self._name
 
     @property
-    def unique_id(self):
+    def unique_id(self) -> str:
         """Return the unique_id of the sensor."""
         return f"{self._device_id}_{self._attribute}"
 
     @property
     @abstractmethod
-    def state(self):
+    def state(self) -> None:
         """Return the state of the sensor."""
 
     @property
-    def unit_of_measurement(self):
+    def unit_of_measurement(self) -> str:
         """Return the unit of measurement."""
         return self._unit
 
@@ -209,7 +237,7 @@ class ChargerSensor(BaseSensor, CoordinatorEntity, SensorEntity):
     """Representation of a sensor for the go-eCharger."""
 
     @property
-    def device_info(self):
+    def device_info(self) -> dict:
         return {
             "identifiers": {(DOMAIN, self._device_id)},
             "name": self._device_id,
@@ -218,16 +246,8 @@ class ChargerSensor(BaseSensor, CoordinatorEntity, SensorEntity):
         }
 
     @property
-    def state(self):
+    def state(self) -> str:
         """Return the state of the sensor."""
-        # return custom message in case charging is not allowed
-        # TODO: do via HO translations
-        if (
-            self._attribute == "charging_allowed"
-            and self.coordinator.data[self._device_id][self._attribute] == "off"
-        ):
-            return "Off - Please authenticate your car to allow charging"
-
         # if charging is not allowed, show current as 0
         if (
             self._attribute == "charger_max_current"
