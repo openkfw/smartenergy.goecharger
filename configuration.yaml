@@ -1,0 +1,9 @@
+# Loads default set of integrations. Do not remove.
+default_config:
+
+logger:
+  default: info
+  logs:
+    homeassistant.components.goechargerv2: debug
+
+goechargerv2:

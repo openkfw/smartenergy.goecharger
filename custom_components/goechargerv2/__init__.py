@@ -6,7 +6,7 @@ from datetime import timedelta
 
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
-from goecharger.goecharger import GoeChargerApi
+from goechargerv2.goecharger import GoeChargerApi
 from homeassistant import core
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_API_TOKEN, CONF_HOST, CONF_NAME, CONF_SCAN_INTERVAL

@@ -12,7 +12,7 @@ classifiers = [
   "License :: OSI Approved :: MIT License",
   "Operating System :: OS Independent",
 ]
-dependencies = ["homeassistant", "home-assistant-bluetooth", "voluptuous", "voluptuous-serialize"]
+dependencies = ["homeassistant", "home-assistant-bluetooth", "voluptuous", "voluptuous-serialize", "goechargerv2"]
 description = "This is an integration for home assistant for the go echarger wallbox (API v2)."
 keywords = ["goecharger", "kfw", "homeassistant", "cloud"]
 name = "homeassistant_goechargerv2"

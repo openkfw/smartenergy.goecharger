@@ -3,3 +3,4 @@ homeassistant==2022.9.5
 pylint==2.15.3
 voluptuous==0.13.1
 voluptuous-serialize==2.5.0
+goechargerv2==0.1.1
