@@ -27,8 +27,6 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install pylint
-        # temporary installation of the testing goecharger api library
-        pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ goechargerv2
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Analysing the code with pylint
       run: |
