@@ -4,6 +4,6 @@ default_config:
 logger:
   default: info
   logs:
-    homeassistant.components.goechargerv2: debug
+    homeassistant.components.go_echarger: debug
 
-goechargerv2:
+go_echarger:
