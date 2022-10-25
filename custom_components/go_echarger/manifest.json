@@ -1,17 +1,17 @@
 {
-  "domain": "goechargerv2",
+  "domain": "go_echarger",
   "name": "go-e Charger v2",
   "version": "0.1.0",
   "documentation": "https://github.com/openkfw/homeassistant_goechargerv2",
   "issue_tracker": "https://github.com/openkfw/homeassistant_goechargerv2/issues",
   "iot_class": "local_polling",
   "config_flow": true,
-  "dependencies": [],
+  "dependencies": ["sensor"],
   "codeowners": [
     "@openkfw"
   ],
   "requirements": [
-    "goechargerv2==0.1.1"
+    "goechargerv2==0.1.2"
   ]
 }
 
