@@ -95,7 +95,7 @@ def _setup_apis(config, hass) -> dict:
             chargers_api[name] = {CONF_NAME: name, API: GoeChargerApi(url, token)}
 
     else:
-        _LOGGER.warning(f"Missing {DOMAIN} entry in the config")
+        _LOGGER.warning("Missing %s entry in the config", DOMAIN)
 
     _LOGGER.debug("Configured charger APIs=%s", chargers_api)
 
