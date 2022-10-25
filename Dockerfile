@@ -1,6 +1,6 @@
-FROM ghcr.io/home-assistant/home-assistant:stable
+FROM homeassistant/home-assistant:stable
 
-RUN python3 -m pip install stdlib_list black goechargerv2
+# TODO: shouldn't be needed
+RUN python3 -m pip install goechargerv2
 
-COPY custom_components /config/custom_components
 COPY configuration.yaml /config/configuration.yaml
