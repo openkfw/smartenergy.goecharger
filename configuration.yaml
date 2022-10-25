@@ -2,8 +2,9 @@
 default_config:
 
 logger:
-  default: info
+  default: warning
   logs:
-    homeassistant.components.go_echarger: debug
+    custom_components.go_echarger: debug
 
-go_echarger:
+# config:
+#   - hacs.disable(HacsDisabledReason.RATE_LIMIT) return True

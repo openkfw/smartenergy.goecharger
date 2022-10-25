@@ -95,7 +95,7 @@ def _setup_apis(config, hass) -> dict:
             chargers_api[name] = {CONF_NAME: name, API: GoeChargerApi(url, token)}
 
     else:
-        raise ValueError(f"Missing {DOMAIN} entry in the config")
+        _LOGGER.warning(f"Missing {DOMAIN} entry in the config")
 
     _LOGGER.debug("Configured charger APIs=%s", chargers_api)
 
@@ -194,6 +194,8 @@ async def async_setup(hass: core.HomeAssistant, config: dict) -> bool:
 
     _LOGGER.debug("Setting up the Go-eCharger integration")
 
+    hass.data[DOMAIN] = hass.data[DOMAIN] if DOMAIN in hass.data else {}
+    domain_config = config[DOMAIN] if DOMAIN in config else {}
     charger = ChargerController(hass)
 
     # expose services for other integrations
@@ -216,9 +218,7 @@ async def async_setup(hass: core.HomeAssistant, config: dict) -> bool:
     }
 
     charger_names = list(
-        map(
-            lambda charger: charger[0][CONF_NAME], config[DOMAIN].get(CONF_CHARGERS, [])
-        )
+        map(lambda charger: charger[0][CONF_NAME], domain_config.get(CONF_CHARGERS, []))
     )
 
     for charger_name in charger_names:
