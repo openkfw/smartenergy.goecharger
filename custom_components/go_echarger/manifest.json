@@ -11,7 +11,7 @@
     "@openkfw"
   ],
   "requirements": [
-    "goechargerv2==0.1.1"
+    "goechargerv2==0.1.2"
   ]
 }
 

@@ -33,6 +33,6 @@ jobs:
         pylint $(git ls-files '*.py')
     - name: Test with unittest
       run: |
-        python3 -m unittest -v tests/*.py
+        pytest
     - name: Validating with hassfest
       uses: home-assistant/actions/hassfest@master
