@@ -5,6 +5,10 @@ logger:
   default: warning
   logs:
     custom_components.go_echarger: debug
+    custom_components.hacs: debug
+    aiogithubapi: debug
 
-# config:
-#   - hacs.disable(HacsDisabledReason.RATE_LIMIT) return True
+sensor:
+  - platform: time_date
+    display_options:
+      - 'date_time'
