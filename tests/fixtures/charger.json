@@ -1,20 +1,50 @@
 [
     {
         "name": "charger1",
-        "host": "1.1.1.1",
+        "host": "http://1.1.1.1",
         "api_token": "example",
         "scan_interval": 10
     },
     {
         "name": "charger2",
-        "host": "1.1.1.1",
+        "host": "http://1.1.1.1",
         "api_token": "example",
         "scan_interval": 10
     },
     {
         "name": "charger3",
-        "host": "1.1.1.2",
+        "host": "http://1.1.1.2",
         "api_token": "foo",
+        "scan_interval": 10
+    },
+    {
+        "name": "charger1",
+        "host": "http://1.1.1.1",
+        "api_token": "example",
+        "scan_interval": -10
+    },
+    {
+        "name": "charger1",
+        "host": "http://1.1.1.1",
+        "api_token": "example",
+        "scan_interval": 60001
+    },
+    {
+        "name": "charger1",
+        "host": "1.1.1.1",
+        "api_token": "example",
+        "scan_interval": 10
+    },
+    {
+        "name": "charger1",
+        "host": "http://1.1.1.1/",
+        "api_token": "example",
+        "scan_interval": 10
+    },
+    {
+        "name": "charger1",
+        "host": "http://2.2.2.2",
+        "api_token": "example",
         "scan_interval": 10
     }
 ]
