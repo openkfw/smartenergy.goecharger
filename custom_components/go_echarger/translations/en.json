@@ -1,5 +1,9 @@
 {
     "config": {
+        "error": {
+            "invalid_host": "Provided host is invalid",
+            "invalid_auth": "Couldn't authenticate, please check the provided host and token"
+        },
         "step": {
             "user": {
                 "data": {
@@ -13,6 +17,10 @@
         }
     },
     "options": {
+        "error": {
+            "invalid_host": "Provided host is invalid",
+            "invalid_auth": "Couldn't authenticate, please check the provided host and token"
+        },
         "step": {
             "init": {
                 "data": {

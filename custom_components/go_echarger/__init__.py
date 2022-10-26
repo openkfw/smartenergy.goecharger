@@ -58,7 +58,10 @@ CONFIG_SCHEMA: vol.Schema = vol.Schema(
 
 
 def _setup_coordinator(
-    state_fetcher_class, scan_interval, coordinator_name, hass
+    state_fetcher_class: type,
+    scan_interval: timedelta,
+    coordinator_name: str,
+    hass: core.HomeAssistant,
 ) -> DataUpdateCoordinator:
     _LOGGER.debug("Configuring coordinator=%s", coordinator_name)
 
@@ -76,7 +79,7 @@ def _setup_coordinator(
     return coordinator
 
 
-def _setup_apis(config, hass) -> dict:
+def _setup_apis(config: dict, hass: core.HomeAssistant) -> dict:
     chargers_api = {}
 
     if DOMAIN in config:
