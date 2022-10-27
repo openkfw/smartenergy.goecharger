@@ -2,6 +2,7 @@
 
 import logging
 
+from homeassistant.core import HomeAssistant
 from homeassistant.const import CONF_NAME
 
 from .const import CHARGERS_API, DOMAIN, INIT_STATE
@@ -16,7 +17,7 @@ class StateFetcher:
 
     coordinator = None
 
-    def __init__(self, hass) -> None:
+    def __init__(self, hass: HomeAssistant) -> None:
         self._hass = hass
 
     async def fetch_states(self) -> dict:

@@ -7,7 +7,7 @@ from datetime import timedelta
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 from goechargerv2.goecharger import GoeChargerApi
-from homeassistant import core
+from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_API_TOKEN, CONF_HOST, CONF_NAME, CONF_SCAN_INTERVAL
 from homeassistant.helpers.discovery import async_load_platform
@@ -61,7 +61,7 @@ def _setup_coordinator(
     state_fetcher_class: type,
     scan_interval: timedelta,
     coordinator_name: str,
-    hass: core.HomeAssistant,
+    hass: HomeAssistant,
 ) -> DataUpdateCoordinator:
     _LOGGER.debug("Configuring coordinator=%s", coordinator_name)
 
@@ -79,7 +79,7 @@ def _setup_coordinator(
     return coordinator
 
 
-def _setup_apis(config: dict, hass: core.HomeAssistant) -> dict:
+def _setup_apis(config: dict, hass: HomeAssistant) -> dict:
     chargers_api = {}
 
     if DOMAIN in config:
@@ -105,9 +105,7 @@ def _setup_apis(config: dict, hass: core.HomeAssistant) -> dict:
     return chargers_api
 
 
-async def async_setup_entry(
-    hass: core.HomeAssistant, config_entry: ConfigEntry
-) -> bool:
+async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     """
     Sets up a charger defined via the UI. This includes:
     - setup of the API
@@ -163,15 +161,13 @@ async def async_setup_entry(
 
 
 async def options_update_listener(
-    hass: core.HomeAssistant, config_entry: ConfigEntry
+    hass: HomeAssistant, config_entry: ConfigEntry
 ) -> None:
     """Handle options update."""
     await hass.config_entries.async_reload(config_entry.entry_id)
 
 
-async def async_unload_entry(
-    hass: core.HomeAssistant, config_entry: ConfigEntry
-) -> bool:
+async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     """Unload a config entry."""
     entry_id = config_entry.entry_id
     _LOGGER.debug("Unloading the charger=%s", entry_id)
@@ -192,7 +188,7 @@ async def async_unload_entry(
     return unload_ok
 
 
-async def async_setup(hass: core.HomeAssistant, config: dict) -> bool:
+async def async_setup(hass: HomeAssistant, config: dict) -> bool:
     """Set up Go-eCharger platforms and services."""
 
     _LOGGER.debug("Setting up the Go-eCharger integration")

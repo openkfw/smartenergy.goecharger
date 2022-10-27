@@ -92,7 +92,7 @@ class GoeChargerConfigFlow(ConfigFlow, domain=DOMAIN):
         """Get the options flow for this handler."""
         return GoeChargerOptionsFlowHandler(config_entry)
 
-    async def async_step_user(self, user_input=None) -> FlowResult:
+    async def async_step_user(self, user_input: dict = None) -> FlowResult:
         """Handle a flow initialized by the user."""
         errors = {}
         data_schema = _get_config_schema({CONF_SCAN_INTERVAL: 10})
@@ -132,7 +132,7 @@ class GoeChargerOptionsFlowHandler(OptionsFlow):
         self.config_entry: ConfigEntry = config_entry
         self.options: dict[str, Any] = dict(config_entry.options)
 
-    async def async_step_init(self, user_input=None) -> FlowResult:
+    async def async_step_init(self, user_input: dict = None) -> FlowResult:
         """Manage the options."""
         errors = {}
         data_schema = _get_config_schema(

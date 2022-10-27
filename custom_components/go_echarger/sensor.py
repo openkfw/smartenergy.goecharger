@@ -2,8 +2,9 @@
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Literal
+from typing import Callable, Literal
 
+from homeassistant.core import HomeAssistant
 from homeassistant.components.sensor import (
     DEVICE_CLASS_CURRENT,
     DEVICE_CLASS_ENERGY,
@@ -83,7 +84,11 @@ CHARGER_SENSORS_CONFIG: dict = {
 
 
 def _setup_sensors(
-    sensor_ids, sensors_config, coordinator_name, sensor_class, hass
+    hass: HomeAssistant,
+    sensor_ids: list,
+    sensors_config: dict,
+    sensor_class: type,
+    coordinator_name: str,
 ) -> list:
     entities = []
 
@@ -134,9 +139,9 @@ def _setup_sensors(
 
 
 async def async_setup_entry(
-    hass,
-    config_entry,
-    async_add_entities,
+    hass: HomeAssistant,
+    config_entry: dict,
+    async_add_entities: Callable,
 ) -> None:
     """Setup sensors from a config entry created in the integrations UI."""
     entry_id = config_entry.entry_id
@@ -148,11 +153,11 @@ async def async_setup_entry(
 
     async_add_entities(
         _setup_sensors(
+            hass,
             [entry_id],
             CHARGER_SENSORS_CONFIG,
-            f"{entry_id}_coordinator",
             ChargerSensor,
-            hass,
+            f"{entry_id}_coordinator",
         ),
         update_before_add=True,
     )
@@ -160,7 +165,10 @@ async def async_setup_entry(
 
 # pylint: disable=unused-argument
 async def async_setup_platform(
-    hass, config, async_add_entities, discovery_info=None
+    hass: HomeAssistant,
+    config: dict,
+    async_add_entities: Callable,
+    discovery_info: dict = None,
 ) -> None:
     """Set up go-eCharger Sensor platform."""
     _LOGGER.debug("Setting up the go-eCharger sensor platform")
