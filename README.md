@@ -1,5 +1,7 @@
 # WIP: Homeassistant integration for Go eCharger API v2
 
+[![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
+
 This is an integration for home assistant for the go echarger wallbox (API v2) - still work in progress.
 
 ## How to run

@@ -1,6 +1,5 @@
 {
     "name": "go-e Charger v2",
     "content_in_root": false,
-    "render_readme": true,
-    "domains": ["sensor"]
+    "render_readme": true
   }
