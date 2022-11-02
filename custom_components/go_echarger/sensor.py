@@ -180,11 +180,11 @@ async def async_setup_platform(
     for charger_name in discovery_info[CONF_CHARGERS]:
         async_add_entities(
             _setup_sensors(
+                hass,
                 [charger_name],
                 CHARGER_SENSORS_CONFIG,
-                f"{charger_name}_coordinator",
                 ChargerSensor,
-                hass,
+                f"{charger_name}_coordinator",
             )
         )
 
