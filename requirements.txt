@@ -1,3 +1,3 @@
 pylint==2.15.3
-goechargerv2==0.1.2
+goechargerv2==0.1.8
 pytest-homeassistant-custom-component==0.12.10
