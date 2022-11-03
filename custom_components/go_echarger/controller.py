@@ -17,6 +17,20 @@ async def fetch_status(hass: HomeAssistant, charger_name: str) -> dict:
     return fetched_status
 
 
+async def start_charging(hass: HomeAssistant, charger_name: str) -> dict:
+    """Start charging of a car via API, no state refresh."""
+
+    api = hass.data[DOMAIN][INIT_STATE][CHARGERS_API][charger_name][API]
+    await hass.async_add_executor_job(api.set_force_charging, True)
+
+
+async def stop_charging(hass: HomeAssistant, charger_name: str) -> dict:
+    """Stop charging of a car via API, no state refresh."""
+
+    api = hass.data[DOMAIN][INIT_STATE][CHARGERS_API][charger_name][API]
+    await hass.async_add_executor_job(api.set_force_charging, False)
+
+
 class ChargerController:
     """Represents go-eCharger controller, abstracting API calls into methods."""
 
@@ -45,8 +59,8 @@ class ChargerController:
         """Get name and assigned power from the service call and call the API accordingly.
         In case charging is not allowed, log a warning and early escape."""
 
-        charger_name = call.data.get("device_name", None)
-        charging_power = call.data.get("charging_power", None)
+        charger_name = call["data"].get("device_name", None)
+        charging_power = call["data"].get("charging_power", None)
         api = self._hass.data[DOMAIN][INIT_STATE][CHARGERS_API][charger_name][API]
 
         if not self._is_charging_allowed:
@@ -69,7 +83,7 @@ class ChargerController:
         """Get name and assigned power from the service call and call the API accordingly.
         In case charging is not allowed, log a warning and early escape."""
 
-        charger_name = call.data.get("device_name", None)
+        charger_name = call["data"].get("device_name", None)
         api = self._hass.data[DOMAIN][INIT_STATE][CHARGERS_API][charger_name][API]
 
         if not self._is_charging_allowed:
@@ -86,8 +100,8 @@ class ChargerController:
         """Get name and power from the service call and call the API accordingly.
         In case charging is not allowed, log an error and early escape."""
 
-        charger_name = call.data.get("device_name", None)
-        charging_power = call.data.get("charging_power", None)
+        charger_name = call["data"].get("device_name", None)
+        charging_power = call["data"].get("charging_power", None)
         api = self._hass.data[DOMAIN][INIT_STATE][CHARGERS_API][charger_name][API]
 
         if not self._is_charging_allowed:
@@ -108,8 +122,8 @@ class ChargerController:
         Possible phase values: 0 (Auto), 1 (1-phased), 2 (3-phased)
         """
 
-        charger_name = call.data.get("device_name", None)
-        phase = call.data.get("phase", None)
+        charger_name = call["data"].get("device_name", None)
+        phase = call["data"].get("phase", None)
         api = self._hass.data[DOMAIN][INIT_STATE][CHARGERS_API][charger_name][API]
 
         if not phase in [0, 1, 2]:
@@ -130,8 +144,8 @@ class ChargerController:
         Possible values: 0 (open), 1 (wait)
         """
 
-        charger_name = call.data.get("device_name", None)
-        status = call.data.get("status", None)
+        charger_name = call["data"].get("device_name", None)
+        status = call["data"].get("status", None)
         api = self._hass.data[DOMAIN][INIT_STATE]["apis"][charger_name][API]
 
         if not status in [0, 1]:

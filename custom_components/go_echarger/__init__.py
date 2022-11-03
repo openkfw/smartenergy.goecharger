@@ -6,7 +6,6 @@ from datetime import timedelta
 
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
-from goechargerv2.goecharger import GoeChargerApi
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_API_TOKEN, CONF_HOST, CONF_NAME, CONF_SCAN_INTERVAL
@@ -14,7 +13,6 @@ from homeassistant.helpers.discovery import async_load_platform
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .const import (
-    API,
     CHARGERS_API,
     CONF_CHARGERS,
     DOMAIN,
@@ -22,7 +20,7 @@ from .const import (
     UNSUB_OPTIONS_UPDATE_LISTENER,
 )
 from .controller import ChargerController
-from .state import StateFetcher
+from .state import StateFetcher, init_state
 
 _LOGGER: logging.Logger = logging.getLogger(__name__)
 
@@ -93,9 +91,9 @@ def _setup_apis(config: dict, hass: HomeAssistant) -> dict:
             name = charger[0][CONF_NAME]
             url = charger[0][CONF_HOST]
             token = charger[0][CONF_API_TOKEN]
-            _LOGGER.debug("Configuring API for the charger=%s", name)
 
-            chargers_api[name] = {CONF_NAME: name, API: GoeChargerApi(url, token)}
+            _LOGGER.debug("Configuring API for the charger=%s", name)
+            chargers_api[name] = init_state(name, url, token)
 
     else:
         _LOGGER.warning("Missing %s entry in the config", DOMAIN)
@@ -111,6 +109,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     - setup of the API
     - coordinator
     - sensors
+    - switches
     """
     options = config_entry.options
     data = dict(config_entry.data)
@@ -130,10 +129,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     token = options[CONF_API_TOKEN]
 
     _LOGGER.debug("Configuring API for the charger=%s", entry_id)
-    hass.data[DOMAIN][INIT_STATE][CHARGERS_API][entry_id] = {
-        CONF_NAME: name,
-        API: GoeChargerApi(url, token),
-    }
+    hass.data[DOMAIN][INIT_STATE][CHARGERS_API][entry_id] = init_state(name, url, token)
 
     await _setup_coordinator(
         StateFetcher,
@@ -146,6 +142,9 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
 
     hass.async_create_task(
         hass.config_entries.async_forward_entry_setup(config_entry, "sensor")
+    )
+    hass.async_create_task(
+        hass.config_entries.async_forward_entry_setup(config_entry, "switch")
     )
 
     unsub_options_update_listener = config_entry.add_update_listener(
@@ -175,7 +174,10 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
     unload_ok = all(
         await asyncio.gather(
             *[hass.config_entries.async_forward_entry_unload(config_entry, "sensor")]
-        )
+        ),
+        await asyncio.gather(
+            *[hass.config_entries.async_forward_entry_unload(config_entry, "switch")]
+        ),
     )
 
     # Remove options_update_listener.
@@ -195,17 +197,21 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
 
     hass.data[DOMAIN] = hass.data[DOMAIN] if DOMAIN in hass.data else {}
     domain_config = config[DOMAIN] if DOMAIN in config else {}
-    charger = ChargerController(hass)
+    charger_controller = ChargerController(hass)
 
     # expose services for other integrations
-    hass.services.async_register(DOMAIN, "start_charging", charger.start_charging)
-    hass.services.async_register(DOMAIN, "stop_charging", charger.stop_charging)
     hass.services.async_register(
-        DOMAIN, "change_charging_power", charger.change_charging_power
+        DOMAIN, "start_charging", charger_controller.start_charging
     )
-    hass.services.async_register(DOMAIN, "set_phase", charger.set_phase)
     hass.services.async_register(
-        DOMAIN, "set_authentication", charger.set_authentication
+        DOMAIN, "stop_charging", charger_controller.stop_charging
+    )
+    hass.services.async_register(
+        DOMAIN, "change_charging_power", charger_controller.change_charging_power
+    )
+    hass.services.async_register(DOMAIN, "set_phase", charger_controller.set_phase)
+    hass.services.async_register(
+        DOMAIN, "set_authentication", charger_controller.set_authentication
     )
 
     scan_interval = DEFAULT_UPDATE_INTERVAL
@@ -233,6 +239,19 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
         async_load_platform(
             hass,
             "sensor",
+            DOMAIN,
+            {
+                CONF_CHARGERS: charger_names,
+            },
+            config,
+        )
+    )
+
+    # load platform with switches
+    hass.async_create_task(
+        async_load_platform(
+            hass,
+            "switch",
             DOMAIN,
             {
                 CONF_CHARGERS: charger_names,

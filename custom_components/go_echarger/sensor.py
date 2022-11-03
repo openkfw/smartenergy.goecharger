@@ -13,7 +13,7 @@ from homeassistant.components.sensor import (
 )
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import CONF_CHARGERS, DOMAIN
+from .const import CONF_CHARGERS, DOMAIN, MANUFACTURER
 
 MINUTE_IN_MS: Literal[60000] = 60_000
 
@@ -123,7 +123,7 @@ def _setup_sensors(
             sensors.append(
                 sensor_class(
                     hass.data[DOMAIN][coordinator_name],
-                    f"sensor.go_echarger_{sensor_id}_{sensor}",
+                    f"sensor.{DOMAIN}_{sensor_id}_{sensor}",
                     sensor_id,
                     sensor_name,
                     sensor,
@@ -249,7 +249,7 @@ class ChargerSensor(BaseSensor, CoordinatorEntity, SensorEntity):
         return {
             "identifiers": {(DOMAIN, self._device_id)},
             "name": self._device_id,
-            "manufacturer": "",
+            "manufacturer": MANUFACTURER,
             "model": "",
         }
 

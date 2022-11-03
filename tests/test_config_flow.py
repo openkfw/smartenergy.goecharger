@@ -1,7 +1,7 @@
 """Test the Go-eCharger config flow and options flow."""
 
-from http.client import BAD_REQUEST, OK
 import json
+from functools import partial
 from unittest.mock import patch, Mock
 
 import pytest
@@ -12,6 +12,7 @@ from homeassistant.data_entry_flow import FlowResult
 from homeassistant.data_entry_flow import RESULT_TYPE_CREATE_ENTRY, RESULT_TYPE_FORM
 from pytest_homeassistant_custom_component.common import MockConfigEntry, load_fixture
 from custom_components.go_echarger.const import DOMAIN
+from .mock_api import mocked_api_requests
 
 GO_E_CHARGER_MOCK_REFERENCE = "custom_components.go_echarger.config_flow.GoeChargerApi"
 
@@ -23,27 +24,6 @@ CHARGER_INVALID_INTERVAL_MAX: dict = json.loads(load_fixture("charger.json"))[4]
 CHARGER_INVALID_HOST_PREFIX: dict = json.loads(load_fixture("charger.json"))[5]
 CHARGER_INVALID_HOST_SUFFIX: dict = json.loads(load_fixture("charger.json"))[6]
 CHARGER_AUTH_FAILED: dict = json.loads(load_fixture("charger.json"))[7]
-
-
-# pylint: disable=unused-argument
-def mocked_api_requests(*args, **kwargs) -> dict | int:
-    """Module handling mocked API requests"""
-
-    class MockResponse:
-        """Class handling mocked API responses"""
-
-        def __init__(self, json_data, status_code) -> None:
-            self.json_data = json_data
-            self.status_code = status_code
-
-        def request_status(self) -> dict:
-            """Return data as a JSON"""
-            return self.json_data
-
-    if args[0] in ["http://1.1.1.1", "http://1.1.1.2"]:
-        return MockResponse({}, OK)
-
-    return BAD_REQUEST
 
 
 async def _initialize_and_assert_flow(hass: HomeAssistant) -> FlowResult:
@@ -99,7 +79,7 @@ async def _assert_invalid_scan_interval(
 
 @patch(
     GO_E_CHARGER_MOCK_REFERENCE,
-    Mock(side_effect=mocked_api_requests),
+    Mock(side_effect=partial(mocked_api_requests, data={})),
 )
 async def _assert_invalid_auth(flow_id: str, data: dict, configure_fn) -> None:
     """Test an error is created when host and token failed to authenticate."""
@@ -113,7 +93,7 @@ async def _assert_invalid_auth(flow_id: str, data: dict, configure_fn) -> None:
 
 @patch(
     GO_E_CHARGER_MOCK_REFERENCE,
-    Mock(side_effect=mocked_api_requests),
+    Mock(side_effect=partial(mocked_api_requests, data={})),
 )
 async def test_config_flow_init(hass: HomeAssistant) -> None:
     """Test we can configure the integration via config flow."""
@@ -177,7 +157,7 @@ async def test_config_flow_invalid_auth(hass: HomeAssistant) -> None:
 
 @patch(
     GO_E_CHARGER_MOCK_REFERENCE,
-    Mock(side_effect=mocked_api_requests),
+    Mock(side_effect=partial(mocked_api_requests, data={})),
 )
 async def test_options_flow_init(hass) -> None:
     """Test we can configure the integration via options flow."""

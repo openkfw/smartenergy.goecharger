@@ -4,6 +4,13 @@
 
 This is an integration for home assistant for the go echarger wallbox (API v2) - still work in progress.
 
+Supported features:
+
+- List of supported sensors: TBD
+- Switch input to enable/disable charging
+- Exposed Home Assistant services for: TBD
+- Registering wallboxes via `configuration.yaml` and also via the Home Assistant UI
+
 ## How to run
 
 ### HACS
