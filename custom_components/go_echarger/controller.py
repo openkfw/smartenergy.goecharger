@@ -146,7 +146,7 @@ class ChargerController:
 
         charger_name = call["data"].get("device_name", None)
         status = call["data"].get("status", None)
-        api = self._hass.data[DOMAIN][INIT_STATE]["apis"][charger_name][API]
+        api = self._hass.data[DOMAIN][INIT_STATE][CHARGERS_API][charger_name][API]
 
         if not status in [0, 1]:
             return

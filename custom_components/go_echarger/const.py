@@ -3,6 +3,7 @@
 DOMAIN = "go_echarger"
 CONF_CHARGERS = "chargers"
 ENABLED = "enabled"
+CHARGER_ACCESS = "charger_access"
 CHARGERS_API = "chargers_api"
 API = "api"
 INIT_STATE = "init"

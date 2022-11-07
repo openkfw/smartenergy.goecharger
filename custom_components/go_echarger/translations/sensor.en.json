@@ -1,7 +1,8 @@
 {
     "state": {
         "go_echarger__allow_charging": {
-            "off": "Off - Please authenticate your car to allow charging"
+            "off": "No",
+            "on": "Yes"
         }
     }
 }

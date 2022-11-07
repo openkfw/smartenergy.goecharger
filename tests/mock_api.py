@@ -2,6 +2,8 @@
 
 from http.client import BAD_REQUEST, OK
 
+from custom_components.go_echarger.const import CHARGER_ACCESS
+
 # pylint: disable=unused-argument
 def mocked_api_requests(*args, **kwargs) -> dict | int:
     """Module handling mocked API requests."""
@@ -19,6 +21,11 @@ def mocked_api_requests(*args, **kwargs) -> dict | int:
 
         def set_force_charging(self, val: bool) -> dict:
             """Return provided boolean"""
+            return val
+
+        def set_access_control(self, val: bool) -> dict:
+            """Return provided boolean"""
+            self.json_data[CHARGER_ACCESS] = bool(not val)
             return val
 
     if args[0] in ["http://1.1.1.1", "http://1.1.1.2"]:

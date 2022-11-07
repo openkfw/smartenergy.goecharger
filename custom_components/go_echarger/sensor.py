@@ -1,6 +1,7 @@
 """Sensor platform configuration for Go-eCharger"""
 
 import logging
+import numbers
 from abc import ABC, abstractmethod
 from typing import Callable, Literal
 
@@ -256,6 +257,8 @@ class ChargerSensor(BaseSensor, CoordinatorEntity, SensorEntity):
     @property
     def state(self) -> str:
         """Return the state of the sensor."""
+        attr_value = self.coordinator.data[self._device_id][self._attribute]
+
         # if charging is not allowed, show current as 0
         if (
             self._attribute == "charger_max_current"
@@ -268,17 +271,17 @@ class ChargerSensor(BaseSensor, CoordinatorEntity, SensorEntity):
         # if the type is 1, we want to show the time
         if (
             self._attribute == "charging_duration"
-            and "value" in self.coordinator.data[self._device_id][self._attribute]
-            and self.coordinator.data[self._device_id][self._attribute]["type"] == 1
+            and "value" in attr_value
+            and attr_value["type"] == 1
         ):
-            return (
-                self.coordinator.data[self._device_id][self._attribute]["value"]
-                / MINUTE_IN_MS
-            )
+            return attr_value["value"] / MINUTE_IN_MS
 
-        if self.state_class == TIME_MINUTES:
-            return (
-                self.coordinator.data[self._device_id][self._attribute] / MINUTE_IN_MS
-            )
+        # if attribute is a number and larger than 0, convert it to minutes
+        if (
+            self.state_class == TIME_MINUTES
+            and isinstance(attr_value, numbers.Number)
+            and attr_value > 0
+        ):
+            return attr_value / MINUTE_IN_MS
 
-        return self.coordinator.data[self._device_id][self._attribute]
+        return attr_value
