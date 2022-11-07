@@ -49,17 +49,13 @@ class StateFetcher:
         """
 
         car_charging_status = data[CHARGER_FORCE_CHARGING]
-        car_not_connected_or_fully_charged = (
-            data["car_status"] == "Charger ready, no car connected"
-            or data["car_status"] == "Charging finished, car can be disconnected"
-        )
+        car_not_connected = data["car_status"] == "Charger ready, no car connected"
 
         if car_charging_status == "on":
             # turn charging off if:
             # - car is not connected
-            # - or car is fully charged
             # - or charging is disabled
-            if car_not_connected_or_fully_charged or not is_enabled:
+            if car_not_connected or not is_enabled:
                 _LOGGER.warning(
                     """Car %s is not connected or is fully charged or charging is manually disabled,
                     disabling charging""",
@@ -69,8 +65,8 @@ class StateFetcher:
         else:
             # turn charging on if:
             # - charging is enabled
-            # - and car is connected/not fully charged
-            if is_enabled and not car_not_connected_or_fully_charged:
+            # - and car is connected
+            if is_enabled and not car_not_connected:
                 _LOGGER.debug("Charging is enabled, starting to charge")
                 await start_charging(self._hass, charger_name)
 
