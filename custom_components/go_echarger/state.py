@@ -57,7 +57,7 @@ class StateFetcher:
             # - or charging is disabled
             if car_not_connected or not is_enabled:
                 _LOGGER.warning(
-                    """Car %s is not connected or is fully charged or charging is manually disabled,
+                    """Car %s is not connected or charging is manually disabled,
                     disabling charging""",
                     charger_name,
                 )
