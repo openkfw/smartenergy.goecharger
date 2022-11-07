@@ -268,13 +268,13 @@ class ChargerSensor(BaseSensor, CoordinatorEntity, SensorEntity):
 
         # charging time is provided in the following format:
         # null=no charging in progress, type=0 counter going up, type=1 duration in ms
-        # if the type is 1, we want to show the time
+        # if the type is 0 or 1, we want to show the time
         if (
             self._attribute == "charging_duration"
             and "value" in attr_value
-            and attr_value["type"] == 1
+            and attr_value["type"] in [0, 1]
         ):
-            return attr_value["value"] / MINUTE_IN_MS
+            return round(attr_value["value"] / MINUTE_IN_MS, 2)
 
         # if attribute is a number and larger than 0, convert it to minutes
         if (
@@ -282,6 +282,6 @@ class ChargerSensor(BaseSensor, CoordinatorEntity, SensorEntity):
             and isinstance(attr_value, numbers.Number)
             and attr_value > 0
         ):
-            return attr_value / MINUTE_IN_MS
+            return round(attr_value / MINUTE_IN_MS, 2)
 
         return attr_value
