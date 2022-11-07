@@ -6,7 +6,14 @@ from homeassistant.core import HomeAssistant
 from homeassistant.const import CONF_NAME
 from goechargerv2.goecharger import GoeChargerApi
 
-from .const import CHARGERS_API, API, DOMAIN, INIT_STATE, ENABLED
+from .const import (
+    CHARGERS_API,
+    API,
+    DOMAIN,
+    INIT_STATE,
+    ENABLED,
+    CHARGER_FORCE_CHARGING,
+)
 from .controller import fetch_status, start_charging, stop_charging
 
 _LOGGER: logging.Logger = logging.getLogger(__name__)
@@ -33,6 +40,40 @@ class StateFetcher:
     def __init__(self, hass: HomeAssistant) -> None:
         self._hass = hass
 
+    async def _handle_charging(
+        self, is_enabled: bool, data: dict, charger_name: str
+    ) -> None:
+        """
+        Handle automatic charging of a car. Charging is enabled/disabled based on the
+        switch state and data received from the API, e.g. car status.
+        """
+
+        car_charging_status = data[CHARGER_FORCE_CHARGING]
+        car_not_connected_or_fully_charged = (
+            data["car_status"] == "Charger ready, no car connected"
+            or data["car_status"] == "Charging finished, car can be disconnected"
+        )
+
+        if car_charging_status == "on":
+            # turn charging off if:
+            # - car is not connected
+            # - or car is fully charged
+            # - or charging is disabled
+            if car_not_connected_or_fully_charged or not is_enabled:
+                _LOGGER.warning(
+                    """Car %s is not connected or is fully charged or charging is manually disabled,
+                    disabling charging""",
+                    charger_name,
+                )
+                await stop_charging(self._hass, charger_name)
+        else:
+            # turn charging on if:
+            # - charging is enabled
+            # - and car is connected/not fully charged
+            if is_enabled and not car_not_connected_or_fully_charged:
+                _LOGGER.debug("Charging is enabled, starting to charge")
+                await start_charging(self._hass, charger_name)
+
     async def fetch_states(self) -> dict:
         """
         Fetch go-eCharger car status via API.
@@ -56,11 +97,11 @@ class StateFetcher:
                 else True
             )
 
-            # if charging is enabled, start charging, otherwise stop charging
-            if is_enabled:
-                await start_charging(self._hass, charger_name)
-            else:
-                await stop_charging(self._hass, charger_name)
+            # handle charging of a car
+            if charger_name in current_data:
+                await self._handle_charging(
+                    is_enabled, current_data[charger_name], charger_name
+                )
 
             updated_data[charger_name] = await fetch_status(self._hass, charger_name)
             updated_data[charger_name][CONF_NAME] = chargers_api[charger_name][

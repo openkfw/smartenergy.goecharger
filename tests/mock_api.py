@@ -21,6 +21,7 @@ def mocked_api_requests(*args, **kwargs) -> dict | int:
 
         def set_force_charging(self, val: bool) -> dict:
             """Return provided boolean"""
+            self.json_data["charger_force_charging"] = "on" if val else "off"
             return val
 
         def set_access_control(self, val: bool) -> dict:

@@ -1,4 +1,4 @@
-"""Test integration_blueprint switch."""
+"""Test Go-eCharger switch inputs."""
 
 import json
 from functools import partial
@@ -14,12 +14,13 @@ from custom_components.go_echarger.const import (
     DOMAIN,
     ENABLED,
     CHARGER_ACCESS,
+    CHARGER_FORCE_CHARGING,
     CONF_CHARGERS,
 )
 from .mock_api import mocked_api_requests
 
 INIT_STATE = {
-    "car_status": None,
+    "car_status": "Car is charging",
     "serial_number": None,
     "charger_max_current": None,
     "charging_allowed": None,
@@ -33,6 +34,7 @@ INIT_STATE = {
     "charging_limit": None,
     "phase_switch_mode": None,
     CHARGER_ACCESS: True,
+    CHARGER_FORCE_CHARGING: "off",
 }
 GO_E_CHARGER_MOCK_REFERENCE = "custom_components.go_echarger.state.GoeChargerApi"
 CHARGER_1: dict = json.loads(load_fixture("charger.json"))[0]
