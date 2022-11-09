@@ -15,6 +15,13 @@ Supported features:
 
 ## How to run
 
+### Simple setup without HACS
+
+1. Run `./start-local.sh -s` (`-s` skips the HACS installation)
+2. Open <http://127.0.0.1:8123> in the browser
+3. Create an account
+4. You are on the dashboard screen and should see bunch of sensors for the Go-eCharger integration.
+
 ### HACS
 
 1. Run `./start-local.sh`
@@ -32,7 +39,7 @@ Supported features:
 13. Go to Settings -> System -> click `RESTART` and wait few seconds.
 14. Go to Settings -> Devices & Services. Click the `ADD INTEGRATION` button.
 15. Search for `go-e` -> click -> fill in details -> click `SUBMIT`.
-16. Go to the dashboard screen, you should see bunch of sensor for the Go-eCharger integration.
+16. Go to the dashboard screen, you should see bunch of sensors for the Go-eCharger integration.
 
 ## Development
 

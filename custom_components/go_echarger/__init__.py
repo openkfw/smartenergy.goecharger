@@ -11,6 +11,10 @@ from homeassistant.const import CONF_API_TOKEN, CONF_HOST, CONF_NAME, CONF_SCAN_
 from homeassistant.helpers.discovery import async_load_platform
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.helpers.typing import ConfigType, HomeAssistantType
+from homeassistant.components.button import DOMAIN as BUTTON_DOMAIN
+from homeassistant.components.sensor import DOMAIN as SENSOR_DOMAIN
+from homeassistant.components.switch import DOMAIN as SWITCH_DOMAIN
+from homeassistant.components.number import DOMAIN as NUMBER_DOMAIN
 
 from .const import (
     CHARGERS_API,
@@ -26,6 +30,8 @@ _LOGGER: logging.Logger = logging.getLogger(__name__)
 
 MIN_UPDATE_INTERVAL: timedelta = timedelta(seconds=10)
 DEFAULT_UPDATE_INTERVAL: timedelta = timedelta(seconds=10)
+
+PLATFORMS = [BUTTON_DOMAIN, SENSOR_DOMAIN, SWITCH_DOMAIN, NUMBER_DOMAIN]
 
 # Configuration validation
 CONFIG_SCHEMA: vol.Schema = vol.Schema(
@@ -111,6 +117,7 @@ async def async_setup_entry(hass: HomeAssistantType, config_entry: ConfigEntry) 
     - sensors
     - switches
     - buttons
+    - number inputs
     """
     options = config_entry.options
     data = dict(config_entry.data)
@@ -139,15 +146,10 @@ async def async_setup_entry(hass: HomeAssistantType, config_entry: ConfigEntry) 
 
     hass.data[DOMAIN][entry_id] = data
 
-    hass.async_create_task(
-        hass.config_entries.async_forward_entry_setup(config_entry, "sensor")
-    )
-    hass.async_create_task(
-        hass.config_entries.async_forward_entry_setup(config_entry, "switch")
-    )
-    hass.async_create_task(
-        hass.config_entries.async_forward_entry_setup(config_entry, "button")
-    )
+    for platform in PLATFORMS:
+        hass.async_create_task(
+            hass.config_entries.async_forward_entry_setup(config_entry, platform)
+        )
 
     unsub_options_update_listener = config_entry.add_update_listener(
         options_update_listener
@@ -175,17 +177,20 @@ async def async_unload_entry(
     entry_id = config_entry.entry_id
     _LOGGER.debug("Unloading the charger=%s", entry_id)
 
-    unload_ok = all(
-        await asyncio.gather(
-            *[hass.config_entries.async_forward_entry_unload(config_entry, "sensor")]
-        ),
-        await asyncio.gather(
-            *[hass.config_entries.async_forward_entry_unload(config_entry, "switch")]
-        ),
-        await asyncio.gather(
-            *[hass.config_entries.async_forward_entry_unload(config_entry, "button")]
-        ),
-    )
+    unloaded_platforms = [
+        (
+            await asyncio.gather(
+                *[
+                    hass.config_entries.async_forward_entry_unload(
+                        config_entry, platform
+                    )
+                ]
+            ),
+            platform,
+        )
+        for platform in PLATFORMS
+    ]
+    unload_ok = all(unloaded_platforms)
 
     # Remove options_update_listener.
     hass.data[DOMAIN][INIT_STATE][UNSUB_OPTIONS_UPDATE_LISTENER][entry_id]()
@@ -193,6 +198,8 @@ async def async_unload_entry(
     # Remove config entry from the domain.
     if unload_ok:
         hass.data[DOMAIN][INIT_STATE][CHARGERS_API].pop(entry_id)
+
+    _LOGGER.debug("Unloaded the charger=%s", entry_id)
 
     return unload_ok
 
@@ -241,44 +248,19 @@ async def async_setup(hass: HomeAssistantType, config: ConfigType) -> bool:
             hass,
         ).async_refresh()
 
-    # load platform with sensors
-    hass.async_create_task(
-        async_load_platform(
-            hass,
-            "sensor",
-            DOMAIN,
-            {
-                CONF_CHARGERS: charger_names,
-            },
-            config,
+    # load all platforms
+    for platform in PLATFORMS:
+        hass.async_create_task(
+            async_load_platform(
+                hass,
+                platform,
+                DOMAIN,
+                {
+                    CONF_CHARGERS: charger_names,
+                },
+                config,
+            )
         )
-    )
-
-    # load platform with switches
-    hass.async_create_task(
-        async_load_platform(
-            hass,
-            "switch",
-            DOMAIN,
-            {
-                CONF_CHARGERS: charger_names,
-            },
-            config,
-        )
-    )
-
-    # load platform with buttons
-    hass.async_create_task(
-        async_load_platform(
-            hass,
-            "button",
-            DOMAIN,
-            {
-                CONF_CHARGERS: charger_names,
-            },
-            config,
-        )
-    )
 
     _LOGGER.debug("Setup for the Go-eCharger integration completed")
 

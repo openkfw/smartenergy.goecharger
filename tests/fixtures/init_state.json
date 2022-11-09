@@ -1,6 +1,6 @@
 {
     "car_status": "Car is charging",
-    "charger_max_current": null,
+    "charger_max_current": 2,
     "charging_allowed": null,
     "energy_since_car_connected": null,
     "energy_total": null,

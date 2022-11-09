@@ -35,9 +35,9 @@ class BaseDescriptiveEntity:
 
     def __init__(
         self,
+        hass,
         device_id,
         description,
-        hass,
     ) -> None:
         """Initialize the device."""
         super().__init__()
@@ -51,7 +51,7 @@ class BaseDescriptiveEntity:
 class AuthButton(BaseDescriptiveEntity, ButtonEntity):
     """Representation of an Auth Button."""
 
-    entity_description = None
+    entity_description: BaseButtonDescription = None
 
     async def async_press(self) -> None:
         """Handle the button press. Authenticates the user against the wallbox"""
@@ -61,19 +61,22 @@ class AuthButton(BaseDescriptiveEntity, ButtonEntity):
         )
 
 
-def _create_buttons(hass: HomeAssistantType, chargers: dict) -> list[AuthButton]:
+def _create_buttons(hass: HomeAssistantType, chargers: list[str]) -> list[AuthButton]:
+    """
+    Create input buttons for authentication.
+    """
     button_entities = []
 
     for charger_name in chargers:
         button_entities.append(
             AuthButton(
+                hass,
                 charger_name,
                 BaseButtonDescription(
                     key=f"{BUTTON_DOMAIN}.{DOMAIN}_{charger_name}_authentication",
                     name="Authenticate",
                     icon="mdi:security",
                 ),
-                hass,
             )
         )
 

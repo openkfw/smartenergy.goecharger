@@ -19,7 +19,17 @@ from homeassistant.helpers.typing import (
     DiscoveryInfoType,
 )
 
-from .const import CONF_CHARGERS, DOMAIN, MANUFACTURER
+from .const import (
+    CONF_CHARGERS,
+    DOMAIN,
+    MANUFACTURER,
+    CAR_STATUS,
+    CHARGING_ALLOWED,
+    CHARGER_MAX_CURRENT,
+    ENERGY_SINCE_CAR_CONNECTED,
+    ENERGY_TOTAL,
+    PHASE_SWITCH_MODE,
+)
 
 MINUTE_IN_MS: Literal[60000] = 60_000
 
@@ -35,39 +45,129 @@ _LOGGER: logging.Logger = logging.getLogger(__name__)
 
 CHARGER_SENSORS_CONFIG: dict = {
     "sensors": [
-        "car_status",
-        "charger_max_current",
-        "charging_allowed",
-        "energy_since_car_connected",
-        "energy_total",
-        "phase_switch_mode",
+        CAR_STATUS,
+        CHARGER_MAX_CURRENT,
+        CHARGING_ALLOWED,
+        ENERGY_SINCE_CAR_CONNECTED,
+        ENERGY_TOTAL,
+        PHASE_SWITCH_MODE,
         "name",
     ],
     "units": {
-        "car_status": {"unit": "", "name": "Car charging status"},
-        "charging_allowed": {"unit": "", "name": "Car charging allowed"},
-        "charger_max_current": {"unit": AMPERE, "name": "Current charging speed (max)"},
-        "energy_since_car_connected": {
+        CAR_STATUS: {"unit": "", "name": "Car charging status"},
+        CHARGING_ALLOWED: {"unit": "", "name": "Car charging allowed"},
+        CHARGER_MAX_CURRENT: {"unit": AMPERE, "name": "Current charging speed (max)"},
+        ENERGY_SINCE_CAR_CONNECTED: {
             "unit": K_WATT_HOUR,
             "name": "Energy since car connected",
         },
-        "car_consumption": {"unit": "", "name": "Car consumption"},
-        "energy_total": {"unit": K_WATT_HOUR, "name": "Energy total"},
-        "phase_switch_mode": {"unit": "", "name": "Phase switch mode"},
+        ENERGY_TOTAL: {"unit": K_WATT_HOUR, "name": "Energy total"},
+        PHASE_SWITCH_MODE: {"unit": "", "name": "Phase switch mode"},
         "name": {"unit": "", "name": "Charger name"},
     },
     "state_classes": {
-        "charger_max_current": STATE_CLASS_TOTAL,
-        "energy_since_car_connected": K_WATT_HOUR,
-        "energy_total": K_WATT_HOUR,
+        CHARGER_MAX_CURRENT: STATE_CLASS_TOTAL,
+        ENERGY_SINCE_CAR_CONNECTED: K_WATT_HOUR,
+        ENERGY_TOTAL: K_WATT_HOUR,
     },
     "device_classes": {
-        "charger_max_current": DEVICE_CLASS_CURRENT,
-        "energy_since_car_connected": DEVICE_CLASS_ENERGY,
-        "energy_total": DEVICE_CLASS_ENERGY,
-        "charging_allowed": "go_echarger__allow_charging",
+        CHARGER_MAX_CURRENT: DEVICE_CLASS_CURRENT,
+        ENERGY_SINCE_CAR_CONNECTED: DEVICE_CLASS_ENERGY,
+        ENERGY_TOTAL: DEVICE_CLASS_ENERGY,
+        CHARGING_ALLOWED: "go_echarger__allow_charging",
     },
 }
+
+
+class BaseSensor(ABC):
+    """Representation of a Base sensor."""
+
+    # pylint: disable=too-many-arguments
+    def __init__(
+        self,
+        coordinator,
+        entity_id,
+        device_id,
+        name,
+        attribute,
+        unit,
+        state_class,
+        device_class,
+    ) -> None:
+        """Initialize the Base sensor."""
+
+        super().__init__(coordinator)
+        self._device_id = device_id
+        self.entity_id = entity_id
+        self._name = name
+        self._attribute = attribute
+        self._unit = unit
+        self._attr_state_class = state_class
+        self._attr_device_class = device_class
+
+    @property
+    @abstractmethod
+    def device_info(self) -> None:
+        """Return the info about the device."""
+
+    @property
+    def name(self) -> str:
+        """Return the name of the sensor."""
+        return self._name
+
+    @property
+    def unique_id(self) -> str:
+        """Return the unique_id of the sensor."""
+        return f"{self._device_id}_{self._attribute}"
+
+    @property
+    @abstractmethod
+    def state(self) -> None:
+        """Return the state of the sensor."""
+
+    @property
+    def unit_of_measurement(self) -> str:
+        """Return the unit of measurement."""
+        return self._unit
+
+
+class ChargerSensor(BaseSensor, CoordinatorEntity, SensorEntity):
+    """Representation of a sensor for the go-eCharger."""
+
+    @property
+    def device_info(self) -> dict:
+        return {
+            "identifiers": {(DOMAIN, self._device_id)},
+            "name": self._device_id,
+            "manufacturer": MANUFACTURER,
+            "model": "",
+        }
+
+    @property
+    def state(self) -> str:
+        """Return the state of the sensor."""
+        attr_value = self.coordinator.data[self._device_id][self._attribute]
+
+        # if charging is not allowed, show current as 0
+        if (
+            self._attribute == CHARGER_MAX_CURRENT
+            and self.coordinator.data[self._device_id][CHARGING_ALLOWED] == "off"
+        ):
+            return 0
+
+        # convert Wh to kWh and round to 2 decimal positions
+        if self._unit == K_WATT_HOUR and isinstance(attr_value, numbers.Number):
+            attr_value = round(attr_value / 1000, 2)
+
+        # if attribute is a number and larger than 0, convert it to minutes
+        if (
+            self.state_class == TIME_MINUTES
+            and isinstance(attr_value, numbers.Number)
+            and attr_value > 0
+        ):
+            return round(attr_value / MINUTE_IN_MS, 2)
+
+        return attr_value
 
 
 def _setup_sensors(
@@ -174,94 +274,3 @@ async def async_setup_platform(
                 f"{charger_name}_coordinator",
             )
         )
-
-
-class BaseSensor(ABC):
-    """Representation of a Base sensor."""
-
-    # pylint: disable=too-many-arguments
-    def __init__(
-        self,
-        coordinator,
-        entity_id,
-        device_id,
-        name,
-        attribute,
-        unit,
-        state_class,
-        device_class,
-    ) -> None:
-        """Initialize the Base sensor."""
-
-        super().__init__(coordinator)
-        self._device_id = device_id
-        self.entity_id = entity_id
-        self._name = name
-        self._attribute = attribute
-        self._unit = unit
-        self._attr_state_class = state_class
-        self._attr_device_class = device_class
-
-    @property
-    @abstractmethod
-    def device_info(self) -> None:
-        """Return the info about the device."""
-
-    @property
-    def name(self) -> str:
-        """Return the name of the sensor."""
-        return self._name
-
-    @property
-    def unique_id(self) -> str:
-        """Return the unique_id of the sensor."""
-        return f"{self._device_id}_{self._attribute}"
-
-    @property
-    @abstractmethod
-    def state(self) -> None:
-        """Return the state of the sensor."""
-
-    @property
-    def unit_of_measurement(self) -> str:
-        """Return the unit of measurement."""
-        return self._unit
-
-
-class ChargerSensor(BaseSensor, CoordinatorEntity, SensorEntity):
-    """Representation of a sensor for the go-eCharger."""
-
-    @property
-    def device_info(self) -> dict:
-        return {
-            "identifiers": {(DOMAIN, self._device_id)},
-            "name": self._device_id,
-            "manufacturer": MANUFACTURER,
-            "model": "",
-        }
-
-    @property
-    def state(self) -> str:
-        """Return the state of the sensor."""
-        attr_value = self.coordinator.data[self._device_id][self._attribute]
-
-        # if charging is not allowed, show current as 0
-        if (
-            self._attribute == "charger_max_current"
-            and self.coordinator.data[self._device_id]["charging_allowed"] == "off"
-        ):
-            return 0
-
-        # convert Wh to kWh and round to 2 decimal positions
-        if self._unit == K_WATT_HOUR and isinstance(attr_value, numbers.Number):
-            attr_value = round(attr_value / 1000, 2)
-
-        # if attribute is a number and larger than 0, convert it to minutes
-        if (
-            self.state_class == TIME_MINUTES
-            and isinstance(attr_value, numbers.Number)
-            and attr_value > 0
-        ):
-            return round(attr_value / MINUTE_IN_MS, 2)
-
-        return attr_value

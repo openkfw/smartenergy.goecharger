@@ -87,9 +87,12 @@ class StateFetcher:
         updated_data = {}
 
         for charger_name in chargers_api.keys():
+            # if enabled property is already present take it, otherwise set it to True
             is_enabled = (
                 current_data[charger_name][ENABLED]
-                if current_data and ENABLED in current_data[charger_name]
+                if current_data
+                and charger_name in current_data
+                and ENABLED in current_data[charger_name]
                 else True
             )
 

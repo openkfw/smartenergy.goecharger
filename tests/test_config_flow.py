@@ -7,9 +7,9 @@ from unittest.mock import patch, Mock
 import pytest
 
 from homeassistant import config_entries
-from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.data_entry_flow import RESULT_TYPE_CREATE_ENTRY, RESULT_TYPE_FORM
+from homeassistant.helpers.typing import HomeAssistantType
 from pytest_homeassistant_custom_component.common import MockConfigEntry, load_fixture
 from custom_components.go_echarger.const import DOMAIN
 from .mock_api import mocked_api_requests
@@ -26,7 +26,7 @@ CHARGER_INVALID_HOST_SUFFIX: dict = json.loads(load_fixture("charger.json"))[6]
 CHARGER_AUTH_FAILED: dict = json.loads(load_fixture("charger.json"))[7]
 
 
-async def _initialize_and_assert_flow(hass: HomeAssistant) -> FlowResult:
+async def _initialize_and_assert_flow(hass: HomeAssistantType) -> FlowResult:
     result_init = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": config_entries.SOURCE_USER}
     )
@@ -36,7 +36,9 @@ async def _initialize_and_assert_flow(hass: HomeAssistant) -> FlowResult:
     return result_init
 
 
-async def _initialize_and_assert_options(hass: HomeAssistant, data: dict) -> FlowResult:
+async def _initialize_and_assert_options(
+    hass: HomeAssistantType, data: dict
+) -> FlowResult:
     config_entry = MockConfigEntry(
         domain=DOMAIN,
         unique_id="added_charger",
@@ -95,7 +97,7 @@ async def _assert_invalid_auth(flow_id: str, data: dict, configure_fn) -> None:
     GO_E_CHARGER_MOCK_REFERENCE,
     Mock(side_effect=partial(mocked_api_requests, data={})),
 )
-async def test_config_flow_init(hass: HomeAssistant) -> None:
+async def test_config_flow_init(hass: HomeAssistantType) -> None:
     """Test we can configure the integration via config flow."""
     result_init = await _initialize_and_assert_flow(hass)
     result_configure = await hass.config_entries.flow.async_configure(
@@ -109,7 +111,7 @@ async def test_config_flow_init(hass: HomeAssistant) -> None:
     assert result_configure["data"] == CHARGER_1
 
 
-async def test_config_flow_invalid_host(hass: HomeAssistant) -> None:
+async def test_config_flow_invalid_host(hass: HomeAssistantType) -> None:
     """Test an error is created when host is invalid."""
     result_init = await _initialize_and_assert_flow(hass)
     # wrong protocol
@@ -126,7 +128,7 @@ async def test_config_flow_invalid_host(hass: HomeAssistant) -> None:
     )
 
 
-async def test_config_flow_invalid_scan_interval(hass: HomeAssistant) -> None:
+async def test_config_flow_invalid_scan_interval(hass: HomeAssistantType) -> None:
     """Test an error is created when scan interval is invalid."""
     result_init = await _initialize_and_assert_flow(hass)
     # min is 1
@@ -145,7 +147,7 @@ async def test_config_flow_invalid_scan_interval(hass: HomeAssistant) -> None:
     )
 
 
-async def test_config_flow_invalid_auth(hass: HomeAssistant) -> None:
+async def test_config_flow_invalid_auth(hass: HomeAssistantType) -> None:
     """Test an error is created when host and token failed to authenticate."""
     result_init = await _initialize_and_assert_flow(hass)
     await _assert_invalid_auth(
@@ -173,7 +175,7 @@ async def test_options_flow_init(hass) -> None:
     assert result_configure["data"] == CHARGER_3
 
 
-async def test_options_flow_invalid_host(hass: HomeAssistant) -> None:
+async def test_options_flow_invalid_host(hass: HomeAssistantType) -> None:
     """Test an error is created when host is invalid."""
     result_init = await _initialize_and_assert_options(hass, CHARGER_2)
     # wrong protocol
@@ -190,7 +192,7 @@ async def test_options_flow_invalid_host(hass: HomeAssistant) -> None:
     )
 
 
-async def test_options_flow_invalid_scan_interval(hass: HomeAssistant) -> None:
+async def test_options_flow_invalid_scan_interval(hass: HomeAssistantType) -> None:
     """Test an error is created when scan interval is invalid."""
     result_init = await _initialize_and_assert_options(hass, CHARGER_2)
     # min is 1
@@ -209,7 +211,7 @@ async def test_options_flow_invalid_scan_interval(hass: HomeAssistant) -> None:
     )
 
 
-async def test_options_flow_invalid_auth(hass: HomeAssistant) -> None:
+async def test_options_flow_invalid_auth(hass: HomeAssistantType) -> None:
     """Test an error is created when host and token failed to authenticate."""
     result_init = await _initialize_and_assert_options(hass, CHARGER_2)
     await _assert_invalid_auth(

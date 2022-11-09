@@ -24,12 +24,12 @@ class BaseSwitch(ABC):
     # pylint: disable=too-many-arguments
     def __init__(
         self,
+        hass,
         coordinator,
         entity_id,
         name,
         attribute,
         device_id,
-        hass,
     ) -> None:
         """Initialize the go-eCharger switch."""
         super().__init__(coordinator)
@@ -93,20 +93,27 @@ class EnableDisableSwitch(BaseSwitch, CoordinatorEntity, SwitchEntity):
         return self.coordinator.data[self._device_id][self._attribute]
 
 
-def _create_enable_disable_switch(
-    hass: HomeAssistantType, charger_name: str
+def _create_switches(
+    hass: HomeAssistantType, chargers: list[str]
 ) -> EnableDisableSwitch:
     """
     Create a switch for authentication attribute. This will toggle access control  to the car.
     """
-    return EnableDisableSwitch(
-        hass.data[DOMAIN][f"{charger_name}_coordinator"],
-        f"{SWITCH_DOMAIN}.{DOMAIN}_{charger_name}_{ENABLED}",
-        "Enable/disable charging",
-        ENABLED,
-        charger_name,
-        hass,
-    )
+    switch_entities = []
+
+    for charger_name in chargers:
+        switch_entities.append(
+            EnableDisableSwitch(
+                hass,
+                hass.data[DOMAIN][f"{charger_name}_coordinator"],
+                f"{SWITCH_DOMAIN}.{DOMAIN}_{charger_name}_{ENABLED}",
+                "Enable/disable charging",
+                ENABLED,
+                charger_name,
+            )
+        )
+
+    return switch_entities
 
 
 async def async_setup_entry(
@@ -123,7 +130,7 @@ async def async_setup_entry(
         config.update(config_entry.options)
 
     async_add_entities(
-        [_create_enable_disable_switch(hass, entry_id)],
+        _create_switches(hass, [entry_id]),
         update_before_add=True,
     )
 
@@ -142,5 +149,4 @@ async def async_setup_platform(
         _LOGGER.error("Missing discovery_info, skipping setup")
         return
 
-    for charger_name in discovery_info[CONF_CHARGERS]:
-        async_add_entities([_create_enable_disable_switch(hass, charger_name)])
+    async_add_entities(_create_switches(hass, discovery_info[CONF_CHARGERS]))

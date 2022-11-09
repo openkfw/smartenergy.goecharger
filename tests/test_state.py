@@ -4,8 +4,8 @@ import json
 from functools import partial
 from unittest.mock import patch, Mock
 
-from homeassistant.core import HomeAssistant
 from homeassistant.const import CONF_NAME
+from homeassistant.helpers.typing import HomeAssistantType
 from pytest_homeassistant_custom_component.common import load_fixture
 
 from custom_components.go_echarger import async_setup
@@ -34,7 +34,7 @@ CHARGER_1: dict = json.loads(load_fixture("charger.json"))[0]
         )
     ),
 )
-async def test_charge_if_allowed(hass: HomeAssistant) -> None:
+async def test_charge_if_allowed(hass: HomeAssistantType) -> None:
     """Test if charging is enabled if car is in the correct state and charging is enabled."""
     charger_name = CHARGER_1[CONF_NAME]
     coordinator_name = f"{charger_name}_coordinator"
@@ -64,7 +64,7 @@ async def test_charge_if_allowed(hass: HomeAssistant) -> None:
         )
     ),
 )
-async def test_not_charge_if_not_connected(hass: HomeAssistant) -> None:
+async def test_not_charge_if_not_connected(hass: HomeAssistantType) -> None:
     """Test if charging is disabled if car not connected."""
     charger_name = CHARGER_1[CONF_NAME]
     coordinator_name = f"{charger_name}_coordinator"
