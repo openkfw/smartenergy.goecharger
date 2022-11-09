@@ -6,11 +6,11 @@
   "issue_tracker": "https://github.com/openkfw/homeassistant_goechargerv2/issues",
   "iot_class": "local_polling",
   "config_flow": true,
-  "dependencies": ["sensor", "switch"],
+  "dependencies": ["sensor", "switch", "button"],
   "codeowners": [
     "@openkfw"
   ],
   "requirements": [
-    "goechargerv2==0.1.10"
+    "goechargerv2==0.1.11"
   ]
 }

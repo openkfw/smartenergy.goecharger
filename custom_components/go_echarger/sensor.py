@@ -27,7 +27,7 @@ MINUTE_IN_MS: Literal[60000] = 60_000
 AMPERE: Literal["A"] = "A"
 VOLT: Literal["V"] = "V"
 POWER_WATT: Literal["W"] = "W"
-WATT_HOUR: Literal["Wh"] = "Wh"
+K_WATT_HOUR: Literal["kWh"] = "kWh"
 PERCENT: Literal["%"] = "%"
 TIME_MINUTES: Literal["min"] = "min"
 
@@ -36,54 +36,35 @@ _LOGGER: logging.Logger = logging.getLogger(__name__)
 CHARGER_SENSORS_CONFIG: dict = {
     "sensors": [
         "car_status",
-        "serial_number",
         "charger_max_current",
         "charging_allowed",
-        "allowed_ampere",
         "energy_since_car_connected",
-        "charging_duration",
-        "min_charging_time",
-        "car_consumption",
-        "rssi_signal_strength",
         "energy_total",
-        "charging_limit",
         "phase_switch_mode",
         "name",
     ],
     "units": {
         "car_status": {"unit": "", "name": "Car charging status"},
-        "serial_number": {"unit": "", "name": "Serial number"},
         "charging_allowed": {"unit": "", "name": "Car charging allowed"},
-        "charger_max_current": {"unit": AMPERE, "name": "Charger Max Current"},
-        "allowed_ampere": {"unit": AMPERE, "name": "Amperes allowed to charge"},
+        "charger_max_current": {"unit": AMPERE, "name": "Current charging speed (max)"},
         "energy_since_car_connected": {
-            "unit": WATT_HOUR,
+            "unit": K_WATT_HOUR,
             "name": "Energy since car connected",
         },
-        "charging_duration": {"unit": TIME_MINUTES, "name": "Charging duration"},
-        "min_charging_time": {"unit": TIME_MINUTES, "name": "Minimal charging time"},
         "car_consumption": {"unit": "", "name": "Car consumption"},
-        "rssi_signal_strength": {"unit": "", "name": "RSSI signal strength"},
-        "energy_total": {"unit": WATT_HOUR, "name": "Energy total"},
-        "charging_limit": {"unit": WATT_HOUR, "name": "Charging energy limit"},
+        "energy_total": {"unit": K_WATT_HOUR, "name": "Energy total"},
         "phase_switch_mode": {"unit": "", "name": "Phase switch mode"},
-        "name": {"unit": "", "name": "Friendly car name"},
+        "name": {"unit": "", "name": "Charger name"},
     },
     "state_classes": {
         "charger_max_current": STATE_CLASS_TOTAL,
-        "allowed_ampere": AMPERE,
-        "energy_since_car_connected": WATT_HOUR,
-        "energy_total": WATT_HOUR,
-        "charging_limit": WATT_HOUR,
-        "charging_duration": TIME_MINUTES,
-        "min_charging_time": TIME_MINUTES,
+        "energy_since_car_connected": K_WATT_HOUR,
+        "energy_total": K_WATT_HOUR,
     },
     "device_classes": {
         "charger_max_current": DEVICE_CLASS_CURRENT,
-        "allowed_ampere": DEVICE_CLASS_CURRENT,
         "energy_since_car_connected": DEVICE_CLASS_ENERGY,
         "energy_total": DEVICE_CLASS_ENERGY,
-        "charging_limit": DEVICE_CLASS_ENERGY,
         "charging_allowed": "go_echarger__allow_charging",
     },
 }
@@ -271,15 +252,9 @@ class ChargerSensor(BaseSensor, CoordinatorEntity, SensorEntity):
         ):
             return 0
 
-        # charging time is provided in the following format:
-        # null=no charging in progress, type=0 counter going up, type=1 duration in ms
-        # if the type is 0 or 1, we want to show the time
-        if (
-            self._attribute == "charging_duration"
-            and "value" in attr_value
-            and attr_value["type"] in [0, 1]
-        ):
-            return round(attr_value["value"] / MINUTE_IN_MS, 2)
+        # convert Wh to kWh and round to 2 decimal positions
+        if self._unit == K_WATT_HOUR and isinstance(attr_value, numbers.Number):
+            attr_value = round(attr_value / 1000, 2)
 
         # if attribute is a number and larger than 0, convert it to minutes
         if (

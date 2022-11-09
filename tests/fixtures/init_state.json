@@ -1,0 +1,10 @@
+{
+    "car_status": "Car is charging",
+    "charger_max_current": null,
+    "charging_allowed": null,
+    "energy_since_car_connected": null,
+    "energy_total": null,
+    "phase_switch_mode": null,
+    "charger_access": false,
+    "charger_force_charging": "off"
+}

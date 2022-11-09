@@ -73,7 +73,7 @@ pip freeze | xargs pip uninstall -y
 ### Linting
 
 ```bash
-pylint tests/*.py custom_components/**/*.py
+pylint tests/**/*.py custom_components/**/*.py mock_api/**/*.py
 ```
 
 ### Formatting

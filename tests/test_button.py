@@ -13,28 +13,10 @@ from custom_components.go_echarger import async_setup, async_setup_entry
 from custom_components.go_echarger.const import (
     DOMAIN,
     CHARGER_ACCESS,
-    CHARGER_FORCE_CHARGING,
     CONF_CHARGERS,
 )
 from .mock_api import mocked_api_requests
 
-INIT_STATE = {
-    "car_status": "Car is charging",
-    "serial_number": None,
-    "charger_max_current": None,
-    "charging_allowed": None,
-    "allowed_ampere": None,
-    "energy_since_car_connected": None,
-    "charging_duration": {"type": 1, "value": 0},
-    "min_charging_time": 0,
-    "car_consumption": None,
-    "rssi_signal_strength": None,
-    "energy_total": None,
-    "charging_limit": None,
-    "phase_switch_mode": None,
-    CHARGER_ACCESS: False,
-    CHARGER_FORCE_CHARGING: "off",
-}
 GO_E_CHARGER_MOCK_REFERENCE = "custom_components.go_echarger.state.GoeChargerApi"
 CHARGER_1: dict = json.loads(load_fixture("charger.json"))[0]
 
@@ -44,7 +26,7 @@ CHARGER_1: dict = json.loads(load_fixture("charger.json"))[0]
     Mock(
         side_effect=partial(
             mocked_api_requests,
-            data=INIT_STATE,
+            data=json.loads(load_fixture("init_state.json")),
         )
     ),
 )
@@ -79,7 +61,7 @@ async def test_button_auth_enable(hass: HomeAssistant) -> None:
     Mock(
         side_effect=partial(
             mocked_api_requests,
-            data=INIT_STATE,
+            data=json.loads(load_fixture("init_state.json")),
         )
     ),
 )
