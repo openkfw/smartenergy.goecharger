@@ -14,9 +14,9 @@ sensor:
       - 'date_time'
 
 # uncomment if you want to have a quick access/test without HACS
-# change TBD to the real values
+# change mock values to the real values
 # go_echarger:
 #   chargers:
 #     - name: charger1
-#       host: TBD
-#       api_token: TBD
+#       host: http://mock-api:4000
+#       api_token: TEST

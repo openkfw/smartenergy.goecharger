@@ -5,14 +5,19 @@ import numbers
 from abc import ABC, abstractmethod
 from typing import Callable, Literal
 
-from homeassistant.core import HomeAssistant
 from homeassistant.components.sensor import (
     DEVICE_CLASS_CURRENT,
     DEVICE_CLASS_ENERGY,
     STATE_CLASS_TOTAL,
     SensorEntity,
+    DOMAIN as SENSOR_DOMAIN,
 )
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from homeassistant.helpers.typing import (
+    ConfigType,
+    HomeAssistantType,
+    DiscoveryInfoType,
+)
 
 from .const import CONF_CHARGERS, DOMAIN, MANUFACTURER
 
@@ -85,7 +90,7 @@ CHARGER_SENSORS_CONFIG: dict = {
 
 
 def _setup_sensors(
-    hass: HomeAssistant,
+    hass: HomeAssistantType,
     sensor_ids: list,
     sensors_config: dict,
     sensor_class: type,
@@ -124,7 +129,7 @@ def _setup_sensors(
             sensors.append(
                 sensor_class(
                     hass.data[DOMAIN][coordinator_name],
-                    f"sensor.{DOMAIN}_{sensor_id}_{sensor}",
+                    f"{SENSOR_DOMAIN}.{DOMAIN}_{sensor_id}_{sensor}",
                     sensor_id,
                     sensor_name,
                     sensor,
@@ -140,7 +145,7 @@ def _setup_sensors(
 
 
 async def async_setup_entry(
-    hass: HomeAssistant,
+    hass: HomeAssistantType,
     config_entry: dict,
     async_add_entities: Callable,
 ) -> None:
@@ -166,10 +171,10 @@ async def async_setup_entry(
 
 # pylint: disable=unused-argument
 async def async_setup_platform(
-    hass: HomeAssistant,
-    config: dict,
+    hass: HomeAssistantType,
+    config: ConfigType,
     async_add_entities: Callable,
-    discovery_info: dict = None,
+    discovery_info: DiscoveryInfoType = None,
 ) -> None:
     """Set up go-eCharger Sensor platform."""
     _LOGGER.debug("Setting up the go-eCharger sensor platform")

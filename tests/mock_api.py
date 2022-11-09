@@ -30,6 +30,7 @@ def mocked_api_requests(*args, **kwargs) -> dict | int:
             return val
 
     if args[0] in ["http://1.1.1.1", "http://1.1.1.2"]:
-        return MockResponse(kwargs["data"], OK)
+        # use .copy() to not mutate the original data
+        return MockResponse(kwargs["data"].copy(), OK)
 
     return BAD_REQUEST

@@ -6,11 +6,11 @@ from datetime import timedelta
 
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
-from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_API_TOKEN, CONF_HOST, CONF_NAME, CONF_SCAN_INTERVAL
 from homeassistant.helpers.discovery import async_load_platform
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+from homeassistant.helpers.typing import ConfigType, HomeAssistantType
 
 from .const import (
     CHARGERS_API,
@@ -59,7 +59,7 @@ def _setup_coordinator(
     state_fetcher_class: type,
     scan_interval: timedelta,
     coordinator_name: str,
-    hass: HomeAssistant,
+    hass: HomeAssistantType,
 ) -> DataUpdateCoordinator:
     _LOGGER.debug("Configuring coordinator=%s", coordinator_name)
 
@@ -77,7 +77,7 @@ def _setup_coordinator(
     return coordinator
 
 
-def _setup_apis(config: dict, hass: HomeAssistant) -> dict:
+def _setup_apis(config: ConfigType, hass: HomeAssistantType) -> dict:
     chargers_api = {}
 
     if DOMAIN in config:
@@ -103,23 +103,22 @@ def _setup_apis(config: dict, hass: HomeAssistant) -> dict:
     return chargers_api
 
 
-async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
+async def async_setup_entry(hass: HomeAssistantType, config_entry: ConfigEntry) -> bool:
     """
     Sets up a charger defined via the UI. This includes:
     - setup of the API
     - coordinator
     - sensors
     - switches
+    - buttons
     """
     options = config_entry.options
     data = dict(config_entry.data)
     entry_id = config_entry.entry_id
 
     _LOGGER.debug(
-        "Setting up a dynamic Go-eCharger charger with id=%s, data=%s and options=%s",
+        "Setting up a dynamic Go-eCharger charger with id=%s",
         entry_id,
-        data,
-        options,
     )
 
     # scan interval is provided as an integer, but has to be an interval
@@ -146,6 +145,9 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     hass.async_create_task(
         hass.config_entries.async_forward_entry_setup(config_entry, "switch")
     )
+    hass.async_create_task(
+        hass.config_entries.async_forward_entry_setup(config_entry, "button")
+    )
 
     unsub_options_update_listener = config_entry.add_update_listener(
         options_update_listener
@@ -160,13 +162,15 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
 
 
 async def options_update_listener(
-    hass: HomeAssistant, config_entry: ConfigEntry
+    hass: HomeAssistantType, config_entry: ConfigEntry
 ) -> None:
     """Handle options update."""
     await hass.config_entries.async_reload(config_entry.entry_id)
 
 
-async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
+async def async_unload_entry(
+    hass: HomeAssistantType, config_entry: ConfigEntry
+) -> bool:
     """Unload a config entry."""
     entry_id = config_entry.entry_id
     _LOGGER.debug("Unloading the charger=%s", entry_id)
@@ -177,6 +181,9 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
         ),
         await asyncio.gather(
             *[hass.config_entries.async_forward_entry_unload(config_entry, "switch")]
+        ),
+        await asyncio.gather(
+            *[hass.config_entries.async_forward_entry_unload(config_entry, "button")]
         ),
     )
 
@@ -190,7 +197,7 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
     return unload_ok
 
 
-async def async_setup(hass: HomeAssistant, config: dict) -> bool:
+async def async_setup(hass: HomeAssistantType, config: ConfigType) -> bool:
     """Set up Go-eCharger platforms and services."""
 
     _LOGGER.debug("Setting up the Go-eCharger integration")
@@ -252,6 +259,19 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
         async_load_platform(
             hass,
             "switch",
+            DOMAIN,
+            {
+                CONF_CHARGERS: charger_names,
+            },
+            config,
+        )
+    )
+
+    # load platform with buttons
+    hass.async_create_task(
+        async_load_platform(
+            hass,
+            "button",
             DOMAIN,
             {
                 CONF_CHARGERS: charger_names,

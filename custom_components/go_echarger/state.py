@@ -2,8 +2,8 @@
 
 import logging
 
-from homeassistant.core import HomeAssistant
 from homeassistant.const import CONF_NAME
+from homeassistant.helpers.typing import HomeAssistantType
 from goechargerv2.goecharger import GoeChargerApi
 
 from .const import (
@@ -37,7 +37,7 @@ class StateFetcher:
 
     coordinator = None
 
-    def __init__(self, hass: HomeAssistant) -> None:
+    def __init__(self, hass: HomeAssistantType) -> None:
         self._hass = hass
 
     async def _handle_charging(

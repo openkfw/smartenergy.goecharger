@@ -5,7 +5,11 @@ from functools import partial
 from unittest.mock import patch, Mock
 
 from homeassistant.core import HomeAssistant
-from homeassistant.components.switch import SERVICE_TURN_OFF, SERVICE_TURN_ON
+from homeassistant.components.switch import (
+    SERVICE_TURN_OFF,
+    SERVICE_TURN_ON,
+    DOMAIN as SWITCH_DOMAIN,
+)
 from homeassistant.const import ATTR_ENTITY_ID, CONF_NAME
 from pytest_homeassistant_custom_component.common import load_fixture
 
@@ -61,66 +65,22 @@ async def test_switch_charging_enable_disable(hass: HomeAssistant) -> None:
 
     # disable the switch
     await hass.services.async_call(
-        "switch",
+        SWITCH_DOMAIN,
         SERVICE_TURN_OFF,
-        service_data={ATTR_ENTITY_ID: f"switch.{DOMAIN}_{charger_name}_{ENABLED}"},
+        service_data={
+            ATTR_ENTITY_ID: f"{SWITCH_DOMAIN}.{DOMAIN}_{charger_name}_{ENABLED}"
+        },
         blocking=True,
     )
     assert hass.data[DOMAIN][coordinator_name].data[charger_name][ENABLED] is False
 
     # enable the switch
     await hass.services.async_call(
-        "switch",
+        SWITCH_DOMAIN,
         SERVICE_TURN_ON,
-        service_data={ATTR_ENTITY_ID: f"switch.{DOMAIN}_{charger_name}_{ENABLED}"},
+        service_data={
+            ATTR_ENTITY_ID: f"{SWITCH_DOMAIN}.{DOMAIN}_{charger_name}_{ENABLED}"
+        },
         blocking=True,
     )
     assert hass.data[DOMAIN][coordinator_name].data[charger_name][ENABLED] is True
-
-
-@patch(
-    GO_E_CHARGER_MOCK_REFERENCE,
-    Mock(
-        side_effect=partial(
-            mocked_api_requests,
-            data=INIT_STATE,
-        )
-    ),
-)
-async def test_switch_auth_enable_disable(hass: HomeAssistant) -> None:
-    """Test if authentication switch can be enabled/disabled."""
-    charger_name = CHARGER_1[CONF_NAME]
-    coordinator_name = f"{charger_name}_coordinator"
-    assert await async_setup(hass, {DOMAIN: {CONF_CHARGERS: [[CHARGER_1]]}})
-    await hass.async_block_till_done()
-
-    # switch is enabled by default
-    assert (
-        hass.data[DOMAIN][coordinator_name].data[charger_name][CHARGER_ACCESS] is True
-    )
-
-    # disable the switch
-    await hass.services.async_call(
-        "switch",
-        SERVICE_TURN_OFF,
-        service_data={
-            ATTR_ENTITY_ID: f"switch.{DOMAIN}_{charger_name}_{CHARGER_ACCESS}"
-        },
-        blocking=True,
-    )
-    assert (
-        hass.data[DOMAIN][coordinator_name].data[charger_name][CHARGER_ACCESS] is False
-    )
-
-    # enable the switch
-    await hass.services.async_call(
-        "switch",
-        SERVICE_TURN_ON,
-        service_data={
-            ATTR_ENTITY_ID: f"switch.{DOMAIN}_{charger_name}_{CHARGER_ACCESS}"
-        },
-        blocking=True,
-    )
-    assert (
-        hass.data[DOMAIN][coordinator_name].data[charger_name][CHARGER_ACCESS] is True
-    )

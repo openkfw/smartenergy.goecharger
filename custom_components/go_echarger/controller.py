@@ -2,13 +2,14 @@
 
 import logging
 
-from homeassistant.core import HomeAssistant
+from homeassistant.helpers.typing import HomeAssistantType, ServiceCallType
+
 from .const import API, CHARGERS_API, DOMAIN, INIT_STATE
 
 _LOGGER: logging.Logger = logging.getLogger(__name__)
 
 
-async def fetch_status(hass: HomeAssistant, charger_name: str) -> dict:
+async def fetch_status(hass: HomeAssistantType, charger_name: str) -> dict:
     """Fetch go-eCharger car status via API."""
 
     api = hass.data[DOMAIN][INIT_STATE][CHARGERS_API][charger_name][API]
@@ -17,14 +18,14 @@ async def fetch_status(hass: HomeAssistant, charger_name: str) -> dict:
     return fetched_status
 
 
-async def start_charging(hass: HomeAssistant, charger_name: str) -> dict:
+async def start_charging(hass: HomeAssistantType, charger_name: str) -> dict:
     """Start charging of a car via API, no state refresh."""
 
     api = hass.data[DOMAIN][INIT_STATE][CHARGERS_API][charger_name][API]
     await hass.async_add_executor_job(api.set_force_charging, True)
 
 
-async def stop_charging(hass: HomeAssistant, charger_name: str) -> dict:
+async def stop_charging(hass: HomeAssistantType, charger_name: str) -> dict:
     """Stop charging of a car via API, no state refresh."""
 
     api = hass.data[DOMAIN][INIT_STATE][CHARGERS_API][charger_name][API]
@@ -34,7 +35,7 @@ async def stop_charging(hass: HomeAssistant, charger_name: str) -> dict:
 class ChargerController:
     """Represents go-eCharger controller, abstracting API calls into methods."""
 
-    def __init__(self, hass: HomeAssistant) -> None:
+    def __init__(self, hass: HomeAssistantType) -> None:
         self._hass = hass
 
     def _is_charging_allowed(self, charger_name: str) -> bool:
@@ -55,7 +56,7 @@ class ChargerController:
 
         return True
 
-    async def start_charging(self, call: dict) -> None:
+    async def start_charging(self, call: ServiceCallType) -> None:
         """Get name and assigned power from the service call and call the API accordingly.
         In case charging is not allowed, log a warning and early escape."""
 
@@ -79,7 +80,7 @@ class ChargerController:
         await self._hass.async_add_executor_job(api.set_force_charging, True)
         await self._hass.data[DOMAIN][f"{charger_name}_coordinator"].async_refresh()
 
-    async def stop_charging(self, call: dict) -> None:
+    async def stop_charging(self, call: ServiceCallType) -> None:
         """Get name and assigned power from the service call and call the API accordingly.
         In case charging is not allowed, log a warning and early escape."""
 
@@ -96,7 +97,7 @@ class ChargerController:
         await self._hass.async_add_executor_job(api.set_force_charging, False)
         await self._hass.data[DOMAIN][f"{charger_name}_coordinator"].async_refresh()
 
-    async def change_charging_power(self, call: dict) -> None:
+    async def change_charging_power(self, call: ServiceCallType) -> None:
         """Get name and power from the service call and call the API accordingly.
         In case charging is not allowed, log an error and early escape."""
 
@@ -116,7 +117,7 @@ class ChargerController:
         await self._hass.async_add_executor_job(api.set_max_current, charging_power)
         await self._hass.data[DOMAIN][f"{charger_name}_coordinator"].async_refresh()
 
-    async def set_phase(self, call: dict) -> None:
+    async def set_phase(self, call: ServiceCallType) -> None:
         """Get name and phase from the service call and call the API accordingly.
         In case the phase value is not set correctly, log an error and early escape.
         Possible phase values: 0 (Auto), 1 (1-phased), 2 (3-phased)
@@ -138,7 +139,7 @@ class ChargerController:
         await self._hass.async_add_executor_job(api.set_phase, phase)
         await self._hass.data[DOMAIN][f"{charger_name}_coordinator"].async_refresh()
 
-    async def set_authentication(self, call: dict) -> None:
+    async def set_authentication(self, call: ServiceCallType) -> None:
         """Get name and status from the service call and call the API accordingly.
         In case the status value is not set correctly, log an error and early escape.
         Possible values: 0 (open), 1 (wait)

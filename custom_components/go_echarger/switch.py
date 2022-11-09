@@ -4,11 +4,15 @@ import logging
 from typing import Callable
 from abc import ABC, abstractmethod
 
-from homeassistant.core import HomeAssistant
-from homeassistant.components.switch import SwitchEntity
+from homeassistant.components.switch import SwitchEntity, DOMAIN as SWITCH_DOMAIN
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from homeassistant.helpers.typing import (
+    ConfigType,
+    HomeAssistantType,
+    DiscoveryInfoType,
+)
 
-from .const import DOMAIN, CONF_CHARGERS, MANUFACTURER, ENABLED, CHARGER_ACCESS
+from .const import DOMAIN, CONF_CHARGERS, MANUFACTURER, ENABLED
 from .controller import ChargerController
 
 _LOGGER: logging.Logger = logging.getLogger(__name__)
@@ -75,25 +79,12 @@ class EnableDisableSwitch(BaseSwitch, CoordinatorEntity, SwitchEntity):
 
     async def async_turn_on(self, **kwargs) -> None:
         """Turn the entity on."""
-        if self._attribute == CHARGER_ACCESS:
-            await self._charger_controller.set_authentication(
-                {"data": {"device_name": self._device_id, "status": 0}}
-            )
-        else:
-            self.coordinator.data[self._device_id][self._attribute] = True
-
+        self.coordinator.data[self._device_id][self._attribute] = True
         await self.coordinator.async_request_refresh()
 
     async def async_turn_off(self, **kwargs) -> None:
         """Turn the entity off."""
-
-        if self._attribute == CHARGER_ACCESS:
-            await self._charger_controller.set_authentication(
-                {"data": {"device_name": self._device_id, "status": 1}}
-            )
-        else:
-            self.coordinator.data[self._device_id][self._attribute] = False
-
+        self.coordinator.data[self._device_id][self._attribute] = False
         await self.coordinator.async_request_refresh()
 
     @property
@@ -103,14 +94,14 @@ class EnableDisableSwitch(BaseSwitch, CoordinatorEntity, SwitchEntity):
 
 
 def _create_enable_disable_switch(
-    hass: HomeAssistant, charger_name: str
+    hass: HomeAssistantType, charger_name: str
 ) -> EnableDisableSwitch:
     """
     Create a switch for authentication attribute. This will toggle access control  to the car.
     """
     return EnableDisableSwitch(
         hass.data[DOMAIN][f"{charger_name}_coordinator"],
-        f"switch.{DOMAIN}_{charger_name}_{ENABLED}",
+        f"{SWITCH_DOMAIN}.{DOMAIN}_{charger_name}_{ENABLED}",
         "Enable/disable charging",
         ENABLED,
         charger_name,
@@ -118,24 +109,8 @@ def _create_enable_disable_switch(
     )
 
 
-def _create_authenticate_switch(
-    hass: HomeAssistant, charger_name: str
-) -> EnableDisableSwitch:
-    """
-    Create a switch to enable/disable car charging.
-    """
-    return EnableDisableSwitch(
-        hass.data[DOMAIN][f"{charger_name}_coordinator"],
-        f"switch.{DOMAIN}_{charger_name}_charger_access",
-        "Authenticate",
-        CHARGER_ACCESS,
-        charger_name,
-        hass,
-    )
-
-
 async def async_setup_entry(
-    hass: HomeAssistant,
+    hass: HomeAssistantType,
     config_entry: dict,
     async_add_entities: Callable,
 ) -> None:
@@ -148,20 +123,17 @@ async def async_setup_entry(
         config.update(config_entry.options)
 
     async_add_entities(
-        [
-            _create_enable_disable_switch(hass, entry_id),
-            _create_authenticate_switch(hass, entry_id),
-        ],
+        [_create_enable_disable_switch(hass, entry_id)],
         update_before_add=True,
     )
 
 
 # pylint: disable=unused-argument
 async def async_setup_platform(
-    hass: HomeAssistant,
-    _config: dict,
+    hass: HomeAssistantType,
+    _config: ConfigType,
     async_add_entities: Callable,
-    discovery_info: dict | None = None,
+    discovery_info: DiscoveryInfoType | None = None,
 ) -> None:
     """Set up go-eCharger Switch platform."""
     _LOGGER.debug("Setting up the go-eCharger switch platform")
@@ -171,9 +143,4 @@ async def async_setup_platform(
         return
 
     for charger_name in discovery_info[CONF_CHARGERS]:
-        async_add_entities(
-            [
-                _create_enable_disable_switch(hass, charger_name),
-                _create_authenticate_switch(hass, charger_name),
-            ]
-        )
+        async_add_entities([_create_enable_disable_switch(hass, charger_name)])
