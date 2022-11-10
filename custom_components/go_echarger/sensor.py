@@ -78,6 +78,7 @@ CHARGER_SENSORS_CONFIG: dict = {
         ENERGY_SINCE_CAR_CONNECTED: DEVICE_CLASS_ENERGY,
         ENERGY_TOTAL: DEVICE_CLASS_ENERGY,
         CHARGING_ALLOWED: "go_echarger__allow_charging",
+        PHASE_SWITCH_MODE: "go_echarger__phase_switch_mode",
     },
 }
 

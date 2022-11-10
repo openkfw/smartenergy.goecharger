@@ -22,6 +22,7 @@ from .const import (
     CONF_CHARGERS,
     MIN_CHARGING_CURRENT_LIMIT,
     MAX_CHARGING_CURRENT_LIMIT,
+    CHARGER_MAX_CURRENT,
 )
 from .controller import ChargerController
 
@@ -29,7 +30,7 @@ _LOGGER: logging.Logger = logging.getLogger(__name__)
 
 NUMBER_INPUTS = [
     {
-        "id": "charger_max_current",
+        "id": CHARGER_MAX_CURRENT,
         "name": "Set charging speed",
         "icon": "mdi:current-ac",
     }

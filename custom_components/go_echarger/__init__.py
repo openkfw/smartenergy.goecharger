@@ -15,6 +15,7 @@ from homeassistant.components.button import DOMAIN as BUTTON_DOMAIN
 from homeassistant.components.sensor import DOMAIN as SENSOR_DOMAIN
 from homeassistant.components.switch import DOMAIN as SWITCH_DOMAIN
 from homeassistant.components.number import DOMAIN as NUMBER_DOMAIN
+from homeassistant.components.select import DOMAIN as SELECT_DOMAIN
 
 from .const import (
     CHARGERS_API,
@@ -31,7 +32,13 @@ _LOGGER: logging.Logger = logging.getLogger(__name__)
 MIN_UPDATE_INTERVAL: timedelta = timedelta(seconds=10)
 DEFAULT_UPDATE_INTERVAL: timedelta = timedelta(seconds=10)
 
-PLATFORMS = [BUTTON_DOMAIN, SENSOR_DOMAIN, SWITCH_DOMAIN, NUMBER_DOMAIN]
+PLATFORMS: list[str] = [
+    BUTTON_DOMAIN,
+    SENSOR_DOMAIN,
+    SWITCH_DOMAIN,
+    NUMBER_DOMAIN,
+    SELECT_DOMAIN,
+]
 
 # Configuration validation
 CONFIG_SCHEMA: vol.Schema = vol.Schema(
@@ -118,6 +125,7 @@ async def async_setup_entry(hass: HomeAssistantType, config_entry: ConfigEntry) 
     - switches
     - buttons
     - number inputs
+    - select inputs
     """
     options = config_entry.options
     data = dict(config_entry.data)

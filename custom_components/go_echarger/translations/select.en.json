@@ -1,9 +1,5 @@
 {
     "state": {
-        "go_echarger__allow_charging": {
-            "off": "No",
-            "on": "Yes"
-        },
         "go_echarger__phase_switch_mode": {
             "0": "Auto",
             "1": "1-phase",

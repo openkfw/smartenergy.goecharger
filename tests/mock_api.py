@@ -2,7 +2,11 @@
 
 from http.client import BAD_REQUEST, OK
 
-from custom_components.go_echarger.const import CHARGER_ACCESS, CHARGER_MAX_CURRENT
+from custom_components.go_echarger.const import (
+    CHARGER_ACCESS,
+    CHARGER_MAX_CURRENT,
+    PHASE_SWITCH_MODE,
+)
 
 # pylint: disable=unused-argument
 def mocked_api_requests(*args, **kwargs) -> dict | int:
@@ -32,6 +36,11 @@ def mocked_api_requests(*args, **kwargs) -> dict | int:
         def set_max_current(self, val: int) -> int:
             """Return provided value and update data"""
             self.json_data[CHARGER_MAX_CURRENT] = val
+            return val
+
+        def set_phase(self, val: int) -> int:
+            """Return provided value and update data"""
+            self.json_data[PHASE_SWITCH_MODE] = val
             return val
 
     if args[0] in ["http://1.1.1.1", "http://1.1.1.2"]:
