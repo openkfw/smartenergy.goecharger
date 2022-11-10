@@ -12,3 +12,9 @@ sensor:
   - platform: time_date
     display_options:
       - 'date_time'
+
+go_echarger:
+  chargers:
+    - name: charger1
+      host: http://mock-api:4000
+      api_token: TEST

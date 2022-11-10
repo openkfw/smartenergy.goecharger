@@ -43,6 +43,18 @@ Supported features:
 
 ## Development
 
+### Running the Home Assistant
+
+If you have issues running VSCode `devcontainer`, there is a script to achieve live reloads of the custom component in the running Docker container.
+
+Run:
+
+```bash
+./start-dev.sh
+```
+
+After few minutes, Home Assistant should running and script should be in the watch mode. Whenever you change a file in the `custom_components/go_echarger` folder, it will restart the Home Assistant within a few seconds. Thus, you have a quick development feedback.
+
 ### Working with virtual env
 
 It is highly recommended to work from within a virtual environment as especially dependencies can mess up quite quickly.

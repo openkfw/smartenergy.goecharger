@@ -1,0 +1,18 @@
+version: "3.9"
+
+services:
+  mock-api:
+    build: ./mock_api
+    container_name: mock-api
+    ports:
+      - "4000:4000"
+
+  homeassistant:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: homeassistant
+    ports:
+      - "8123:8123"
+    volumes:
+      - ./custom_components/go_echarger:/config/custom_components/go_echarger
