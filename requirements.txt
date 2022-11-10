@@ -1,4 +1,4 @@
 pylint==2.15.3
-goechargerv2==0.1.12
+goechargerv2==0.1.13
 pytest-homeassistant-custom-component==0.12.10
 Flask==2.0.3

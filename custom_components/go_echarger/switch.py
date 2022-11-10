@@ -12,7 +12,7 @@ from homeassistant.helpers.typing import (
     DiscoveryInfoType,
 )
 
-from .const import DOMAIN, CONF_CHARGERS, MANUFACTURER, ENABLED
+from .const import DOMAIN, CONF_CHARGERS, MANUFACTURER, CHARGER_FORCE_CHARGING
 from .controller import ChargerController
 
 _LOGGER: logging.Logger = logging.getLogger(__name__)
@@ -79,25 +79,27 @@ class EnableDisableSwitch(BaseSwitch, CoordinatorEntity, SwitchEntity):
 
     async def async_turn_on(self, **kwargs) -> None:
         """Turn the entity on."""
-        self.coordinator.data[self._device_id][self._attribute] = True
-        await self.coordinator.async_request_refresh()
+        await self._charger_controller.start_charging(
+            {"data": {"device_name": self._device_id}}
+        )
 
     async def async_turn_off(self, **kwargs) -> None:
         """Turn the entity off."""
-        self.coordinator.data[self._device_id][self._attribute] = False
-        await self.coordinator.async_request_refresh()
+        await self._charger_controller.stop_charging(
+            {"data": {"device_name": self._device_id}}
+        )
 
     @property
     def is_on(self) -> str | int:
         """Return the state of the switch."""
-        return self.coordinator.data[self._device_id][self._attribute]
+        return self.coordinator.data[self._device_id][self._attribute] == "on"
 
 
 def _create_switches(
     hass: HomeAssistantType, chargers: list[str]
 ) -> EnableDisableSwitch:
     """
-    Create a switch for authentication attribute. This will toggle access control  to the car.
+    Create a switch for car charging attribute.
     """
     switch_entities = []
 
@@ -106,9 +108,9 @@ def _create_switches(
             EnableDisableSwitch(
                 hass,
                 hass.data[DOMAIN][f"{charger_name}_coordinator"],
-                f"{SWITCH_DOMAIN}.{DOMAIN}_{charger_name}_{ENABLED}",
+                f"{SWITCH_DOMAIN}.{DOMAIN}_{charger_name}_{CHARGER_FORCE_CHARGING}",
                 "Enable/disable charging",
-                ENABLED,
+                CHARGER_FORCE_CHARGING,
                 charger_name,
             )
         )

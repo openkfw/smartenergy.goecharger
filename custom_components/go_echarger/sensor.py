@@ -29,6 +29,7 @@ from .const import (
     ENERGY_SINCE_CAR_CONNECTED,
     ENERGY_TOTAL,
     PHASE_SWITCH_MODE,
+    PHASES_NUMBER_CONNECTED,
 )
 
 MINUTE_IN_MS: Literal[60000] = 60_000
@@ -51,6 +52,7 @@ CHARGER_SENSORS_CONFIG: dict = {
         ENERGY_SINCE_CAR_CONNECTED,
         ENERGY_TOTAL,
         PHASE_SWITCH_MODE,
+        PHASES_NUMBER_CONNECTED,
         "name",
     ],
     "units": {
@@ -63,6 +65,7 @@ CHARGER_SENSORS_CONFIG: dict = {
         },
         ENERGY_TOTAL: {"unit": K_WATT_HOUR, "name": "Energy total"},
         PHASE_SWITCH_MODE: {"unit": "", "name": "Phase switch mode"},
+        PHASES_NUMBER_CONNECTED: {"unit": "", "name": "Number of connected phases"},
         "name": {"unit": "", "name": "Charger name"},
     },
     "state_classes": {

@@ -7,7 +7,7 @@ app = Flask(__name__)
 SUPPORTED_CAR_CHANGE_VALUES = ["amp", "frc", "alw", "psm", "acs"]
 
 CAR = {
-    "car": 1,
+    "car": 2,
     "sse": "051215",
     "amp": 10,
     "frc": 0,
@@ -22,6 +22,8 @@ CAR = {
     "rssi": -71,
     "psm": 1,
     "acs": 1,
+    "psm": 0,
+    "pnp": 0,
 }
 
 
@@ -45,6 +47,9 @@ def car_set() -> dict:
     for change_value in SUPPORTED_CAR_CHANGE_VALUES:
         request_value = args.get(change_value, None)
         if request_value is not None:
+            if change_value == "psm":
+                CAR["pnp"] = request_value
+
             CAR[change_value] = (
                 bool(int(request_value))
                 if change_value == "alw"

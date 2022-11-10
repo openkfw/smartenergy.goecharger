@@ -4,7 +4,7 @@ import logging
 
 from homeassistant.helpers.typing import HomeAssistantType, ServiceCallType
 
-from .const import API, CHARGERS_API, DOMAIN, INIT_STATE
+from .const import API, CHARGERS_API, DOMAIN, INIT_STATE, CAR_STATUS, CHARGING_ALLOWED
 
 _LOGGER: logging.Logger = logging.getLogger(__name__)
 
@@ -39,17 +39,18 @@ class ChargerController:
         self._hass = hass
 
     def _is_charging_allowed(self, charger_name: str) -> bool:
-        """Check if charging is allowed. If not, log an error and return False, other return True"""
+        """
+        Check if charging is allowed. If not, log an error and return False, otherwise return True
+        """
+        data = self._hass.data[DOMAIN][f"{charger_name}_coordinator"].data[charger_name]
 
         if (
-            self._hass.data[DOMAIN][f"{charger_name}_coordinator"].data[charger_name][
-                "charging_allowed"
-            ]
-            == "off"
+            data[CHARGING_ALLOWED] == "off"
+            or data[CAR_STATUS] == "Charger ready, no car connected"
         ):
             _LOGGER.error(
                 """Charging for the %s is not allowed, please authenticate the car
-                 to allow automated charging""",
+                 to allow automated charging or connect the car""",
                 charger_name,
             )
             return False
@@ -64,7 +65,7 @@ class ChargerController:
         charging_power = call["data"].get("charging_power", None)
         api = self._hass.data[DOMAIN][INIT_STATE][CHARGERS_API][charger_name][API]
 
-        if not self._is_charging_allowed:
+        if not self._is_charging_allowed(charger_name):
             _LOGGER.warning("Charging is currently not allowed")
             return
 
@@ -87,13 +88,12 @@ class ChargerController:
         charger_name = call["data"].get("device_name", None)
         api = self._hass.data[DOMAIN][INIT_STATE][CHARGERS_API][charger_name][API]
 
-        if not self._is_charging_allowed:
+        if not self._is_charging_allowed(charger_name):
             _LOGGER.warning("Charging is currently not allowed")
             return
 
         _LOGGER.debug("Stopping charging for the device=%s", charger_name)
 
-        await self._hass.async_add_executor_job(api.set_max_current, 0)
         await self._hass.async_add_executor_job(api.set_force_charging, False)
         await self._hass.data[DOMAIN][f"{charger_name}_coordinator"].async_refresh()
 
@@ -105,7 +105,7 @@ class ChargerController:
         charging_power = call["data"].get("charging_power", None)
         api = self._hass.data[DOMAIN][INIT_STATE][CHARGERS_API][charger_name][API]
 
-        if not self._is_charging_allowed:
+        if not self._is_charging_allowed(charger_name):
             return
 
         _LOGGER.debug(

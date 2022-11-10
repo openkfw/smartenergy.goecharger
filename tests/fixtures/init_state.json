@@ -1,12 +1,13 @@
 {
     "car_status": "Car is charging",
     "charger_max_current": 2,
-    "charging_allowed": null,
+    "charging_allowed": "on",
     "energy_since_car_connected": null,
     "energy_total": null,
-    "phase_switch_mode": null,
+    "phase_switch_mode": 1,
+    "phases_number_connected": 1,
     "charger_access": false,
-    "charger_force_charging": "off",
+    "charger_force_charging": "on",
     "min_charging_current_limit": 1,
     "max_charging_current_limit": 30
 }
