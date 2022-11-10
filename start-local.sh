@@ -37,7 +37,7 @@ ha-custom
 printf "\n>>> Running containers:\n"
 podman ps
 
-if [ $simple != "-s" ]; then
+if [ "$simple" != "-s" ]; then
     printf "\n>>> Downloading HACS\n"
     sleep 10
     podman exec homeassistant sh -c "cd /config && wget -O - https://get.hacs.xyz | bash -"

@@ -6,5 +6,7 @@
     "energy_total": null,
     "phase_switch_mode": null,
     "charger_access": false,
-    "charger_force_charging": "off"
+    "charger_force_charging": "off",
+    "min_charging_current_limit": 1,
+    "max_charging_current_limit": 30
 }

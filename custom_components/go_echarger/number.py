@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from homeassistant.components.number import (
     NumberEntity,
     NumberEntityDescription,
-    DOMAIN as INPUT_DOMAIN,
+    DOMAIN as NUMBER_DOMAIN,
 )
 from homeassistant.helpers.typing import (
     ConfigType,
@@ -17,7 +17,12 @@ from homeassistant.helpers.typing import (
 )
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DOMAIN, CONF_CHARGERS
+from .const import (
+    DOMAIN,
+    CONF_CHARGERS,
+    MIN_CHARGING_CURRENT_LIMIT,
+    MAX_CHARGING_CURRENT_LIMIT,
+)
 from .controller import ChargerController
 
 _LOGGER: logging.Logger = logging.getLogger(__name__)
@@ -27,11 +32,6 @@ NUMBER_INPUTS = [
         "id": "charger_max_current",
         "name": "Set charging speed",
         "icon": "mdi:current-ac",
-        "input_props": {
-            "min": 1,
-            "max": 32,
-            "step": 1,
-        },
     }
 ]
 
@@ -111,21 +111,37 @@ def _create_input_numbers(
     number_entities = []
 
     for charger_name in chargers:
-        for number_input in NUMBER_INPUTS:
-            number_entities.append(
-                CurrentInputNumber(
-                    hass,
-                    hass.data[DOMAIN][f"{charger_name}_coordinator"],
-                    charger_name,
-                    BaseNumberDescription(
-                        key=f"{INPUT_DOMAIN}.{DOMAIN}_{charger_name}_{number_input['id']}",
-                        name=number_input["name"],
-                        icon=number_input["icon"],
-                    ),
-                    number_input["id"],
-                    number_input["input_props"],
-                )
+        min_limit = hass.data[DOMAIN][f"{charger_name}_coordinator"].data[charger_name][
+            MIN_CHARGING_CURRENT_LIMIT
+        ]
+        max_limit = hass.data[DOMAIN][f"{charger_name}_coordinator"].data[charger_name][
+            MAX_CHARGING_CURRENT_LIMIT
+        ]
+
+        if min_limit >= max_limit:
+            _LOGGER.error(
+                "Min limit is greater than/equal to the max limit, can't configure the number input"
             )
+        else:
+            for number_input in NUMBER_INPUTS:
+                number_entities.append(
+                    CurrentInputNumber(
+                        hass,
+                        hass.data[DOMAIN][f"{charger_name}_coordinator"],
+                        charger_name,
+                        BaseNumberDescription(
+                            key=f"{NUMBER_DOMAIN}.{DOMAIN}_{charger_name}_{number_input['id']}",
+                            name=number_input["name"],
+                            icon=number_input["icon"],
+                        ),
+                        number_input["id"],
+                        {
+                            "min": min_limit,
+                            "max": max_limit,
+                            "step": 1,
+                        },
+                    )
+                )
 
     return number_entities
 

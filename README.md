@@ -106,6 +106,9 @@ To have autoformatting in the VSCode, install the extension `ms-python.black-for
 ```bash
 pytest
 
+# show logs
+pytest -o log_cli=true
+
 # code coverage
 pytest --durations=10 --cov-report term-missing --cov=custom_components.go_echarger tests
 ```
