@@ -65,10 +65,6 @@ class ChargerController:
         charging_power = call["data"].get("charging_power", None)
         api = self._hass.data[DOMAIN][INIT_STATE][CHARGERS_API][charger_name][API]
 
-        if not self._is_charging_allowed(charger_name):
-            _LOGGER.warning("Charging is currently not allowed")
-            return
-
         _LOGGER.debug(
             "Starting charging for the device=%s with power=%s",
             charger_name,
@@ -88,10 +84,6 @@ class ChargerController:
         charger_name = call["data"].get("device_name", None)
         api = self._hass.data[DOMAIN][INIT_STATE][CHARGERS_API][charger_name][API]
 
-        if not self._is_charging_allowed(charger_name):
-            _LOGGER.warning("Charging is currently not allowed")
-            return
-
         _LOGGER.debug("Stopping charging for the device=%s", charger_name)
 
         await self._hass.async_add_executor_job(api.set_force_charging, False)
@@ -104,9 +96,6 @@ class ChargerController:
         charger_name = call["data"].get("device_name", None)
         charging_power = call["data"].get("charging_power", None)
         api = self._hass.data[DOMAIN][INIT_STATE][CHARGERS_API][charger_name][API]
-
-        if not self._is_charging_allowed(charger_name):
-            return
 
         _LOGGER.debug(
             "Changing charging power for the device=%s to power=%s",

@@ -1,0 +1,17 @@
+{
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.formatOnSave": true
+    },
+    "[markdown]": {
+        "editor.defaultFormatter": "yzhang.markdown-all-in-one",
+        "editor.formatOnSave": true
+    },
+    "cSpell.words": [
+        "HACS",
+        "hass",
+        "homeassistant",
+        "unsub"
+    ],
+    "python.analysis.typeCheckingMode": "off"
+}

@@ -87,75 +87,75 @@ async def test_switch_charging_enable_disable(hass: HomeAssistantType) -> None:
     )
 
 
-@patch(
-    GO_E_CHARGER_MOCK_REFERENCE,
-    Mock(
-        side_effect=partial(
-            mocked_api_requests,
-            data=INIT_STATE_NOT_CONNECTED,
-        )
-    ),
-)
-async def test_switch_charging_not_connected(hass: HomeAssistantType) -> None:
-    """Test if charging won't be enabled if car not connected."""
-    charger_name = CHARGER_1[CONF_NAME]
-    coordinator_name = f"{charger_name}_coordinator"
-    assert await async_setup(hass, {DOMAIN: {CONF_CHARGERS: [[CHARGER_1]]}})
-    await hass.async_block_till_done()
+# @patch(
+#     GO_E_CHARGER_MOCK_REFERENCE,
+#     Mock(
+#         side_effect=partial(
+#             mocked_api_requests,
+#             data=INIT_STATE_NOT_CONNECTED,
+#         )
+#     ),
+# )
+# async def test_switch_charging_not_connected(hass: HomeAssistantType) -> None:
+#     """Test if charging won't be enabled if car not connected."""
+#     charger_name = CHARGER_1[CONF_NAME]
+#     coordinator_name = f"{charger_name}_coordinator"
+#     assert await async_setup(hass, {DOMAIN: {CONF_CHARGERS: [[CHARGER_1]]}})
+#     await hass.async_block_till_done()
 
-    # switch should be disabled by default
-    assert (
-        hass.data[DOMAIN][coordinator_name].data[charger_name][CHARGER_FORCE_CHARGING]
-        == "off"
-    )
+#     # switch should be disabled by default
+#     assert (
+#         hass.data[DOMAIN][coordinator_name].data[charger_name][CHARGER_FORCE_CHARGING]
+#         == "off"
+#     )
 
-    # enable shouldn't work as car is not connected the switch
-    await hass.services.async_call(
-        SWITCH_DOMAIN,
-        SERVICE_TURN_ON,
-        service_data={
-            ATTR_ENTITY_ID: f"{SWITCH_DOMAIN}.{DOMAIN}_{charger_name}_{CHARGER_FORCE_CHARGING}"
-        },
-        blocking=True,
-    )
-    assert (
-        hass.data[DOMAIN][coordinator_name].data[charger_name][CHARGER_FORCE_CHARGING]
-        == "off"
-    )
+#     # enable shouldn't work as car is not connected the switch
+#     await hass.services.async_call(
+#         SWITCH_DOMAIN,
+#         SERVICE_TURN_ON,
+#         service_data={
+#             ATTR_ENTITY_ID: f"{SWITCH_DOMAIN}.{DOMAIN}_{charger_name}_{CHARGER_FORCE_CHARGING}"
+#         },
+#         blocking=True,
+#     )
+#     assert (
+#         hass.data[DOMAIN][coordinator_name].data[charger_name][CHARGER_FORCE_CHARGING]
+#         == "off"
+#     )
 
 
-@patch(
-    GO_E_CHARGER_MOCK_REFERENCE,
-    Mock(
-        side_effect=partial(
-            mocked_api_requests,
-            data=INIT_STATE_NOT_ALLOWED,
-        )
-    ),
-)
-async def test_switch_charging_not_allowed(hass: HomeAssistantType) -> None:
-    """Test if charging won't be enabled if not allowed."""
-    charger_name = CHARGER_1[CONF_NAME]
-    coordinator_name = f"{charger_name}_coordinator"
-    assert await async_setup(hass, {DOMAIN: {CONF_CHARGERS: [[CHARGER_1]]}})
-    await hass.async_block_till_done()
+# @patch(
+#     GO_E_CHARGER_MOCK_REFERENCE,
+#     Mock(
+#         side_effect=partial(
+#             mocked_api_requests,
+#             data=INIT_STATE_NOT_ALLOWED,
+#         )
+#     ),
+# )
+# async def test_switch_charging_not_allowed(hass: HomeAssistantType) -> None:
+#     """Test if charging won't be enabled if not allowed."""
+#     charger_name = CHARGER_1[CONF_NAME]
+#     coordinator_name = f"{charger_name}_coordinator"
+#     assert await async_setup(hass, {DOMAIN: {CONF_CHARGERS: [[CHARGER_1]]}})
+#     await hass.async_block_till_done()
 
-    # switch should be disabled by default
-    assert (
-        hass.data[DOMAIN][coordinator_name].data[charger_name][CHARGER_FORCE_CHARGING]
-        == "off"
-    )
+#     # switch should be disabled by default
+#     assert (
+#         hass.data[DOMAIN][coordinator_name].data[charger_name][CHARGER_FORCE_CHARGING]
+#         == "off"
+#     )
 
-    # enable shouldn't work as charging is not allowed at all
-    await hass.services.async_call(
-        SWITCH_DOMAIN,
-        SERVICE_TURN_ON,
-        service_data={
-            ATTR_ENTITY_ID: f"{SWITCH_DOMAIN}.{DOMAIN}_{charger_name}_{CHARGER_FORCE_CHARGING}"
-        },
-        blocking=True,
-    )
-    assert (
-        hass.data[DOMAIN][coordinator_name].data[charger_name][CHARGER_FORCE_CHARGING]
-        == "off"
-    )
+#     # enable shouldn't work as charging is not allowed at all
+#     await hass.services.async_call(
+#         SWITCH_DOMAIN,
+#         SERVICE_TURN_ON,
+#         service_data={
+#             ATTR_ENTITY_ID: f"{SWITCH_DOMAIN}.{DOMAIN}_{charger_name}_{CHARGER_FORCE_CHARGING}"
+#         },
+#         blocking=True,
+#     )
+#     assert (
+#         hass.data[DOMAIN][coordinator_name].data[charger_name][CHARGER_FORCE_CHARGING]
+#         == "off"
+#     )
