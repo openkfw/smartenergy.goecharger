@@ -22,7 +22,7 @@ requires-python = ">=3.7"
 version = "0.1.0"
 
 [project.optional-dependencies]
-dev = ["black", "pylint", "pytest-homeassistant-custom-component", "Flask"]
+dev = ["black", "pylint", "pytest-homeassistant-custom-component", "Flask", "pre-commit"]
 
 [project.urls]
 "Bug Tracker" = "https://github.com/openkfw/homeassistant_goechargerv2/issues"

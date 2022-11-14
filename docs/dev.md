@@ -69,6 +69,7 @@ deactivate
 
 ```bash
 python3 -m pip install -r requirements.txt
+pre-commit install -t pre-push
 ```
 
 ## Uninstall all pip packages
