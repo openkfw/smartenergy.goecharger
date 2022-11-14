@@ -1,8 +1,6 @@
 #!/bin/bash
 set -e
 
-simple=$1
-
 export PROJECT=smart_energy
 
 podman network create -d bridge $PROJECT || true
@@ -37,13 +35,11 @@ ha-custom
 printf "\n>>> Running containers:\n"
 podman ps
 
-if [ "$simple" != "-s" ]; then
-    printf "\n>>> Downloading HACS\n"
-    sleep 10
-    podman exec homeassistant sh -c "cd /config && wget -O - https://get.hacs.xyz | bash -"
+printf "\n>>> Downloading HACS\n"
+sleep 10
+podman exec homeassistant sh -c "cd /config && wget -O - https://get.hacs.xyz | bash -"
 
-    printf "\n>>> Restarting HA container to enable HACS\n"
-    podman restart homeassistant
-fi
+printf "\n>>> Restarting HA container to enable HACS\n"
+podman restart homeassistant
 
 printf "\n>>> You can open Home Assistant in your browser at: http://127.0.0.1:8123"

@@ -4,6 +4,7 @@ requires = ["setuptools>=61.0"]
 
 [project]
 authors = [
+  {name = "Felix Stark", email = "felix.stark@kfw.de"},
   {name = "Ingmar Mueller", email = "ingmar.mueller@kfw.de"},
   {name = "Mario Macai", email = "mario.macai@accenture.com"},
 ]
@@ -12,8 +13,8 @@ classifiers = [
   "License :: OSI Approved :: MIT License",
   "Operating System :: OS Independent",
 ]
-dependencies = ["homeassistant", "home-assistant-bluetooth", "voluptuous", "voluptuous-serialize", "goechargerv2"]
-description = "This is an integration for home assistant for the go echarger wallbox (API v2)."
+dependencies = ["goechargerv2"]
+description = "This is an integration for the Home Assistant for the Go-e Charger wallbox (API v2)."
 keywords = ["goecharger", "kfw", "homeassistant", "cloud"]
 name = "homeassistant_goechargerv2"
 readme = "README.md"
@@ -21,7 +22,7 @@ requires-python = ">=3.7"
 version = "0.1.0"
 
 [project.optional-dependencies]
-dev = ["black", "pylint"]
+dev = ["black", "pylint", "pytest-homeassistant-custom-component", "Flask"]
 
 [project.urls]
 "Bug Tracker" = "https://github.com/openkfw/homeassistant_goechargerv2/issues"

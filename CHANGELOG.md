@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added initial version of the Home Assistant integration for Go-eCharger.
+- Added initial version of the Home Assistant integration for Go-e Charger.
 
 <!-- Blocks below work as a reference, don't remove them! -->
 

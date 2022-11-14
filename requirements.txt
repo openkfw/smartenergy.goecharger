@@ -1,3 +1,4 @@
+black==22.10.0
 pylint==2.15.3
 goechargerv2==0.1.13
 pytest-homeassistant-custom-component==0.12.10

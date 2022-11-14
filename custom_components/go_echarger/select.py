@@ -1,4 +1,4 @@
-"""Support for Go-eCharger custom select inputs."""
+"""Support for Go-e Charger custom select inputs."""
 
 from __future__ import annotations
 import logging
@@ -128,7 +128,7 @@ async def async_setup_entry(
     """Setup select inputs from a config entry created in the integrations UI."""
     entry_id = config_entry.entry_id
     config = hass.data[DOMAIN][entry_id]
-    _LOGGER.debug("Setting up the go-eCharger button for=%s", entry_id)
+    _LOGGER.debug("Setting up the Go-e Charger button for=%s", entry_id)
 
     if config_entry.options:
         config.update(config_entry.options)
@@ -146,8 +146,8 @@ async def async_setup_platform(
     async_add_entities: Callable,
     discovery_info: DiscoveryInfoType = None,
 ) -> None:
-    """Set up go-eCharger select platform."""
-    _LOGGER.debug("Setting up the go-eCharger select platform")
+    """Set up Go-e Charger select platform."""
+    _LOGGER.debug("Setting up the Go-e Charger select platform")
 
     if discovery_info is None:
         _LOGGER.error("Missing discovery_info, skipping setup")

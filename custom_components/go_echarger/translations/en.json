@@ -8,11 +8,11 @@
             "user": {
                 "data": {
                     "name": "Charger name",
-                    "host": "Go-eCharger cloud API host",
-                    "api_token": "Go-eCharger cloud API token",
+                    "host": "Go-e Charger cloud API host",
+                    "api_token": "Go-e Charger cloud API token",
                     "scan_interval": "Scan interval for data updates"
                 },
-                "description": "Configure your go-eCharger car charger."
+                "description": "Configure your Go-e Charger car charger."
             }
         }
     },
@@ -25,11 +25,11 @@
             "init": {
                 "data": {
                     "name": "Charger name",
-                    "host": "Go-eCharger cloud API host",
-                    "api_token": "Go-eCharger cloud API token",
+                    "host": "Go-e Charger cloud API host",
+                    "api_token": "Go-e Charger cloud API token",
                     "scan_interval": "Scan interval for data updates"
                 },
-                "description": "Configure your go-eCharger car charger."
+                "description": "Configure your Go-e Charger car charger."
             }
         }
     }

@@ -1,4 +1,4 @@
-"""Support for Go-eCharger custom buttons."""
+"""Support for Go-e Charger custom buttons."""
 
 from __future__ import annotations
 import logging
@@ -91,7 +91,7 @@ async def async_setup_entry(
     """Setup buttons from a config entry created in the integrations UI."""
     entry_id = config_entry.entry_id
     config = hass.data[DOMAIN][entry_id]
-    _LOGGER.debug("Setting up the go-eCharger button for=%s", entry_id)
+    _LOGGER.debug("Setting up the Go-e Charger button for=%s", entry_id)
 
     if config_entry.options:
         config.update(config_entry.options)
@@ -109,8 +109,8 @@ async def async_setup_platform(
     async_add_entities: Callable,
     discovery_info: DiscoveryInfoType = None,
 ) -> None:
-    """Set up go-eCharger Button platform."""
-    _LOGGER.debug("Setting up the go-eCharger button platform")
+    """Set up Go-e Charger Button platform."""
+    _LOGGER.debug("Setting up the Go-e Charger button platform")
 
     if discovery_info is None:
         _LOGGER.error("Missing discovery_info, skipping setup")

@@ -2,131 +2,97 @@
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
 
-This is an integration for home assistant for the go echarger wallbox (API v2) - still work in progress.
+This is an integration for the Home Assistant for the Go-e Charger wallbox (API v2) using [this library](https://github.com/openkfw/goechargerv2).
 
-Supported features:
-
-- List of supported sensors: TBD
-- Switch inputs for:
-  - Enable/disable charging
-  - Turn authentication on/off
-- Exposed Home Assistant services for: TBD
-- Registering wallboxes via `configuration.yaml` and also via the Home Assistant UI
-
-## How to run
-
-### Simple setup without HACS
-
-1. Run `./start-local.sh -s` (`-s` skips the HACS installation)
-2. Open <http://127.0.0.1:8123> in the browser
-3. Create an account
-4. You are on the dashboard screen and should see bunch of sensors for the Go-eCharger integration.
+## How to use it
 
 ### HACS
 
-1. Run `./start-local.sh`
-2. Open <http://127.0.0.1:8123> in the browser
-3. Create an account
-4. Fill in your timezone correctly, e.g. click the `DETECT` button. __This is very important, otherwise HACS might not work properly.__
-5. Finish the setup, eventually you should end up on the dashboard screen. Make sure that the time on the dashboard is correct with your timezone.
-6. Go to Settings -> Devices & Services. Click the `ADD INTEGRATION` button.
-7. Follow the steps from here <https://hacs.xyz/docs/configuration/basic>.
-8. In the left menu you should have HACS icon now, click it.
-9. Click on `Integrations` -> click 3 dots top right corner -> click `Custom repositories`.
-10. In the dialog window, add `https://github.com/openkfw/homeassistant_goechargerv2` as a repository and select `Integration` as a category.
-11. Click `ADD`, wait for spinner to finish and close the dialog.
-12. Click `EXPLORE & DOWNLOAD REPOSITORIES` -> search for `go-e` -> select the `go-e Charger v2` -> wait and click `DOWNLOAD`.
-13. Go to Settings -> System -> click `RESTART` and wait few seconds.
-14. Go to Settings -> Devices & Services. Click the `ADD INTEGRATION` button.
-15. Search for `go-e` -> click -> fill in details -> click `SUBMIT`.
-16. Go to the dashboard screen, you should see bunch of sensors for the Go-eCharger integration.
+1. Open your Home Assistant in a browser.
+2. In case you don't have HACS, follow the steps from here <https://hacs.xyz/docs/configuration/basic>.
+3. In the left menu you should have HACS icon, click it.
+4. Click on `Integrations` -> click 3 dots top right corner -> click `Custom repositories`.
+5. In the dialog window, add `https://github.com/openkfw/homeassistant_goechargerv2` as a repository and select `Integration` as a category.
+6. Click `ADD`, wait for spinner to finish and close the dialog.
+7. Click `EXPLORE & DOWNLOAD REPOSITORIES` -> search for `go-e` -> select the `go-e Charger v2` -> wait and click `DOWNLOAD`.
+8. Go to Settings -> System -> click `RESTART` and wait few seconds.
+9. Go to Settings -> Devices & Services. Click the `ADD INTEGRATION` button.
+10. Search for `go-e Charger v2` -> click -> fill in details -> click `SUBMIT`.
+
+Example config:
+
+![example config](./docs/ha-example-config.png)
+
+> Make sure that there is no trailing slash in the API host, otherwise the validation fails. When pressing submit, validation will also check the connectivity and fails if not able to connect and authenticate.
+
+11. Go to the dashboard screen, you should see bunch of sensors for the Go-e Charger integration.
+
+### Example Lovelace card
+
+TBD
+
+## Features
+
+### Sensors
+
+| Parameter | Name                       | Description                                                    |
+| --------- | -------------------------- | -------------------------------------------------------------- |
+| car       | car_status                 | State of the car - connected/charging/etc.                     |
+| alw       | charging_allowed           | Whether the car is allowed to charge at all.                   |
+| amp       | charger_max_current        | Requested current for charging in A.                           |
+| wh        | energy_since_car_connected | Energy in kWh since car is connected.                          |
+| eto       | energy_total               | Total energy used in kWh.                                      |
+| psm       | phase_switch_mode          | Phase switch mode - auto/1/3.                                  |
+| pnp       | phases_number_connected    | Number of connected phases - relates to the phase_switch_mode. |
+
+### Switches
+
+| Parameter | Name                   | Description              |
+| --------- | ---------------------- | ------------------------ |
+| frc       | charger_force_charging | Enable/disable charging. |
+
+### Buttons
+
+| Parameter | Name           | Description                                  |
+| --------- | -------------- | -------------------------------------------- |
+| acs       | access_control | Changes access control to `open` if desired. |
+
+### Number inputs
+
+| Parameter | Name                | Description                                                                            |
+| --------- | ------------------- | -------------------------------------------------------------------------------------- |
+| amp       | charger_max_current | Set the max current. Min and max values are taken from the `mca` and `ama` parameters. |
+
+### Select inputs
+
+| Parameter | Name              | Description                |
+| --------- | ----------------- | -------------------------- |
+| psm       | phase_switch_mode | Set the phase switch mode. |
+
+### Exposed services
+
+Following functions are exposed as Home Assistant services, thus can be used by other integrations.
+
+| Name                  | Parameters                                                                                         | Description                                                                                                                                                    |
+| --------------------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| start_charging        | `{"device_name": "example_charger", "charging_power": 10}` or `{"device_name": "example_charger"}` | Starts charging with a specified charging power. `charging_power` is optional and you can use this service purely to start without setting the charging power. |
+| stop_charging         | `{"device_name": "example_charger"}`                                                               | Stop charging.                                                                                                                                                 |
+| change_charging_power | `{"device_name": "example_charger", "charging_power": 10}`                                         | Change charging power for a given charger.                                                                                                                     |
+| set_phase             | `{"device_name": "example_charger", "phase": 1}`                                                   | Change phase for a given charger. `phase` accepts values 0, 1, 2.                                                                                              |
+| set_authentication    | `{"device_name": "example_charger", "status": 0}`                                                  | Change access control for a given charger. `status` accepts values 0 and 1.                                                                                    |
+
+### Configuration
+
+The integration can be configured either via UI (config flow) as described in the [How to use it - HACS section](#hacs) or via `configuration.yaml`. For example:
+
+```yaml
+go_echarger:
+  chargers:
+    - name: examplecharger
+      host: https://example.api.v3.go-e.io
+      api_token: 12345
+```
 
 ## Development
 
-### Running the Home Assistant
-
-If you have issues running VSCode `devcontainer`, there is a script to achieve live reloads of the custom component in the running Docker container.
-
-Run:
-
-```bash
-./start-dev.sh
-```
-
-After few minutes, Home Assistant should running and script should be in the watch mode. Whenever you change a file in the `custom_components/go_echarger` folder, it will restart the Home Assistant within a few seconds. Thus, you have a quick development feedback.
-
-### Working with virtual env
-
-It is highly recommended to work from within a virtual environment as especially dependencies can mess up quite quickly.
-
-Create:
-
-```bash
-python3 -m venv env
-```
-
-Activate:
-
-```bash
-source env/bin/activate
-```
-
-Deactivate:
-
-```bash
-deactivate
-```
-
-### Install required pip packages
-
-```bash
-python3 -m pip install -r requirements.txt
-```
-
-### Uninstall all pip packages
-
-```bash
-pip freeze | xargs pip uninstall -y
-```
-
-### Linting
-
-```bash
-pylint tests/**/*.py custom_components/**/*.py mock_api/**/*.py
-```
-
-### Formatting
-
-Formatting is done via [Black](https://black.readthedocs.io/en/stable/getting_started.html).
-
-To install:
-
-```bash
-pip3 install black
-```
-
-To run:
-
-```
-black smart_energy
-```
-
-To have autoformatting in the VSCode, install the extension `ms-python.black-formatter`.
-
-### Unit testing
-
-```bash
-pytest
-
-# show logs
-pytest -o log_cli=true
-
-# code coverage
-pytest --durations=10 --cov-report term-missing --cov=custom_components.go_echarger tests
-```
-
-> __Note: In case you have issues with bcrypt circular import, run this:__
-
-```bash
-python3 -m pip uninstall bcrypt -y && python3 -m pip install bcrypt
-```
+In case you are interested in development, check the guide [here](./docs/dev.md).
