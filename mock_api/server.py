@@ -1,4 +1,4 @@
-"""Mock API for the Go-e Charger wallbox"""
+"""Mock API for the go-e Charger Cloud wallbox"""
 
 from flask import Flask, request
 

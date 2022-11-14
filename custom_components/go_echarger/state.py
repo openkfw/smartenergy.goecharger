@@ -1,4 +1,4 @@
-"""Go-e Charger state (coordinator) management"""
+"""go-e Charger Cloud state (coordinator) management"""
 
 import logging
 
@@ -19,7 +19,7 @@ _LOGGER: logging.Logger = logging.getLogger(__name__)
 
 def init_state(name: str, url: str, token: str) -> dict:
     """
-    Initialize the state with Go-e Charger API and static values.
+    Initialize the state with go-e Charger Cloud API and static values.
     """
 
     return {
@@ -39,16 +39,16 @@ class StateFetcher:
 
     async def fetch_states(self) -> dict:
         """
-        Fetch Go-e Charger car status via API.
+        Fetch go-e Charger Cloud car status via API.
         Fetched data will be enhanced with the:
         - friendly name of the charger
         """
 
-        _LOGGER.debug("Updating the Go-e Charger coordinator data...")
+        _LOGGER.debug("Updating the go-e Charger Cloud coordinator data...")
 
         chargers_api = self._hass.data[DOMAIN][INIT_STATE][CHARGERS_API]
         current_data = self.coordinator.data if self.coordinator.data else {}
-        _LOGGER.debug("Current Go-e Charger coordinator data=%s", current_data)
+        _LOGGER.debug("Current go-e Charger Cloud coordinator data=%s", current_data)
 
         updated_data = {}
 
@@ -58,6 +58,6 @@ class StateFetcher:
                 CONF_NAME
             ]
 
-        _LOGGER.debug("Updated Go-e Charger coordinator data=%s", updated_data)
+        _LOGGER.debug("Updated go-e Charger Cloud coordinator data=%s", updated_data)
 
         return updated_data

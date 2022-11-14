@@ -1,4 +1,4 @@
-"""Go-e Charger main integration file"""
+"""go-e Charger Cloud main integration file"""
 
 import asyncio
 import logging
@@ -132,7 +132,7 @@ async def async_setup_entry(hass: HomeAssistantType, config_entry: ConfigEntry) 
     entry_id = config_entry.entry_id
 
     _LOGGER.debug(
-        "Setting up a dynamic Go-e Charger charger with id=%s",
+        "Setting up a dynamic go-e Charger Cloud charger with id=%s",
         entry_id,
     )
 
@@ -166,7 +166,7 @@ async def async_setup_entry(hass: HomeAssistantType, config_entry: ConfigEntry) 
         entry_id
     ] = unsub_options_update_listener
 
-    _LOGGER.debug("Setup for the dynamic Go-e Charger charger completed")
+    _LOGGER.debug("Setup for the dynamic go-e Charger Cloud charger completed")
 
     return True
 
@@ -213,9 +213,9 @@ async def async_unload_entry(
 
 
 async def async_setup(hass: HomeAssistantType, config: ConfigType) -> bool:
-    """Set up Go-e Charger platforms and services."""
+    """Set up go-e Charger Cloud platforms and services."""
 
-    _LOGGER.debug("Setting up the Go-e Charger integration")
+    _LOGGER.debug("Setting up the go-e Charger Cloud integration")
 
     hass.data[DOMAIN] = hass.data[DOMAIN] if DOMAIN in hass.data else {}
     domain_config = config[DOMAIN] if DOMAIN in config else {}
@@ -270,6 +270,6 @@ async def async_setup(hass: HomeAssistantType, config: ConfigType) -> bool:
             )
         )
 
-    _LOGGER.debug("Setup for the Go-e Charger integration completed")
+    _LOGGER.debug("Setup for the go-e Charger Cloud integration completed")
 
     return True

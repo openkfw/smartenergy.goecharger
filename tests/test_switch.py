@@ -1,4 +1,4 @@
-"""Test Go-e Charger switch inputs."""
+"""Test go-e Charger Cloud switch inputs."""
 
 import json
 from functools import partial

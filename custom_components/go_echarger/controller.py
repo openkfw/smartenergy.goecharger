@@ -1,4 +1,4 @@
-"""API controller configuration for Go-e Charger integration"""
+"""API controller configuration for go-e Charger Cloud integration"""
 
 import logging
 
@@ -10,7 +10,7 @@ _LOGGER: logging.Logger = logging.getLogger(__name__)
 
 
 async def fetch_status(hass: HomeAssistantType, charger_name: str) -> dict:
-    """Fetch Go-e Charger car status via API."""
+    """Fetch go-e Charger Cloud car status via API."""
 
     api = hass.data[DOMAIN][INIT_STATE][CHARGERS_API][charger_name][API]
     fetched_status = await hass.async_add_executor_job(api.request_status)
@@ -33,7 +33,7 @@ async def stop_charging(hass: HomeAssistantType, charger_name: str) -> dict:
 
 
 class ChargerController:
-    """Represents Go-e Charger controller, abstracting API calls into methods."""
+    """Represents go-e Charger Cloud controller, abstracting API calls into methods."""
 
     def __init__(self, hass: HomeAssistantType) -> None:
         self._hass = hass

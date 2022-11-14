@@ -1,6 +1,6 @@
 {
   "domain": "go_echarger",
-  "name": "go-e Charger v2",
+  "name": "go-e Charger Cloud",
   "version": "0.1.0",
   "documentation": "https://github.com/openkfw/homeassistant_goechargerv2",
   "issue_tracker": "https://github.com/openkfw/homeassistant_goechargerv2/issues",

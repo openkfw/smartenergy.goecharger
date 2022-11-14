@@ -1,4 +1,4 @@
-"""Switch platform configuration for Go-e Charger"""
+"""Switch platform configuration for go-e Charger Cloud"""
 
 import logging
 from typing import Callable
@@ -31,7 +31,7 @@ class BaseSwitch(ABC):
         attribute,
         device_id,
     ) -> None:
-        """Initialize the Go-e Charger switch."""
+        """Initialize the go-e Charger Cloud switch."""
         super().__init__(coordinator)
         self.entity_id = entity_id
         self._name = name
@@ -126,7 +126,7 @@ async def async_setup_entry(
     """Setup sensors from a config entry created in the integrations UI."""
     entry_id = config_entry.entry_id
     config = hass.data[DOMAIN][entry_id]
-    _LOGGER.debug("Setting up the Go-e Charger switch for=%s", entry_id)
+    _LOGGER.debug("Setting up the go-e Charger Cloud switch for=%s", entry_id)
 
     if config_entry.options:
         config.update(config_entry.options)
@@ -144,8 +144,8 @@ async def async_setup_platform(
     async_add_entities: Callable,
     discovery_info: DiscoveryInfoType | None = None,
 ) -> None:
-    """Set up Go-e Charger Switch platform."""
-    _LOGGER.debug("Setting up the Go-e Charger switch platform")
+    """Set up go-e Charger Cloud Switch platform."""
+    _LOGGER.debug("Setting up the go-e Charger Cloud switch platform")
 
     if discovery_info is None:
         _LOGGER.error("Missing discovery_info, skipping setup")

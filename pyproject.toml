@@ -14,7 +14,7 @@ classifiers = [
   "Operating System :: OS Independent",
 ]
 dependencies = ["goechargerv2"]
-description = "This is an integration for the Home Assistant for the Go-e Charger wallbox (API v2)."
+description = "This is an integration for the Home Assistant for the go-e Charger Cloud wallbox (API v2)."
 keywords = ["goecharger", "kfw", "homeassistant", "cloud"]
 name = "homeassistant_goechargerv2"
 readme = "README.md"

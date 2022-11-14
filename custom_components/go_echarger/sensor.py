@@ -1,4 +1,4 @@
-"""Sensor platform configuration for Go-e Charger"""
+"""Sensor platform configuration for go-e Charger Cloud"""
 
 import logging
 import numbers
@@ -136,7 +136,7 @@ class BaseSensor(ABC):
 
 
 class ChargerSensor(BaseSensor, CoordinatorEntity, SensorEntity):
-    """Representation of a sensor for the Go-e Charger."""
+    """Representation of a sensor for the go-e Charger Cloud."""
 
     @property
     def device_info(self) -> dict:
@@ -237,7 +237,7 @@ async def async_setup_entry(
     """Setup sensors from a config entry created in the integrations UI."""
     entry_id = config_entry.entry_id
     config = hass.data[DOMAIN][entry_id]
-    _LOGGER.debug("Setting up the Go-e Charger sensor for=%s", entry_id)
+    _LOGGER.debug("Setting up the go-e Charger Cloud sensor for=%s", entry_id)
 
     if config_entry.options:
         config.update(config_entry.options)
@@ -261,8 +261,8 @@ async def async_setup_platform(
     async_add_entities: Callable,
     discovery_info: DiscoveryInfoType = None,
 ) -> None:
-    """Set up Go-e Charger Sensor platform."""
-    _LOGGER.debug("Setting up the Go-e Charger sensor platform")
+    """Set up go-e Charger Cloud Sensor platform."""
+    _LOGGER.debug("Setting up the go-e Charger Cloud sensor platform")
 
     if discovery_info is None:
         _LOGGER.error("Missing discovery_info, skipping setup")

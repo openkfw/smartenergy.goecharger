@@ -1,4 +1,4 @@
-"""Support for Go-e Charger custom number inputs."""
+"""Support for go-e Charger Cloud custom number inputs."""
 
 from __future__ import annotations
 import logging
@@ -155,7 +155,7 @@ async def async_setup_entry(
     """Setup number inputs from a config entry created in the integrations UI."""
     entry_id = config_entry.entry_id
     config = hass.data[DOMAIN][entry_id]
-    _LOGGER.debug("Setting up the Go-e Charger button for=%s", entry_id)
+    _LOGGER.debug("Setting up the go-e Charger Cloud button for=%s", entry_id)
 
     if config_entry.options:
         config.update(config_entry.options)
@@ -173,8 +173,8 @@ async def async_setup_platform(
     async_add_entities: Callable,
     discovery_info: DiscoveryInfoType = None,
 ) -> None:
-    """Set up Go-e Charger number platform."""
-    _LOGGER.debug("Setting up the Go-e Charger number platform")
+    """Set up go-e Charger Cloud number platform."""
+    _LOGGER.debug("Setting up the go-e Charger Cloud number platform")
 
     if discovery_info is None:
         _LOGGER.error("Missing discovery_info, skipping setup")

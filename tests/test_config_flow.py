@@ -1,4 +1,4 @@
-"""Test the Go-e Charger config flow and options flow."""
+"""Test the go-e Charger Cloud config flow and options flow."""
 
 import json
 from functools import partial

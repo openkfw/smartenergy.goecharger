@@ -30,10 +30,10 @@ In case you want to try HACS locally, run:
 4. Click on `Integrations` -> click 3 dots top right corner -> click `Custom repositories`.
 5. In the dialog window, add `https://github.com/openkfw/homeassistant_goechargerv2` as a repository and select `Integration` as a category.
 6. Click `ADD`, wait for spinner to finish and close the dialog.
-7. Click `EXPLORE & DOWNLOAD REPOSITORIES` -> search for `go-e` -> select the `go-e Charger v2` -> wait and click `DOWNLOAD`.
+7. Click `EXPLORE & DOWNLOAD REPOSITORIES` -> search for `go-e` -> select the `go-e Charger Cloud` -> wait and click `DOWNLOAD`.
 8. Go to Settings -> System -> click `RESTART` and wait few seconds.
 9. Go to Settings -> Devices & Services. Click the `ADD INTEGRATION` button.
-10. Search for `go-e Charger v2` -> click -> fill in details -> click `SUBMIT`.
+10. Search for `go-e Charger Cloud` -> click -> fill in details -> click `SUBMIT`.
 
 Example config:
 
@@ -41,7 +41,7 @@ Example config:
 
 > Make sure that there is no trailing slash in the API host, otherwise the validation fails. When pressing submit, validation will also check the connectivity and fails if not able to connect and authenticate.
 
-11. Go to the dashboard screen, you should see bunch of sensors for the Go-e Charger integration.
+11. Go to the dashboard screen, you should see bunch of sensors for the go-e Charger Cloud integration.
 
 ## Working with virtual env
 

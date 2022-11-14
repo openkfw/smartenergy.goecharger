@@ -1,4 +1,4 @@
-"""Go-e Charger config flow and options flow setup"""
+"""go-e Charger Cloud config flow and options flow setup"""
 
 import re
 from typing import Any, Literal
@@ -81,7 +81,7 @@ async def _validate_user_input(hass: HomeAssistantType, user_input: dict) -> dic
 
 
 class GoeChargerConfigFlow(ConfigFlow, domain=DOMAIN):
-    """Config flow for the Go-e Charger component."""
+    """Config flow for the go-e Charger Cloud component."""
 
     VERSION: Literal[1] = 1
 
