@@ -1,6 +1,20 @@
 # Development
 
-## Running the Home Assistant
+## Option 1: VSCode devcontainer
+
+This is a recommended approach by Home Assistant, but feels a bit buggy at the moment.
+
+1. Install `ms-vscode-remote.remote-containers` VSCode plugin.
+2. Restart VSCode and click `Reopen in Container` on bottom right.
+3. Wait few moments to finish the setup and open the command palette, search for `Tasks: Run Task` and select `Run the mock API server`. This will start the mock go-e REST API.
+4. Open the command palette again, search for `Tasks: Run Task` and select `Run Home Assistant on port 9123`. This will start the Home Assistant with the custom component on port `9123`.
+5. Open the <http://127.0.0.1:9123> in a browser.
+6. Create an account.
+7. You should see bunch of auto-created cards on the dashboard.
+
+If you change the code, you'll have to restart the task `Run Home Assistant on port 9123` by running `Tasks: Restart Running Task` from the command palette.
+
+## Option 2: Running the Home Assistant
 
 If you have issues running VSCode `devcontainer`, there is a script to achieve live reloads of the custom component in the running Docker container.
 
@@ -16,7 +30,7 @@ After few minutes, Home Assistant should be running and script should be in the 
 2. Create an account.
 3. You should see bunch of auto-created cards on the dashboard.
 
-## Running the Home Assistant with HACS
+## Option 3: Running the Home Assistant with HACS
 
 In case you want to try HACS locally, run:
 
