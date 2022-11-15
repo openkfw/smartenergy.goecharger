@@ -1,6 +1,6 @@
 # Development
 
-## Option 1: VSCode devcontainer
+## Option 1: Running the Home Assistant with VSCode devcontainer
 
 This is a recommended approach by Home Assistant, but feels a bit buggy at the moment.
 
@@ -20,7 +20,7 @@ Known issues:
 - `[59923 ms] postCreateCommand failed with exit code 2. Skipping any further user-provided commands.` - same as above, try to rebuild the container
 - there are issues with zeroconf installation which leads to some subsequent errors - this is probably caused by the fact that the `ghcr.io/ludeeus/devcontainer/integration:stable` image is just too old
 
-## Option 2: Running the Home Assistant
+## Option 2: Running the Home Assistant with custom script
 
 If you have issues running VSCode `devcontainer`, there is a script to achieve live reloads of the custom component in the running Docker container.
 
