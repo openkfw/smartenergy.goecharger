@@ -30,6 +30,6 @@
             "type": "shell",
             "command": "cd mock_api && python3 -m pip install -r requirements.txt && python3 server.py",
             "problemMatcher": []
-        },
+        }
     ]
 }

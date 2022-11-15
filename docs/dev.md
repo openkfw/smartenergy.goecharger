@@ -9,10 +9,16 @@ This is a recommended approach by Home Assistant, but feels a bit buggy at the m
 3. Wait few moments to finish the setup and open the command palette, search for `Tasks: Run Task` and select `Run the mock API server`. This will start the mock go-e REST API.
 4. Open the command palette again, search for `Tasks: Run Task` and select `Run Home Assistant on port 9123`. This will start the Home Assistant with the custom component on port `9123`.
 5. Open the <http://127.0.0.1:9123> in a browser.
-6. Create an account.
+6. Create an account. __This feels quite buggy at the moment and you have to refresh the browser several times.__
 7. You should see bunch of auto-created cards on the dashboard.
 
 If you change the code, you'll have to restart the task `Run Home Assistant on port 9123` by running `Tasks: Restart Running Task` from the command palette.
+
+Known issues:
+
+- `/bin/bash: line 1: container: command not found` - try to rebuild the container
+- `[59923 ms] postCreateCommand failed with exit code 2. Skipping any further user-provided commands.` - same as above, try to rebuild the container
+- there are issues with zeroconf installation which leads to some subsequent errors - this is probably caused by the fact that the `ghcr.io/ludeeus/devcontainer/integration:stable` image is just too old
 
 ## Option 2: Running the Home Assistant
 
@@ -29,6 +35,7 @@ After few minutes, Home Assistant should be running and script should be in the 
 1. Open the <http://127.0.0.1:8123> in a browser.
 2. Create an account.
 3. You should see bunch of auto-created cards on the dashboard.
+4. Continue with the chapter [Working with virtual env](#working-with-virtual-env) and below to test all the dev capabilities. 
 
 ## Option 3: Running the Home Assistant with HACS
 
