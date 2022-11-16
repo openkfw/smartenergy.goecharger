@@ -24,7 +24,7 @@ def init_state(name: str, url: str, token: str) -> dict:
 
     return {
         CONF_NAME: name,
-        API: GoeChargerApi(url, token),
+        API: GoeChargerApi(url, token, wait=True),
     }
 
 

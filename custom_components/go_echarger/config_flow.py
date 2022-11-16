@@ -57,7 +57,7 @@ async def _ping_host(hass: HomeAssistantType, host: str, token: str) -> None:
     """
     Do a simple status request to check if the authentication works properly.
     """
-    api = GoeChargerApi(host, token)
+    api = GoeChargerApi(host, token, wait=True)
 
     try:
         await hass.async_add_executor_job(api.request_status)

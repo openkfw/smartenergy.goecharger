@@ -95,3 +95,4 @@ virtualization/vagrant/config
 .mypy_cache
 
 .env
+.storage
