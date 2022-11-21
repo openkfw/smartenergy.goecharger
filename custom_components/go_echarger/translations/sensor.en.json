@@ -10,8 +10,8 @@
             "2": "3-phase"
         },
         "go_echarger__access_control": {
-            "True": "Open",
-            "False": "Waiting"
+            "True": "Open mode",
+            "False": "Authentication is required"
         }
     }
 }
