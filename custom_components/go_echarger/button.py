@@ -10,13 +10,14 @@ from homeassistant.components.button import (
     ButtonEntityDescription,
     DOMAIN as BUTTON_DOMAIN,
 )
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.helpers.typing import (
     ConfigType,
     HomeAssistantType,
     DiscoveryInfoType,
 )
 
-from .const import DOMAIN, CONF_CHARGERS
+from .const import DOMAIN, CONF_CHARGERS, CAR_STATUS, STATUS, OFFLINE, WALLBOX_CONTROL
 from .controller import ChargerController
 
 _LOGGER: logging.Logger = logging.getLogger(__name__)
@@ -36,11 +37,12 @@ class BaseDescriptiveEntity:
     def __init__(
         self,
         hass,
+        coordinator,
         device_id,
         description,
     ) -> None:
         """Initialize the device."""
-        super().__init__()
+        super().__init__(coordinator)
         self.entity_description = description
         self.entity_id = description.key
         self._attr_unique_id = description.key
@@ -48,20 +50,64 @@ class BaseDescriptiveEntity:
         self._charger_controller = ChargerController(hass)
 
 
-class AuthButton(BaseDescriptiveEntity, ButtonEntity):
-    """Representation of an Auth Button."""
+class ChargeButton(BaseDescriptiveEntity, CoordinatorEntity, ButtonEntity):
+    """Representation of a Charge Button."""
 
     entity_description: BaseButtonDescription = None
 
     async def async_press(self) -> None:
-        """Handle the button press. Authenticates the user against the wallbox"""
+        """Handle the button press. Start/stop charging or authenticate the user."""
 
-        await self._charger_controller.set_authentication(
-            {"data": {"device_name": self._device_id, "status": 0}}
-        )
+        data = self.coordinator.data[self._device_id]
+
+        if data[STATUS] == OFFLINE:
+            return False
+
+        match data[CAR_STATUS]:
+            case "Car is charging":
+                # car status is 2 - stop charging
+                await self._charger_controller.stop_charging(
+                    {"data": {"device_name": self._device_id}}
+                )
+            case "Car connected, authentication required":
+                # car status is 3 - authenticate
+                await self._charger_controller.set_transaction(
+                    {"data": {"device_name": self._device_id, "status": 0}}
+                )
+            case "Charging finished, car can be disconnected":
+                # car status is 4 - start charging
+                await self._charger_controller.start_charging(
+                    {"data": {"device_name": self._device_id}}
+                )
+            case _:
+                # car status is 1 - do nothing
+                pass
+
+    @property
+    def name(self) -> str:
+        """Return the name of the sensor."""
+
+        data = self.coordinator.data[self._device_id]
+
+        if data[STATUS] == OFFLINE:
+            return "Wallbox is offline"
+
+        match data[CAR_STATUS]:
+            case "Car is charging":
+                # car status is 2 - stop charging
+                return "Stop charging"
+            case "Car connected, authentication required":
+                # car status is 3 - authenticate
+                return "Authenticate car"
+            case "Charging finished, car can be disconnected":
+                # car status is 4 - start charging
+                return "Start charging"
+            case _:
+                # car status is 1 - do nothing
+                return "Please connect car"
 
 
-def _create_buttons(hass: HomeAssistantType, chargers: list[str]) -> list[AuthButton]:
+def _create_buttons(hass: HomeAssistantType, chargers: list[str]) -> list[ChargeButton]:
     """
     Create input buttons for authentication.
     """
@@ -69,13 +115,14 @@ def _create_buttons(hass: HomeAssistantType, chargers: list[str]) -> list[AuthBu
 
     for charger_name in chargers:
         button_entities.append(
-            AuthButton(
+            ChargeButton(
                 hass,
+                hass.data[DOMAIN][f"{charger_name}_coordinator"],
                 charger_name,
                 BaseButtonDescription(
-                    key=f"{BUTTON_DOMAIN}.{DOMAIN}_{charger_name}_authentication",
-                    name="Authenticate",
-                    icon="mdi:security",
+                    key=f"{BUTTON_DOMAIN}.{DOMAIN}_{charger_name}_{WALLBOX_CONTROL}",
+                    name="Wallbox control",
+                    icon="mdi:battery-charging",
                 ),
             )
         )

@@ -7,6 +7,9 @@ DOMAIN = "go_echarger"
 INIT_STATE = "init"
 MANUFACTURER = "go-e GmbH"
 UNSUB_OPTIONS_UPDATE_LISTENER = "unsub_options_update_listener"
+STATUS = "status"
+ONLINE = "online"
+OFFLINE = "offline"
 
 # API attributes
 
@@ -21,3 +24,7 @@ MIN_CHARGING_CURRENT_LIMIT = "min_charging_current_limit"
 MAX_CHARGING_CURRENT_LIMIT = "max_charging_current_limit"
 PHASE_SWITCH_MODE = "phase_switch_mode"
 PHASES_NUMBER_CONNECTED = "phases_number_connected"
+
+# Custom attributes
+
+WALLBOX_CONTROL = "wallbox_control"

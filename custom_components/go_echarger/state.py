@@ -6,12 +6,7 @@ from homeassistant.const import CONF_NAME
 from homeassistant.helpers.typing import HomeAssistantType
 from goechargerv2.goecharger import GoeChargerApi
 
-from .const import (
-    CHARGERS_API,
-    API,
-    DOMAIN,
-    INIT_STATE,
-)
+from .const import CHARGERS_API, API, DOMAIN, INIT_STATE, STATUS, ONLINE, OFFLINE
 from .controller import fetch_status
 
 _LOGGER: logging.Logger = logging.getLogger(__name__)
@@ -53,7 +48,20 @@ class StateFetcher:
         updated_data = {}
 
         for charger_name in chargers_api.keys():
-            updated_data[charger_name] = await fetch_status(self._hass, charger_name)
+            fetched_data = await fetch_status(self._hass, charger_name)
+
+            if (
+                fetched_data.get("success", None) is False
+                and fetched_data.get("msg", None) == "Wallbox is offline"
+            ):
+                updated_data[charger_name] = (
+                    current_data if current_data == {} else current_data[charger_name]
+                )
+                updated_data[charger_name][STATUS] = OFFLINE
+            else:
+                updated_data[charger_name] = fetched_data
+                updated_data[charger_name][STATUS] = ONLINE
+
             updated_data[charger_name][CONF_NAME] = chargers_api[charger_name][
                 CONF_NAME
             ]

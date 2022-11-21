@@ -43,6 +43,11 @@ def mocked_api_requests(*args, **kwargs) -> dict | int:
             self.json_data[PHASE_SWITCH_MODE] = val
             return val
 
+        def set_transaction(self, val: int | None) -> int | None:
+            """Return provided value and update data"""
+            self.json_data["transaction"] = val
+            return val
+
     if args[0] in ["http://1.1.1.1", "http://1.1.1.2"]:
         # use .copy() to not mutate the original data
         return MockResponse(kwargs["data"].copy(), OK)

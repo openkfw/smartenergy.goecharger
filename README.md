@@ -79,7 +79,7 @@ Following functions are exposed as Home Assistant services, thus can be used by 
 | stop_charging         | `{"device_name": "example_charger"}`                                                               | Stop charging.                                                                                                                                                 |
 | change_charging_power | `{"device_name": "example_charger", "charging_power": 10}`                                         | Change charging power for a given charger.                                                                                                                     |
 | set_phase             | `{"device_name": "example_charger", "phase": 1}`                                                   | Change phase for a given charger. `phase` accepts values 0, 1, 2.                                                                                              |
-| set_authentication    | `{"device_name": "example_charger", "status": 0}`                                                  | Change access control for a given charger. `status` accepts values 0 and 1.                                                                                    |
+| set_transaction       | `{"device_name": "example_charger", "status": 0}`                                                  | Set the wallbox transaction. `status` accepts values None (no transaction) and 0 (authenticate all users).                                                     |
 
 ### Configuration
 

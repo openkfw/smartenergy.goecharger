@@ -49,9 +49,9 @@ set_phase:
       description: 1-phased or 3-phased loading
       required: true
       example: 1
-set_authentication:
-  name: Authenticate at charger
-  description: Configure access_control user setting (Open=0, Wait=1)
+set_transaction:
+  name: Wallbox transaction
+  description: Set the wallbox transaction (No transaction=None, Authenticate all users=0)
   fields:
     device_name:
       name: Device name
@@ -59,7 +59,7 @@ set_authentication:
       required: true
       example: charger1
     status:
-      name: Control
-      description: Access_control user setting (Open=0, Wait=1)
+      name: Status
+      description: trx user setting (No transaction=None, Authenticate all users=0)
       required: true
-      example: 1
+      example: 0
