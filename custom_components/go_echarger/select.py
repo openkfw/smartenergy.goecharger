@@ -83,6 +83,9 @@ class PhaseSelectInput(BaseDescriptiveEntity, CoordinatorEntity, SelectEntity):
     @property
     def current_option(self) -> str | None:
         """Return the state of the entity."""
+        if self._attribute not in self.coordinator.data[self._device_id]:
+            return None
+
         return str(self.coordinator.data[self._device_id][self._attribute])
 
 
@@ -96,6 +99,12 @@ def _create_select_inputs(
 
     for charger_name in chargers:
         for select_input in SELECT_INPUTS:
+            data = hass.data[DOMAIN][f"{charger_name}_coordinator"].data[charger_name]
+
+            if PHASE_SWITCH_MODE not in data:
+                _LOGGER.error("Data not available, won't create select inputs")
+                return []
+
             select_entities.append(
                 PhaseSelectInput(
                     hass,
@@ -106,14 +115,10 @@ def _create_select_inputs(
                         name=select_input["name"],
                         icon=select_input["icon"],
                     ),
-                    "go_echarger__phase_switch_mode",
+                    f"{DOMAIN}__phase_switch_mode",
                     select_input["id"],
                     select_input["options"],
-                    str(
-                        hass.data[DOMAIN][f"{charger_name}_coordinator"].data[
-                            charger_name
-                        ][PHASE_SWITCH_MODE]
-                    ),
+                    str(data[PHASE_SWITCH_MODE]),
                 )
             )
 

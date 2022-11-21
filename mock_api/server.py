@@ -4,7 +4,9 @@ from flask import Flask, request
 
 app = Flask(__name__)
 
-SUPPORTED_CAR_CHANGE_VALUES = ["amp", "frc", "alw", "psm", "acs"]
+SUPPORTED_CAR_CHANGE_VALUES = ["amp", "frc", "alw", "psm", "acs", "car", "trx"]
+
+AGE = False
 
 CAR = {
     "car": 2,
@@ -23,6 +25,7 @@ CAR = {
     "acs": 1,
     "psm": 0,
     "pnp": 0,
+    "trx": None,
 }
 
 
@@ -31,7 +34,24 @@ def car_status() -> dict:
     """
     Return mocked car status.
     """
+
+    if AGE:
+        return {"success": False, "reason": "Data is outdated", "age": 122}, 404
+
     return CAR
+
+
+@app.route("/api/age/toggle", methods=["GET"])
+def toggle_age() -> dict:
+    """
+    Toggle the age status.
+    """
+
+    global AGE
+
+    AGE = not AGE
+
+    return {"status": "ok", "value": AGE}
 
 
 @app.route("/api/set", methods=["GET"])

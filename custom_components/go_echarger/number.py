@@ -112,12 +112,17 @@ def _create_input_numbers(
     number_entities = []
 
     for charger_name in chargers:
-        min_limit = hass.data[DOMAIN][f"{charger_name}_coordinator"].data[charger_name][
-            MIN_CHARGING_CURRENT_LIMIT
-        ]
-        max_limit = hass.data[DOMAIN][f"{charger_name}_coordinator"].data[charger_name][
-            MAX_CHARGING_CURRENT_LIMIT
-        ]
+        data = hass.data[DOMAIN][f"{charger_name}_coordinator"].data[charger_name]
+
+        if (
+            MIN_CHARGING_CURRENT_LIMIT not in data
+            or MAX_CHARGING_CURRENT_LIMIT not in data
+        ):
+            _LOGGER.error("Data not available, won't create number inputs")
+            return []
+
+        min_limit = data[MIN_CHARGING_CURRENT_LIMIT]
+        max_limit = data[MAX_CHARGING_CURRENT_LIMIT]
 
         if min_limit >= max_limit:
             _LOGGER.error(

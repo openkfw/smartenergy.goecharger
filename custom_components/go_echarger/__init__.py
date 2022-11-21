@@ -233,7 +233,7 @@ async def async_setup(hass: HomeAssistantType, config: ConfigType) -> bool:
     )
     hass.services.async_register(DOMAIN, "set_phase", charger_controller.set_phase)
     hass.services.async_register(
-        DOMAIN, "set_authentication", charger_controller.set_authentication
+        DOMAIN, "set_transaction", charger_controller.set_transaction
     )
 
     scan_interval = DEFAULT_UPDATE_INTERVAL

@@ -7,7 +7,8 @@
     "phase_switch_mode": 1,
     "phases_number_connected": 1,
     "charger_access": false,
-    "charger_force_charging": "on",
+    "charger_force_charging": "neutral",
     "min_charging_current_limit": 1,
-    "max_charging_current_limit": 30
+    "max_charging_current_limit": 30,
+    "transaction": null
 }

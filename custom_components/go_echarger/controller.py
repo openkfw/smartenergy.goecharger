@@ -128,24 +128,26 @@ class ChargerController:
         await self._hass.async_add_executor_job(api.set_phase, phase)
         await self._hass.data[DOMAIN][f"{charger_name}_coordinator"].async_refresh()
 
-    async def set_authentication(self, call: ServiceCallType) -> None:
+    async def set_transaction(self, call: ServiceCallType) -> None:
         """Get name and status from the service call and call the API accordingly.
         In case the status value is not set correctly, log an error and early escape.
-        Possible values: 0 (open), 1 (wait)
+        Set wallbox transaction with possible values:
+        - None (no transaction)
+        - 0 (authenticate all users)
         """
 
         charger_name = call["data"].get("device_name", None)
         status = call["data"].get("status", None)
         api = self._hass.data[DOMAIN][INIT_STATE][CHARGERS_API][charger_name][API]
 
-        if not status in [0, 1]:
+        if not status in [None, 0]:
             return
 
         _LOGGER.debug(
-            "Setting authentication status for device=%s to %s",
+            "Setting transaction status for device=%s to %s",
             charger_name,
             status,
         )
 
-        await self._hass.async_add_executor_job(api.set_access_control, status)
+        await self._hass.async_add_executor_job(api.set_transaction, status)
         await self._hass.data[DOMAIN][f"{charger_name}_coordinator"].async_refresh()

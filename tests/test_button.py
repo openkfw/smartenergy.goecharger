@@ -12,13 +12,25 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry, load_f
 from custom_components.go_echarger import async_setup, async_setup_entry
 from custom_components.go_echarger.const import (
     DOMAIN,
-    CHARGER_ACCESS,
+    STATUS,
     CONF_CHARGERS,
+    CAR_STATUS,
+    CHARGER_FORCE_CHARGING,
+    WALLBOX_CONTROL,
+    OFFLINE,
 )
 from .mock_api import mocked_api_requests
 
 GO_E_CHARGER_MOCK_REFERENCE = "custom_components.go_echarger.state.GoeChargerApi"
 CHARGER_1: dict = json.loads(load_fixture("charger.json"))[0]
+CHARGER_CAR_STATUS_3 = dict(
+    json.loads(load_fixture("init_state.json")),
+    **{CAR_STATUS: "Car connected, authentication required"},
+)
+CHARGER_CAR_STATUS_4 = dict(
+    json.loads(load_fixture("init_state.json")),
+    **{CAR_STATUS: "Charging finished, car can be disconnected"},
+)
 
 
 @patch(
@@ -30,30 +42,120 @@ CHARGER_1: dict = json.loads(load_fixture("charger.json"))[0]
         )
     ),
 )
-async def test_button_auth_enable(hass: HomeAssistantType) -> None:
+async def test_button_wallbox_charge_stop(hass: HomeAssistantType) -> None:
+    """Test if pressing the button stops the charging."""
+    charger_name = CHARGER_1[CONF_NAME]
+    coordinator_name = f"{charger_name}_coordinator"
+    assert await async_setup(hass, {DOMAIN: {CONF_CHARGERS: [[CHARGER_1]]}})
+    await hass.async_block_till_done()
+
+    # device is in the force state "neutral"
+    assert (
+        hass.data[DOMAIN][coordinator_name].data[charger_name][CHARGER_FORCE_CHARGING]
+        == "neutral"
+    )
+
+    # change the force state to "off"
+    await hass.services.async_call(
+        BUTTON_DOMAIN,
+        SERVICE_PRESS,
+        service_data={
+            ATTR_ENTITY_ID: f"{BUTTON_DOMAIN}.{DOMAIN}_{charger_name}_{WALLBOX_CONTROL}"
+        },
+        blocking=True,
+    )
+    assert (
+        hass.data[DOMAIN][coordinator_name].data[charger_name][CHARGER_FORCE_CHARGING]
+        == "off"
+    )
+
+
+@patch(
+    GO_E_CHARGER_MOCK_REFERENCE,
+    Mock(
+        side_effect=partial(
+            mocked_api_requests,
+            data=CHARGER_CAR_STATUS_3,
+        )
+    ),
+)
+async def test_button_wallbox_auth(hass: HomeAssistantType) -> None:
     """Test if pressing the button enables the device authentication."""
     charger_name = CHARGER_1[CONF_NAME]
     coordinator_name = f"{charger_name}_coordinator"
     assert await async_setup(hass, {DOMAIN: {CONF_CHARGERS: [[CHARGER_1]]}})
     await hass.async_block_till_done()
 
-    # device is by default not authenticated
-    assert (
-        hass.data[DOMAIN][coordinator_name].data[charger_name][CHARGER_ACCESS] is False
-    )
+    # device has no transaction by default
+    assert hass.data[DOMAIN][coordinator_name].data[charger_name]["transaction"] is None
 
-    # authenticate the device
+    # change the transaction to "0" to do the authentication
     await hass.services.async_call(
         BUTTON_DOMAIN,
         SERVICE_PRESS,
         service_data={
-            ATTR_ENTITY_ID: f"{BUTTON_DOMAIN}.{DOMAIN}_{charger_name}_authentication"
+            ATTR_ENTITY_ID: f"{BUTTON_DOMAIN}.{DOMAIN}_{charger_name}_{WALLBOX_CONTROL}"
+        },
+        blocking=True,
+    )
+    assert hass.data[DOMAIN][coordinator_name].data[charger_name]["transaction"] == 0
+
+
+@patch(
+    GO_E_CHARGER_MOCK_REFERENCE,
+    Mock(
+        side_effect=partial(
+            mocked_api_requests,
+            data=CHARGER_CAR_STATUS_4,
+        )
+    ),
+)
+async def test_button_wallbox_charge_start(hass: HomeAssistantType) -> None:
+    """Test if pressing the button starts the charging."""
+    charger_name = CHARGER_1[CONF_NAME]
+    coordinator_name = f"{charger_name}_coordinator"
+    assert await async_setup(hass, {DOMAIN: {CONF_CHARGERS: [[CHARGER_1]]}})
+    await hass.async_block_till_done()
+
+    # device is in the force state "neutral"
+    assert (
+        hass.data[DOMAIN][coordinator_name].data[charger_name][CHARGER_FORCE_CHARGING]
+        == "neutral"
+    )
+
+    # change the force state to "on"
+    await hass.services.async_call(
+        BUTTON_DOMAIN,
+        SERVICE_PRESS,
+        service_data={
+            ATTR_ENTITY_ID: f"{BUTTON_DOMAIN}.{DOMAIN}_{charger_name}_{WALLBOX_CONTROL}"
         },
         blocking=True,
     )
     assert (
-        hass.data[DOMAIN][coordinator_name].data[charger_name][CHARGER_ACCESS] is True
+        hass.data[DOMAIN][coordinator_name].data[charger_name][CHARGER_FORCE_CHARGING]
+        == "on"
     )
+
+
+@patch(
+    GO_E_CHARGER_MOCK_REFERENCE,
+    Mock(
+        side_effect=partial(
+            mocked_api_requests,
+            data={"success": False, "msg": "Wallbox is offline"},
+        )
+    ),
+)
+async def test_button_wallbox_offline(hass: HomeAssistantType) -> None:
+    """Test if wallbox is set to the offline mode when wallbox itself is offline."""
+    charger_name = CHARGER_1[CONF_NAME]
+    coordinator_name = f"{charger_name}_coordinator"
+    assert await async_setup(hass, {DOMAIN: {CONF_CHARGERS: [[CHARGER_1]]}})
+    await hass.async_block_till_done()
+
+    # device should be in the "offline" mode if wallbox is offline
+    assert hass.data[DOMAIN][coordinator_name].data[charger_name][STATUS] == OFFLINE
 
 
 @patch(
@@ -65,8 +167,8 @@ async def test_button_auth_enable(hass: HomeAssistantType) -> None:
         )
     ),
 )
-async def test_button_auth_enable_config_entry(hass: HomeAssistantType) -> None:
-    """Test if pressing the button enables the device authentication
+async def test_button_wallbox_charge_stop_config_entry(hass: HomeAssistantType) -> None:
+    """Test if pressing the button stops the charging,
     if configured via the config entry."""
     charger_name = "test"
     coordinator_name = f"{charger_name}_coordinator"
@@ -82,20 +184,22 @@ async def test_button_auth_enable_config_entry(hass: HomeAssistantType) -> None:
     assert await async_setup_entry(hass, config_entry)
     await hass.async_block_till_done()
 
-    # device is by default not authenticated
+    # device is in the force state "neutral"
     assert (
-        hass.data[DOMAIN][coordinator_name].data[charger_name][CHARGER_ACCESS] is False
+        hass.data[DOMAIN][coordinator_name].data[charger_name][CHARGER_FORCE_CHARGING]
+        == "neutral"
     )
 
-    # authenticate the device
+    # change the force state to "off"
     await hass.services.async_call(
         BUTTON_DOMAIN,
         SERVICE_PRESS,
         service_data={
-            ATTR_ENTITY_ID: f"{BUTTON_DOMAIN}.{DOMAIN}_{charger_name}_authentication"
+            ATTR_ENTITY_ID: f"{BUTTON_DOMAIN}.{DOMAIN}_{charger_name}_{WALLBOX_CONTROL}"
         },
         blocking=True,
     )
     assert (
-        hass.data[DOMAIN][coordinator_name].data[charger_name][CHARGER_ACCESS] is True
+        hass.data[DOMAIN][coordinator_name].data[charger_name][CHARGER_FORCE_CHARGING]
+        == "off"
     )

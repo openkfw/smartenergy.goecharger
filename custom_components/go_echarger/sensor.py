@@ -24,6 +24,7 @@ from .const import (
     DOMAIN,
     MANUFACTURER,
     CAR_STATUS,
+    CHARGER_ACCESS,
     CHARGING_ALLOWED,
     CHARGER_MAX_CURRENT,
     ENERGY_SINCE_CAR_CONNECTED,
@@ -47,8 +48,9 @@ _LOGGER: logging.Logger = logging.getLogger(__name__)
 CHARGER_SENSORS_CONFIG: dict = {
     "sensors": [
         CAR_STATUS,
-        CHARGER_MAX_CURRENT,
+        CHARGER_ACCESS,
         CHARGING_ALLOWED,
+        CHARGER_MAX_CURRENT,
         ENERGY_SINCE_CAR_CONNECTED,
         ENERGY_TOTAL,
         PHASE_SWITCH_MODE,
@@ -57,6 +59,7 @@ CHARGER_SENSORS_CONFIG: dict = {
     ],
     "units": {
         CAR_STATUS: {"unit": "", "name": "Car charging status"},
+        CHARGER_ACCESS: {"unit": "", "name": "Access Control"},
         CHARGING_ALLOWED: {"unit": "", "name": "Car charging allowed"},
         CHARGER_MAX_CURRENT: {"unit": AMPERE, "name": "Current charging speed (max)"},
         ENERGY_SINCE_CAR_CONNECTED: {
@@ -74,11 +77,12 @@ CHARGER_SENSORS_CONFIG: dict = {
         ENERGY_TOTAL: K_WATT_HOUR,
     },
     "device_classes": {
+        CHARGER_ACCESS: f"{DOMAIN}__access_control",
         CHARGER_MAX_CURRENT: DEVICE_CLASS_CURRENT,
         ENERGY_SINCE_CAR_CONNECTED: DEVICE_CLASS_ENERGY,
         ENERGY_TOTAL: DEVICE_CLASS_ENERGY,
-        CHARGING_ALLOWED: "go_echarger__allow_charging",
-        PHASE_SWITCH_MODE: "go_echarger__phase_switch_mode",
+        CHARGING_ALLOWED: f"{DOMAIN}__allow_charging",
+        PHASE_SWITCH_MODE: f"{DOMAIN}__phase_switch_mode",
     },
 }
 
@@ -150,6 +154,9 @@ class ChargerSensor(BaseSensor, CoordinatorEntity, SensorEntity):
     @property
     def state(self) -> str:
         """Return the state of the sensor."""
+        if self._attribute not in self.coordinator.data[self._device_id]:
+            return None
+
         attr_value = self.coordinator.data[self._device_id][self._attribute]
 
         # if charging is not allowed, show current as 0
