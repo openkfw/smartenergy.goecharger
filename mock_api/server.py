@@ -46,7 +46,7 @@ def toggle_age() -> dict:
     """
     Toggle the age status.
     """
-
+    # pylint: disable=global-variable-not-assigned
     global AGE
 
     AGE = not AGE
