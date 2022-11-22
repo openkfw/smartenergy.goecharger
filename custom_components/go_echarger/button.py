@@ -17,7 +17,16 @@ from homeassistant.helpers.typing import (
     DiscoveryInfoType,
 )
 
-from .const import DOMAIN, CONF_CHARGERS, CAR_STATUS, STATUS, OFFLINE, WALLBOX_CONTROL
+from .const import (
+    DOMAIN,
+    CONF_CHARGERS,
+    CAR_STATUS,
+    STATUS,
+    ONLINE,
+    OFFLINE,
+    WALLBOX_CONTROL,
+    CarStatus,
+)
 from .controller import ChargerController
 
 _LOGGER: logging.Logger = logging.getLogger(__name__)
@@ -50,7 +59,7 @@ class BaseDescriptiveEntity:
         self._charger_controller = ChargerController(hass)
 
 
-class ChargeButton(BaseDescriptiveEntity, CoordinatorEntity, ButtonEntity):
+class WallboxControlButton(BaseDescriptiveEntity, CoordinatorEntity, ButtonEntity):
     """Representation of a Charge Button."""
 
     entity_description: BaseButtonDescription = None
@@ -64,17 +73,17 @@ class ChargeButton(BaseDescriptiveEntity, CoordinatorEntity, ButtonEntity):
             return False
 
         match data[CAR_STATUS]:
-            case "Car is charging":
+            case CarStatus.CAR_CHARGING:
                 # car status is 2 - stop charging
                 await self._charger_controller.stop_charging(
                     {"data": {"device_name": self._device_id}}
                 )
-            case "Car connected, authentication required":
+            case CarStatus.CAR_CONNECTED_AUTH_REQUIRED:
                 # car status is 3 - authenticate
                 await self._charger_controller.set_transaction(
                     {"data": {"device_name": self._device_id, "status": 0}}
                 )
-            case "Charging finished, car can be disconnected":
+            case CarStatus.CHARGING_FINISHED_DISCONNECT:
                 # car status is 4 - start charging
                 await self._charger_controller.start_charging(
                     {"data": {"device_name": self._device_id}}
@@ -93,21 +102,31 @@ class ChargeButton(BaseDescriptiveEntity, CoordinatorEntity, ButtonEntity):
             return "Wallbox is offline"
 
         match data[CAR_STATUS]:
-            case "Car is charging":
+            case CarStatus.CAR_CHARGING:
                 # car status is 2 - stop charging
                 return "Stop charging"
-            case "Car connected, authentication required":
+            case CarStatus.CAR_CONNECTED_AUTH_REQUIRED:
                 # car status is 3 - authenticate
                 return "Authenticate car"
-            case "Charging finished, car can be disconnected":
+            case CarStatus.CHARGING_FINISHED_DISCONNECT:
                 # car status is 4 - start charging
                 return "Start charging"
             case _:
                 # car status is 1 - do nothing
                 return "Please connect car"
 
+    @property
+    def available(self) -> bool:
+        """Make the button (un)available based on the status."""
 
-def _create_buttons(hass: HomeAssistantType, chargers: list[str]) -> list[ChargeButton]:
+        data = self.coordinator.data[self._device_id]
+
+        return data[STATUS] == ONLINE
+
+
+def _create_buttons(
+    hass: HomeAssistantType, chargers: list[str]
+) -> list[WallboxControlButton]:
     """
     Create input buttons for authentication.
     """
@@ -115,7 +134,7 @@ def _create_buttons(hass: HomeAssistantType, chargers: list[str]) -> list[Charge
 
     for charger_name in chargers:
         button_entities.append(
-            ChargeButton(
+            WallboxControlButton(
                 hass,
                 hass.data[DOMAIN][f"{charger_name}_coordinator"],
                 charger_name,

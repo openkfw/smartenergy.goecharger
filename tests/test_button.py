@@ -18,6 +18,7 @@ from custom_components.go_echarger.const import (
     CHARGER_FORCE_CHARGING,
     WALLBOX_CONTROL,
     OFFLINE,
+    CarStatus,
 )
 from .mock_api import mocked_api_requests
 
@@ -25,11 +26,11 @@ GO_E_CHARGER_MOCK_REFERENCE = "custom_components.go_echarger.state.GoeChargerApi
 CHARGER_1: dict = json.loads(load_fixture("charger.json"))[0]
 CHARGER_CAR_STATUS_3 = dict(
     json.loads(load_fixture("init_state.json")),
-    **{CAR_STATUS: "Car connected, authentication required"},
+    **{CAR_STATUS: CarStatus.CAR_CONNECTED_AUTH_REQUIRED},
 )
 CHARGER_CAR_STATUS_4 = dict(
     json.loads(load_fixture("init_state.json")),
-    **{CAR_STATUS: "Charging finished, car can be disconnected"},
+    **{CAR_STATUS: CarStatus.CHARGING_FINISHED_DISCONNECT},
 )
 
 
