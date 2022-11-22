@@ -1,5 +1,7 @@
 """Constants re-used across different files"""
 
+from enum import Enum
+
 API = "api"
 CHARGERS_API = "chargers_api"
 CONF_CHARGERS = "chargers"
@@ -28,3 +30,15 @@ PHASES_NUMBER_CONNECTED = "phases_number_connected"
 # Custom attributes
 
 WALLBOX_CONTROL = "wallbox_control"
+
+# Car param status values
+
+
+class CarStatus(str, Enum):
+    """
+    List of possible car status values.
+    """
+
+    CAR_CHARGING = "Car is charging"
+    CAR_CONNECTED_AUTH_REQUIRED = "Car connected, authentication required"
+    CHARGING_FINISHED_DISCONNECT = "Charging finished, car can be disconnected"

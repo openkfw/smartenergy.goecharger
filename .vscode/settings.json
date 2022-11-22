@@ -11,7 +11,8 @@
         "HACS",
         "hass",
         "homeassistant",
-        "unsub"
+        "unsub",
+        "WALLBOX"
     ],
     "python.analysis.typeCheckingMode": "off"
 }

@@ -13,7 +13,6 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.helpers.typing import ConfigType, HomeAssistantType
 from homeassistant.components.button import DOMAIN as BUTTON_DOMAIN
 from homeassistant.components.sensor import DOMAIN as SENSOR_DOMAIN
-from homeassistant.components.switch import DOMAIN as SWITCH_DOMAIN
 from homeassistant.components.number import DOMAIN as NUMBER_DOMAIN
 from homeassistant.components.select import DOMAIN as SELECT_DOMAIN
 
@@ -35,7 +34,6 @@ DEFAULT_UPDATE_INTERVAL: timedelta = timedelta(seconds=10)
 PLATFORMS: list[str] = [
     BUTTON_DOMAIN,
     SENSOR_DOMAIN,
-    SWITCH_DOMAIN,
     NUMBER_DOMAIN,
     SELECT_DOMAIN,
 ]
