@@ -9,6 +9,26 @@ from .const import API, CHARGERS_API, DOMAIN, INIT_STATE, CAR_STATUS, CHARGING_A
 _LOGGER: logging.Logger = logging.getLogger(__name__)
 
 
+class DictObj(dict):
+    """
+    Simple dict class to be able to have data attribute and direct access via dot notation.
+    """
+
+    def __init__(self):
+        self.data = {}
+
+
+def init_service_data(data: dict) -> DictObj:
+    """
+    Initialize Home Assistant service call dict with data attribute and initial values.
+    """
+
+    service_data = DictObj()
+    service_data.data = data
+
+    return service_data
+
+
 async def fetch_status(hass: HomeAssistantType, charger_name: str) -> dict:
     """Fetch go-e Charger Cloud car status via API."""
 
@@ -61,8 +81,8 @@ class ChargerController:
         """Get name and assigned power from the service call and call the API accordingly.
         In case charging is not allowed, log a warning and early escape."""
 
-        charger_name = call["data"].get("device_name", None)
-        charging_power = call["data"].get("charging_power", None)
+        charger_name = call.data.get("device_name", None)
+        charging_power = call.data.get("charging_power", None)
         api = self._hass.data[DOMAIN][INIT_STATE][CHARGERS_API][charger_name][API]
 
         _LOGGER.debug(
@@ -81,7 +101,7 @@ class ChargerController:
         """Get name and assigned power from the service call and call the API accordingly.
         In case charging is not allowed, log a warning and early escape."""
 
-        charger_name = call["data"].get("device_name", None)
+        charger_name = call.data.get("device_name", None)
         api = self._hass.data[DOMAIN][INIT_STATE][CHARGERS_API][charger_name][API]
 
         _LOGGER.debug("Stopping charging for the device=%s", charger_name)
@@ -93,8 +113,8 @@ class ChargerController:
         """Get name and power from the service call and call the API accordingly.
         In case charging is not allowed, log an error and early escape."""
 
-        charger_name = call["data"].get("device_name", None)
-        charging_power = call["data"].get("charging_power", None)
+        charger_name = call.data.get("device_name", None)
+        charging_power = call.data.get("charging_power", None)
         api = self._hass.data[DOMAIN][INIT_STATE][CHARGERS_API][charger_name][API]
 
         _LOGGER.debug(
@@ -112,8 +132,8 @@ class ChargerController:
         Possible phase values: 0 (Auto), 1 (1-phased), 2 (3-phased)
         """
 
-        charger_name = call["data"].get("device_name", None)
-        phase = call["data"].get("phase", None)
+        charger_name = call.data.get("device_name", None)
+        phase = call.data.get("phase", None)
         api = self._hass.data[DOMAIN][INIT_STATE][CHARGERS_API][charger_name][API]
 
         if not phase in [0, 1, 2]:
@@ -136,8 +156,8 @@ class ChargerController:
         - 0 (authenticate all users)
         """
 
-        charger_name = call["data"].get("device_name", None)
-        status = call["data"].get("status", None)
+        charger_name = call.data.get("device_name", None)
+        status = call.data.get("status", None)
         api = self._hass.data[DOMAIN][INIT_STATE][CHARGERS_API][charger_name][API]
 
         if not status in [None, 0]:

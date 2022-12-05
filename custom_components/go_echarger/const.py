@@ -26,6 +26,7 @@ MIN_CHARGING_CURRENT_LIMIT = "min_charging_current_limit"
 MAX_CHARGING_CURRENT_LIMIT = "max_charging_current_limit"
 PHASE_SWITCH_MODE = "phase_switch_mode"
 PHASES_NUMBER_CONNECTED = "phases_number_connected"
+TRANSACTION = "transaction"
 
 # Custom attributes
 
@@ -39,6 +40,11 @@ class CarStatus(str, Enum):
     List of possible car status values.
     """
 
+    # 1
+    CHARGER_READY_NO_CAR = "Charger ready, no car connected"
+    # 2
     CAR_CHARGING = "Car is charging"
+    # 3
     CAR_CONNECTED_AUTH_REQUIRED = "Car connected, authentication required"
+    # 4
     CHARGING_FINISHED_DISCONNECT = "Charging finished, car can be disconnected"

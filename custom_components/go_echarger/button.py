@@ -27,7 +27,7 @@ from .const import (
     WALLBOX_CONTROL,
     CarStatus,
 )
-from .controller import ChargerController
+from .controller import ChargerController, init_service_data
 
 _LOGGER: logging.Logger = logging.getLogger(__name__)
 
@@ -72,22 +72,19 @@ class WallboxControlButton(BaseDescriptiveEntity, CoordinatorEntity, ButtonEntit
         if data[STATUS] == OFFLINE:
             return False
 
+        service_data = init_service_data({"device_name": self._device_id})
+
         match data[CAR_STATUS]:
             case CarStatus.CAR_CHARGING:
                 # car status is 2 - stop charging
-                await self._charger_controller.stop_charging(
-                    {"data": {"device_name": self._device_id}}
-                )
+                await self._charger_controller.stop_charging(service_data)
             case CarStatus.CAR_CONNECTED_AUTH_REQUIRED:
                 # car status is 3 - authenticate
-                await self._charger_controller.set_transaction(
-                    {"data": {"device_name": self._device_id, "status": 0}}
-                )
+                service_data.data["status"] = 0
+                await self._charger_controller.set_transaction(service_data)
             case CarStatus.CHARGING_FINISHED_DISCONNECT:
                 # car status is 4 - start charging
-                await self._charger_controller.start_charging(
-                    {"data": {"device_name": self._device_id}}
-                )
+                await self._charger_controller.start_charging(service_data)
             case _:
                 # car status is 1 - do nothing
                 pass
@@ -121,7 +118,10 @@ class WallboxControlButton(BaseDescriptiveEntity, CoordinatorEntity, ButtonEntit
 
         data = self.coordinator.data[self._device_id]
 
-        return data[STATUS] == ONLINE
+        return (
+            data[STATUS] == ONLINE
+            and data[CAR_STATUS] != CarStatus.CHARGER_READY_NO_CAR
+        )
 
 
 def _create_buttons(

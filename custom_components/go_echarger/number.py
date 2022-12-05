@@ -24,7 +24,7 @@ from .const import (
     MAX_CHARGING_CURRENT_LIMIT,
     CHARGER_MAX_CURRENT,
 )
-from .controller import ChargerController
+from .controller import ChargerController, init_service_data
 
 _LOGGER: logging.Logger = logging.getLogger(__name__)
 
@@ -98,9 +98,11 @@ class CurrentInputNumber(BaseDescriptiveEntity, CoordinatorEntity, NumberEntity)
 
     async def async_set_native_value(self, value: float) -> None:
         """Set the value of the entity."""
-        await self._charger_controller.change_charging_power(
-            {"data": {"device_name": self._device_id, "charging_power": int(value)}}
+        service_data = init_service_data(
+            {"device_name": self._device_id, "charging_power": int(value)}
         )
+
+        await self._charger_controller.change_charging_power(service_data)
 
 
 def _create_input_numbers(
