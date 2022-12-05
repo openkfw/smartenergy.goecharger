@@ -16,6 +16,7 @@ from custom_components.go_echarger.const import (
     CONF_CHARGERS,
     CAR_STATUS,
     CHARGER_FORCE_CHARGING,
+    TRANSACTION,
     WALLBOX_CONTROL,
     OFFLINE,
     CarStatus,
@@ -24,6 +25,10 @@ from .mock_api import mocked_api_requests
 
 GO_E_CHARGER_MOCK_REFERENCE = "custom_components.go_echarger.state.GoeChargerApi"
 CHARGER_1: dict = json.loads(load_fixture("charger.json"))[0]
+CHARGER_CAR_STATUS_1 = dict(
+    json.loads(load_fixture("init_state.json")),
+    **{CAR_STATUS: CarStatus.CHARGER_READY_NO_CAR},
+)
 CHARGER_CAR_STATUS_3 = dict(
     json.loads(load_fixture("init_state.json")),
     **{CAR_STATUS: CarStatus.CAR_CONNECTED_AUTH_REQUIRED},
@@ -88,7 +93,7 @@ async def test_button_wallbox_auth(hass: HomeAssistantType) -> None:
     await hass.async_block_till_done()
 
     # device has no transaction by default
-    assert hass.data[DOMAIN][coordinator_name].data[charger_name]["transaction"] is None
+    assert hass.data[DOMAIN][coordinator_name].data[charger_name][TRANSACTION] is None
 
     # change the transaction to "0" to do the authentication
     await hass.services.async_call(
@@ -99,7 +104,7 @@ async def test_button_wallbox_auth(hass: HomeAssistantType) -> None:
         },
         blocking=True,
     )
-    assert hass.data[DOMAIN][coordinator_name].data[charger_name]["transaction"] == 0
+    assert hass.data[DOMAIN][coordinator_name].data[charger_name][TRANSACTION] == 0
 
 
 @patch(
@@ -137,6 +142,47 @@ async def test_button_wallbox_charge_start(hass: HomeAssistantType) -> None:
         hass.data[DOMAIN][coordinator_name].data[charger_name][CHARGER_FORCE_CHARGING]
         == "on"
     )
+
+
+@patch(
+    GO_E_CHARGER_MOCK_REFERENCE,
+    Mock(
+        side_effect=partial(
+            mocked_api_requests,
+            data=CHARGER_CAR_STATUS_1,
+        )
+    ),
+)
+async def test_button_wallbox_disabled(hass: HomeAssistantType) -> None:
+    """Test if pressing of the button is disabled when car is not connected."""
+    charger_name = CHARGER_1[CONF_NAME]
+    coordinator_name = f"{charger_name}_coordinator"
+    assert await async_setup(hass, {DOMAIN: {CONF_CHARGERS: [[CHARGER_1]]}})
+    await hass.async_block_till_done()
+
+    # device is in the force state "neutral" and trx "None"
+    assert (
+        hass.data[DOMAIN][coordinator_name].data[charger_name][CHARGER_FORCE_CHARGING]
+        == "neutral"
+    )
+    assert hass.data[DOMAIN][coordinator_name].data[charger_name][TRANSACTION] is None
+
+    # button should be disabled
+    await hass.services.async_call(
+        BUTTON_DOMAIN,
+        SERVICE_PRESS,
+        service_data={
+            ATTR_ENTITY_ID: f"{BUTTON_DOMAIN}.{DOMAIN}_{charger_name}_{WALLBOX_CONTROL}"
+        },
+        blocking=True,
+    )
+
+    # therefore expect the same values
+    assert (
+        hass.data[DOMAIN][coordinator_name].data[charger_name][CHARGER_FORCE_CHARGING]
+        == "neutral"
+    )
+    assert hass.data[DOMAIN][coordinator_name].data[charger_name][TRANSACTION] is None
 
 
 @patch(

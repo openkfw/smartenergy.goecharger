@@ -6,6 +6,7 @@ from custom_components.go_echarger.const import (
     CHARGER_ACCESS,
     CHARGER_MAX_CURRENT,
     PHASE_SWITCH_MODE,
+    TRANSACTION,
 )
 
 # pylint: disable=unused-argument
@@ -45,7 +46,7 @@ def mocked_api_requests(*args, **kwargs) -> dict | int:
 
         def set_transaction(self, val: int | None) -> int | None:
             """Return provided value and update data"""
-            self.json_data["transaction"] = val
+            self.json_data[TRANSACTION] = val
             return val
 
     if args[0] in ["http://1.1.1.1", "http://1.1.1.2"]:

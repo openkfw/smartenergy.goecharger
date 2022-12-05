@@ -19,7 +19,7 @@ keywords = ["goecharger", "kfw", "homeassistant", "cloud"]
 name = "homeassistant_goechargerv2"
 readme = "README.md"
 requires-python = ">=3.7"
-version = "0.2.3"
+version = "0.2.4"
 
 [project.optional-dependencies]
 dev = ["black", "pylint", "pytest-homeassistant-custom-component", "Flask", "pre-commit"]

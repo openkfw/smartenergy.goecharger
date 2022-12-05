@@ -18,7 +18,7 @@ from homeassistant.helpers.typing import (
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN, CONF_CHARGERS, PHASE_SWITCH_MODE
-from .controller import ChargerController
+from .controller import ChargerController, init_service_data
 
 _LOGGER: logging.Logger = logging.getLogger(__name__)
 
@@ -76,9 +76,11 @@ class PhaseSelectInput(BaseDescriptiveEntity, CoordinatorEntity, SelectEntity):
 
     async def async_select_option(self, option: str) -> None:
         """Change the selected option."""
-        await self._charger_controller.set_phase(
-            {"data": {"device_name": self._device_id, "phase": int(option)}}
+        service_data = init_service_data(
+            {"device_name": self._device_id, "phase": int(option)}
         )
+
+        await self._charger_controller.set_phase(service_data)
 
     @property
     def current_option(self) -> str | None:
