@@ -2,7 +2,7 @@
 
 from http.client import BAD_REQUEST, OK
 
-from custom_components.go_echarger.const import (
+from custom_components.smart_energy_goecharger.const import (
     CHARGER_ACCESS,
     CHARGER_MAX_CURRENT,
     PHASE_SWITCH_MODE,

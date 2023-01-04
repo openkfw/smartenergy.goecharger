@@ -11,10 +11,12 @@ from homeassistant.data_entry_flow import FlowResult
 from homeassistant.data_entry_flow import RESULT_TYPE_CREATE_ENTRY, RESULT_TYPE_FORM
 from homeassistant.helpers.typing import HomeAssistantType
 from pytest_homeassistant_custom_component.common import MockConfigEntry, load_fixture
-from custom_components.go_echarger.const import DOMAIN
+from custom_components.smart_energy_goecharger.const import DOMAIN
 from .mock_api import mocked_api_requests
 
-GO_E_CHARGER_MOCK_REFERENCE = "custom_components.go_echarger.config_flow.GoeChargerApi"
+GO_E_CHARGER_MOCK_REFERENCE = (
+    "custom_components.smart_energy_goecharger.config_flow.GoeChargerApi"
+)
 
 CHARGER_1: dict = json.loads(load_fixture("charger.json"))[0]
 CHARGER_2: dict = json.loads(load_fixture("charger.json"))[1]

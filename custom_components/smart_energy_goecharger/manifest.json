@@ -1,0 +1,16 @@
+{
+  "domain": "smart_energy_goecharger",
+  "name": "go-e Charger Cloud",
+  "version": "0.3.0",
+  "documentation": "https://github.com/openkfw/smart_energy.goecharger",
+  "issue_tracker": "https://github.com/openkfw/smart_energy.goecharger/issues",
+  "iot_class": "local_polling",
+  "config_flow": true,
+  "dependencies": ["sensor", "switch", "button", "number", "select"],
+  "codeowners": [
+    "@openkfw"
+  ],
+  "requirements": [
+    "smart-energy.goecharger-api==0.3.0"
+  ]
+}

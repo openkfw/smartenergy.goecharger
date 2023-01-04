@@ -13,8 +13,8 @@ from homeassistant.const import ATTR_ENTITY_ID, CONF_NAME
 from homeassistant.helpers.typing import HomeAssistantType
 from pytest_homeassistant_custom_component.common import MockConfigEntry, load_fixture
 
-from custom_components.go_echarger import async_setup, async_setup_entry
-from custom_components.go_echarger.const import (
+from custom_components.smart_energy_goecharger import async_setup, async_setup_entry
+from custom_components.smart_energy_goecharger.const import (
     DOMAIN,
     CONF_CHARGERS,
     PHASE_SWITCH_MODE,
@@ -22,7 +22,9 @@ from custom_components.go_echarger.const import (
 from .mock_api import mocked_api_requests
 
 
-GO_E_CHARGER_MOCK_REFERENCE = "custom_components.go_echarger.state.GoeChargerApi"
+GO_E_CHARGER_MOCK_REFERENCE = (
+    "custom_components.smart_energy_goecharger.state.GoeChargerApi"
+)
 CHARGER_1: dict = json.loads(load_fixture("charger.json"))[0]
 
 

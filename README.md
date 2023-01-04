@@ -2,7 +2,7 @@
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
 
-This is an integration for the Home Assistant for the go-e Charger Cloud wallbox (API v2) using [this library](https://github.com/openkfw/goechargerv2).
+This is an integration for the Home Assistant for the go-e Charger Cloud wallbox (API v2) using [this library](https://github.com/openkfw/smart_energy.goecharger-api).
 
 ## How to use it
 
@@ -12,7 +12,7 @@ This is an integration for the Home Assistant for the go-e Charger Cloud wallbox
 2. In case you don't have HACS, follow the steps from here <https://hacs.xyz/docs/configuration/basic>.
 3. In the left menu you should have HACS icon, click it.
 4. Click on `Integrations` -> click 3 dots top right corner -> click `Custom repositories`.
-5. In the dialog window, add `https://github.com/openkfw/homeassistant_goechargerv2` as a repository and select `Integration` as a category.
+5. In the dialog window, add `https://github.com/openkfw/smart_energy.goecharger` as a repository and select `Integration` as a category.
 6. Click `ADD`, wait for spinner to finish and close the dialog.
 7. Click `EXPLORE & DOWNLOAD REPOSITORIES` -> search for `go-e` -> select the `go-e Charger Cloud` -> wait and click `DOWNLOAD`.
 8. Go to Settings -> System -> click `RESTART` and wait few seconds.
@@ -86,7 +86,7 @@ Following functions are exposed as Home Assistant services, thus can be used by 
 The integration can be configured either via UI (config flow) as described in the [How to use it - HACS section](#hacs) or via `configuration.yaml`. For example:
 
 ```yaml
-go_echarger:
+smart_energy_goecharger:
   chargers:
     - name: examplecharger
       host: https://example.api.v3.go-e.io

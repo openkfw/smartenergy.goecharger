@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 0.3.0
+
+### Changed
+
+- Renamed the integration to `smart-energy-goecharger`.
+- Updated to use renamed api library `smart-energy.goecharger-api`
+
+### Added
+
+- Added Github PR and bug report templates.
+
+## 0.2.4
+
 ### Added
 
 - Added initial version of the Home Assistant integration for go-e Charger Cloud.

@@ -21,4 +21,4 @@ watch() {
     done
 }
 
-watch "./custom_components/go_echarger" 3
+watch "./custom_components/smart_energy_goecharger" 3
