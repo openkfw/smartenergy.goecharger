@@ -192,10 +192,10 @@ def _setup_sensors(
 
     for sensor_id in sensor_ids:
         sensors = []
-        _LOGGER.debug("Creating sensors for the go_echarger=%s", sensor_id)
+        _LOGGER.debug("Creating sensors for the %s=%s", DOMAIN, sensor_id)
 
         for sensor in sensors_config.get("sensors"):
-            _LOGGER.debug("Adding sensor=%s for the go_echarger=%s", sensor, sensor_id)
+            _LOGGER.debug("Adding sensor=%s for the %s=%s", sensor, DOMAIN, sensor_id)
 
             sensor_unit = (
                 sensors_config.get("units").get(sensor).get("unit")

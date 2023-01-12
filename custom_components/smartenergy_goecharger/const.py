@@ -5,7 +5,7 @@ from enum import Enum
 API = "api"
 CHARGERS_API = "chargers_api"
 CONF_CHARGERS = "chargers"
-DOMAIN = "go_echarger"
+DOMAIN = "smartenergy_goecharger"
 INIT_STATE = "init"
 MANUFACTURER = "go-e GmbH"
 UNSUB_OPTIONS_UPDATE_LISTENER = "unsub_options_update_listener"

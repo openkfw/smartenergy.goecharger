@@ -13,8 +13,8 @@ from homeassistant.const import ATTR_ENTITY_ID, CONF_NAME
 from homeassistant.helpers.typing import HomeAssistantType
 from pytest_homeassistant_custom_component.common import MockConfigEntry, load_fixture
 
-from custom_components.go_echarger import async_setup, async_setup_entry
-from custom_components.go_echarger.const import (
+from custom_components.smartenergy_goecharger import async_setup, async_setup_entry
+from custom_components.smartenergy_goecharger.const import (
     DOMAIN,
     CONF_CHARGERS,
     CHARGER_MAX_CURRENT,
@@ -28,7 +28,7 @@ INIT_STATE_WRONG_LIMITS = dict(
     **{MAX_CHARGING_CURRENT_LIMIT: 4, MIN_CHARGING_CURRENT_LIMIT: 5},
 )
 
-GO_E_CHARGER_MOCK_REFERENCE = "custom_components.go_echarger.state.GoeChargerApi"
+GO_E_CHARGER_MOCK_REFERENCE = f"custom_components.{DOMAIN}.state.GoeChargerApi"
 CHARGER_1: dict = json.loads(load_fixture("charger.json"))[0]
 
 

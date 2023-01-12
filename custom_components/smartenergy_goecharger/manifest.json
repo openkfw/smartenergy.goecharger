@@ -1,5 +1,5 @@
 {
-  "domain": "go_echarger",
+  "domain": "smartenergy_goecharger",
   "name": "go-e Charger Cloud",
   "version": "0.2.4",
   "documentation": "https://github.com/openkfw/homeassistant_goechargerv2",
@@ -11,6 +11,6 @@
     "@openkfw"
   ],
   "requirements": [
-    "goechargerv2==0.2.2"
+    "smart-energy.goecharger-api==0.3.1"
   ]
 }

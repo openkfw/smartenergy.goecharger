@@ -13,7 +13,7 @@ classifiers = [
   "License :: OSI Approved :: MIT License",
   "Operating System :: OS Independent",
 ]
-dependencies = ["goechargerv2"]
+dependencies = ["smart-energy.goecharger-api"]
 description = "This is an integration for the Home Assistant for the go-e Charger Cloud wallbox (API v2)."
 keywords = ["goecharger", "kfw", "homeassistant", "cloud"]
 name = "homeassistant_goechargerv2"
