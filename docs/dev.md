@@ -30,7 +30,7 @@ Run:
 ./start-dev.sh
 ```
 
-After few minutes, Home Assistant should be running and script should be in the watch mode. Whenever you change a file in the `custom_components/go_echarger` folder, it will restart the Home Assistant within a few seconds. Thus, you have a quick development feedback.
+After few minutes, Home Assistant should be running and script should be in the watch mode. Whenever you change a file in the `custom_components/smartenergy_goecharger` folder, it will restart the Home Assistant within a few seconds. Thus, you have a quick development feedback.
 
 1. Open the <http://127.0.0.1:8123> in a browser.
 2. Create an account.
@@ -106,7 +106,7 @@ pip freeze | xargs pip uninstall -y
 Linting is done via [Pylint](https://www.pylint.org/).
 
 ```bash
-pylint tests/**/*.py custom_components/**/*.py mock_api/**/*.py
+python3 -m pylint tests/**/*.py custom_components/**/*.py mock_api/**/*.py
 ```
 
 ## Formatting
@@ -114,7 +114,7 @@ pylint tests/**/*.py custom_components/**/*.py mock_api/**/*.py
 Formatting is done via [Black](https://black.readthedocs.io/en/stable/getting_started.html).
 
 ```
-black custom_components/go_echarger
+black custom_components/smartenergy_goecharger
 ```
 
 To have autoformatting in the VSCode, install the extension `ms-python.black-formatter`.
@@ -124,13 +124,13 @@ To have autoformatting in the VSCode, install the extension `ms-python.black-for
 Unit testing is done via [Pytest](https://docs.pytest.org/en/7.2.x/).
 
 ```bash
-pytest
+python3 -m pytest
 
 # show logs
-pytest -o log_cli=true
+python3 -m pytest -o log_cli=true
 
 # code coverage
-pytest --durations=10 --cov-report term-missing --cov=custom_components.go_echarger tests
+python3 -m pytest --durations=10 --cov-report term-missing --cov=custom_components.smartenergy_goecharger tests
 ```
 
 > __Note: In case you have issues with bcrypt circular import, run this:__

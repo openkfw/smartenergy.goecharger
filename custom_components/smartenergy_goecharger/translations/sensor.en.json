@@ -1,15 +1,15 @@
 {
     "state": {
-        "go_echarger__allow_charging": {
+        "smartenergy_goecharger__allow_charging": {
             "off": "No",
             "on": "Yes"
         },
-        "go_echarger__phase_switch_mode": {
+        "smartenergy_goecharger__phase_switch_mode": {
             "0": "Auto",
             "1": "1-phase",
             "2": "3-phase"
         },
-        "go_echarger__access_control": {
+        "smartenergy_goecharger__access_control": {
             "True": "Open mode",
             "False": "Authentication is required"
         }

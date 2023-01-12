@@ -18,5 +18,5 @@ services:
     ports:
       - "8123:8123"
     volumes:
-      - ./custom_components/go_echarger:/config/custom_components/go_echarger
+      - ./custom_components/smartenergy_goecharger:/config/custom_components/smartenergy_goecharger
       - ./.storage:/config/.storage

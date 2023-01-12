@@ -1,7 +1,7 @@
 {
-  "domain": "go_echarger",
+  "domain": "smartenergy_goecharger",
   "name": "go-e Charger Cloud",
-  "version": "0.2.4",
+  "version": "0.3.0",
   "documentation": "https://github.com/openkfw/homeassistant_goechargerv2",
   "issue_tracker": "https://github.com/openkfw/homeassistant_goechargerv2/issues",
   "iot_class": "local_polling",
@@ -11,6 +11,6 @@
     "@openkfw"
   ],
   "requirements": [
-    "goechargerv2==0.2.2"
+    "smart-energy.goecharger-api==0.3.1"
   ]
 }
