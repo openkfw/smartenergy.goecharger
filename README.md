@@ -12,7 +12,7 @@ This is an integration for the Home Assistant for the go-e Charger Cloud wallbox
 2. In case you don't have HACS, follow the steps from here <https://hacs.xyz/docs/configuration/basic>.
 3. In the left menu you should have HACS icon, click it.
 4. Click on `Integrations` -> click 3 dots top right corner -> click `Custom repositories`.
-5. In the dialog window, add `https://github.com/openkfw/homeassistant_goechargerv2` as a repository and select `Integration` as a category.
+5. In the dialog window, add `https://github.com/openkfw/smartenergy.goecharger` as a repository and select `Integration` as a category.
 6. Click `ADD`, wait for spinner to finish and close the dialog.
 7. Click `EXPLORE & DOWNLOAD REPOSITORIES` -> search for `go-e` -> select the `go-e Charger Cloud` -> wait and click `DOWNLOAD`.
 8. Go to Settings -> System -> click `RESTART` and wait few seconds.
