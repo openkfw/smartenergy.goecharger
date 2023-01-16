@@ -47,14 +47,16 @@ In case you want to try HACS locally, run:
 
 1. Open the <http://127.0.0.1:8123> in a browser.
 2. Create an account - make sure that timezone is set correctly, otherwise it will fail to connect to the Github.
-3. In the left menu you should have HACS icon, click it.
-4. Click on `Integrations` -> click 3 dots top right corner -> click `Custom repositories`.
-5. In the dialog window, add `https://github.com/openkfw/homeassistant_goechargerv2` as a repository and select `Integration` as a category.
-6. Click `ADD`, wait for spinner to finish and close the dialog.
-7. Click `EXPLORE & DOWNLOAD REPOSITORIES` -> search for `go-e` -> select the `go-e Charger Cloud` -> wait and click `DOWNLOAD`.
-8. Go to Settings -> System -> click `RESTART` and wait few seconds.
-9. Go to Settings -> Devices & Services. Click the `ADD INTEGRATION` button.
-10. Search for `go-e Charger Cloud` -> click -> fill in details -> click `SUBMIT`.
+3. Go to Settings -> Integrations and click on the `ADD INTEGRATION`.
+4. Search for `HACS` and go through the process.
+5. In the left menu you should have HACS icon, click it.
+6. Click on `Integrations` -> click 3 dots top right corner -> click `Custom repositories`.
+7. In the dialog window, add `https://github.com/openkfw/smartenergy.goecharger` as a repository and select `Integration` as a category.
+8. Click `ADD`, wait for spinner to finish and close the dialog.
+9. Click `EXPLORE & DOWNLOAD REPOSITORIES` -> search for `go-e` -> select the `go-e Charger Cloud` -> wait and click `DOWNLOAD`.
+10. Go to Settings -> System -> click `RESTART` and wait few seconds.
+11. Go to Settings -> Devices & Services. Click the `ADD INTEGRATION` button.
+12. Search for `go-e Charger Cloud` -> click -> fill in details -> click `SUBMIT`.
 
 Example config:
 
