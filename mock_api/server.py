@@ -9,7 +9,7 @@ SUPPORTED_CAR_CHANGE_VALUES = ["amp", "frc", "alw", "psm", "acs", "car", "trx"]
 AGE = False
 
 CAR = {
-    "car": 2,
+    "car": 1,
     "sse": "051215",
     "amp": 10,
     "frc": 0,
@@ -68,6 +68,18 @@ def car_set() -> dict:
         if request_value is not None:
             if change_value == "psm":
                 CAR["pnp"] = request_value
+
+            if change_value == "frc":
+                match request_value:
+                    # stop charging
+                    case "1":
+                        CAR["car"] = 4
+                    # start charging
+                    case "2":
+                        CAR["car"] = 2
+                    # neutral
+                    case _:
+                        pass
 
             CAR[change_value] = (
                 bool(int(request_value))
