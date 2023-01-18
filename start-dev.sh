@@ -5,7 +5,7 @@ printf "\n>>> Removing running Home Assistant\n"
 podman-compose down || true
 
 printf "\n>>> Starting Home Assistant\n"
-podman-compose up -d --build
+podman-compose --podman-run-args="--tz=local" up -d --build
 
 watch() {
     printf "\n>>> Watching folder $1/ for changes...\n"

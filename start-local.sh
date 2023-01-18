@@ -13,6 +13,7 @@ podman rm -f mock-api || true
 
 printf "\n>>> Starting Mock API container\n"
 podman run -d --name mock-api \
+--tz=local \
 --network $PROJECT \
 -p 4000:4000 \
 mock-api
@@ -26,6 +27,7 @@ podman rm -f homeassistant || true
 printf "\n>>> Starting Home Assistant container\n"
 podman run -d --name homeassistant \
 --network $PROJECT \
+--tz=local \
 --cap-add=CAP_NET_RAW,CAP_NET_BIND_SERVICE \
 --restart=unless-stopped \
 -p 8123:8123 \
