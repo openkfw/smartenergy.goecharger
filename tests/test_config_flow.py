@@ -2,16 +2,20 @@
 
 import json
 from functools import partial
-from unittest.mock import patch, Mock
+from unittest.mock import Mock, patch
 
 import pytest
-
 from homeassistant import config_entries
-from homeassistant.data_entry_flow import FlowResult
-from homeassistant.data_entry_flow import RESULT_TYPE_CREATE_ENTRY, RESULT_TYPE_FORM
+from homeassistant.data_entry_flow import (
+    RESULT_TYPE_CREATE_ENTRY,
+    RESULT_TYPE_FORM,
+    FlowResult,
+)
 from homeassistant.helpers.typing import HomeAssistantType
 from pytest_homeassistant_custom_component.common import MockConfigEntry, load_fixture
+
 from custom_components.smartenergy_goecharger.const import DOMAIN
+
 from .mock_api import mocked_api_requests
 
 GO_E_CHARGER_MOCK_REFERENCE = f"custom_components.{DOMAIN}.config_flow.GoeChargerApi"
