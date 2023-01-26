@@ -136,7 +136,7 @@ async def test_config_flow_invalid_scan_interval(hass: HomeAssistantType) -> Non
         result_init["flow_id"],
         CHARGER_INVALID_INTERVAL_MIN,
         hass.config_entries.flow.async_configure,
-        "value must be at least 1 for dictionary value @ data['scan_interval']",
+        "value must be at least 10 for dictionary value @ data['scan_interval']",
     )
     # max is 60000
     await _assert_invalid_scan_interval(
@@ -200,7 +200,7 @@ async def test_options_flow_invalid_scan_interval(hass: HomeAssistantType) -> No
         result_init["flow_id"],
         CHARGER_INVALID_INTERVAL_MIN,
         hass.config_entries.options.async_configure,
-        "value must be at least 1 for dictionary value @ data['scan_interval']",
+        "value must be at least 10 for dictionary value @ data['scan_interval']",
     )
     # max is 60000
     await _assert_invalid_scan_interval(

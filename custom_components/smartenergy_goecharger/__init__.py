@@ -3,18 +3,19 @@
 import asyncio
 import logging
 from datetime import timedelta
+from typing import Callable
 
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
+from homeassistant.components.button import DOMAIN as BUTTON_DOMAIN
+from homeassistant.components.number import DOMAIN as NUMBER_DOMAIN
+from homeassistant.components.select import DOMAIN as SELECT_DOMAIN
+from homeassistant.components.sensor import DOMAIN as SENSOR_DOMAIN
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_API_TOKEN, CONF_HOST, CONF_NAME, CONF_SCAN_INTERVAL
 from homeassistant.helpers.discovery import async_load_platform
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.helpers.typing import ConfigType, HomeAssistantType
-from homeassistant.components.button import DOMAIN as BUTTON_DOMAIN
-from homeassistant.components.sensor import DOMAIN as SENSOR_DOMAIN
-from homeassistant.components.number import DOMAIN as NUMBER_DOMAIN
-from homeassistant.components.select import DOMAIN as SELECT_DOMAIN
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .const import (
     CHARGERS_API,
@@ -29,6 +30,7 @@ from .state import StateFetcher, init_state
 _LOGGER: logging.Logger = logging.getLogger(__name__)
 
 MIN_UPDATE_INTERVAL: timedelta = timedelta(seconds=10)
+MAX_UPDATE_INTERVAL: timedelta = timedelta(seconds=60000)
 DEFAULT_UPDATE_INTERVAL: timedelta = timedelta(seconds=10)
 
 PLATFORMS: list[str] = [
@@ -43,7 +45,7 @@ CONFIG_SCHEMA: vol.Schema = vol.Schema(
     {
         DOMAIN: vol.Schema(
             {
-                vol.Optional(CONF_CHARGERS, default=[]): vol.All(
+                vol.Required(CONF_CHARGERS, default=[]): vol.All(
                     [
                         cv.ensure_list,
                         vol.All(
@@ -51,14 +53,16 @@ CONFIG_SCHEMA: vol.Schema = vol.Schema(
                                 vol.Required(CONF_NAME): vol.All(cv.string),
                                 vol.Required(CONF_HOST): vol.All(cv.string),
                                 vol.Required(CONF_API_TOKEN): vol.All(cv.string),
-                            },
-                            extra=vol.ALLOW_EXTRA,
+                            }
                         ),
                     ],
                 ),
                 vol.Optional(
                     CONF_SCAN_INTERVAL, default=DEFAULT_UPDATE_INTERVAL
-                ): vol.All(cv.time_period, vol.Clamp(min=MIN_UPDATE_INTERVAL)),
+                ): vol.All(
+                    cv.time_period,
+                    vol.Clamp(min=MIN_UPDATE_INTERVAL, max=MAX_UPDATE_INTERVAL),
+                ),
             }
         )
     },
@@ -67,15 +71,14 @@ CONFIG_SCHEMA: vol.Schema = vol.Schema(
 
 
 def _setup_coordinator(
-    state_fetcher_class: type,
+    hass: HomeAssistantType,
     scan_interval: timedelta,
     coordinator_name: str,
-    hass: HomeAssistantType,
 ) -> DataUpdateCoordinator:
     _LOGGER.debug("Configuring coordinator=%s", coordinator_name)
 
-    state_fetcher = state_fetcher_class(hass)
-    coordinator = DataUpdateCoordinator(
+    state_fetcher: StateFetcher = StateFetcher(hass)
+    coordinator: DataUpdateCoordinator[dict] = DataUpdateCoordinator(
         hass,
         _LOGGER,
         name=DOMAIN,
@@ -88,20 +91,22 @@ def _setup_coordinator(
     return coordinator
 
 
-def _setup_apis(config: ConfigType, hass: HomeAssistantType) -> dict:
-    chargers_api = {}
+def _setup_apis(hass: HomeAssistantType, config: ConfigType) -> dict:
+    chargers_api: dict = {}
 
     if DOMAIN in config:
         hass.data[DOMAIN] = {}
-        scan_interval = config[DOMAIN].get(CONF_SCAN_INTERVAL, DEFAULT_UPDATE_INTERVAL)
+        scan_interval: timedelta = config[DOMAIN].get(
+            CONF_SCAN_INTERVAL, DEFAULT_UPDATE_INTERVAL
+        )
         _LOGGER.debug("Scan interval set to=%s", scan_interval)
 
-        chargers = config[DOMAIN].get(CONF_CHARGERS, [])
+        chargers: list[list[dict]] = config[DOMAIN].get(CONF_CHARGERS, [])
 
         for charger in chargers:
-            name = charger[0][CONF_NAME]
-            url = charger[0][CONF_HOST]
-            token = charger[0][CONF_API_TOKEN]
+            name: str = charger[0][CONF_NAME]
+            url: str = charger[0][CONF_HOST]
+            token: str = charger[0][CONF_API_TOKEN]
 
             _LOGGER.debug("Configuring API for the charger=%s", name)
             chargers_api[name] = init_state(name, url, token)
@@ -120,14 +125,13 @@ async def async_setup_entry(hass: HomeAssistantType, config_entry: ConfigEntry) 
     - setup of the API
     - coordinator
     - sensors
-    - switches
     - buttons
     - number inputs
     - select inputs
     """
-    options = config_entry.options
-    data = dict(config_entry.data)
-    entry_id = config_entry.entry_id
+    options: dict = config_entry.options
+    data: dict = dict(config_entry.data)
+    entry_id: str = config_entry.entry_id
 
     _LOGGER.debug(
         "Setting up a dynamic go-e Charger Cloud charger with id=%s",
@@ -135,20 +139,19 @@ async def async_setup_entry(hass: HomeAssistantType, config_entry: ConfigEntry) 
     )
 
     # scan interval is provided as an integer, but has to be an interval
-    scan_interval = timedelta(seconds=options[CONF_SCAN_INTERVAL])
-    name = options[CONF_NAME]
-    url = options[CONF_HOST]
-    token = options[CONF_API_TOKEN]
+    scan_interval: timedelta = timedelta(seconds=options[CONF_SCAN_INTERVAL])
+    name: str = options[CONF_NAME]
+    url: str = options[CONF_HOST]
+    token: str = options[CONF_API_TOKEN]
 
     _LOGGER.debug("Configuring API for the charger=%s", entry_id)
     hass.data[DOMAIN][INIT_STATE][CHARGERS_API][entry_id] = init_state(name, url, token)
 
     await _setup_coordinator(
-        StateFetcher,
+        hass,
         scan_interval,
         f"{entry_id}_coordinator",
-        hass,
-    ).async_refresh()
+    ).async_config_entry_first_refresh()
 
     hass.data[DOMAIN][entry_id] = data
 
@@ -157,7 +160,7 @@ async def async_setup_entry(hass: HomeAssistantType, config_entry: ConfigEntry) 
             hass.config_entries.async_forward_entry_setup(config_entry, platform)
         )
 
-    unsub_options_update_listener = config_entry.add_update_listener(
+    unsub_options_update_listener: Callable = config_entry.add_update_listener(
         options_update_listener
     )
     hass.data[DOMAIN][INIT_STATE][UNSUB_OPTIONS_UPDATE_LISTENER][
@@ -180,10 +183,10 @@ async def async_unload_entry(
     hass: HomeAssistantType, config_entry: ConfigEntry
 ) -> bool:
     """Unload a config entry."""
-    entry_id = config_entry.entry_id
+    entry_id: str = config_entry.entry_id
     _LOGGER.debug("Unloading the charger=%s", entry_id)
 
-    unloaded_platforms = [
+    unloaded_platforms: list[tuple[list, str]] = [
         (
             await asyncio.gather(
                 *[
@@ -196,7 +199,7 @@ async def async_unload_entry(
         )
         for platform in PLATFORMS
     ]
-    unload_ok = all(unloaded_platforms)
+    unload_ok: bool = all(unloaded_platforms)
 
     # Remove options_update_listener.
     hass.data[DOMAIN][INIT_STATE][UNSUB_OPTIONS_UPDATE_LISTENER][entry_id]()
@@ -216,8 +219,8 @@ async def async_setup(hass: HomeAssistantType, config: ConfigType) -> bool:
     _LOGGER.debug("Setting up the go-e Charger Cloud integration")
 
     hass.data[DOMAIN] = hass.data[DOMAIN] if DOMAIN in hass.data else {}
-    domain_config = config[DOMAIN] if DOMAIN in config else {}
-    charger_controller = ChargerController(hass)
+    domain_config: dict = config[DOMAIN] if DOMAIN in config else {}
+    charger_controller: ChargerController = ChargerController(hass)
 
     # expose services for other integrations
     hass.services.async_register(
@@ -234,25 +237,24 @@ async def async_setup(hass: HomeAssistantType, config: ConfigType) -> bool:
         DOMAIN, "set_transaction", charger_controller.set_transaction
     )
 
-    scan_interval = DEFAULT_UPDATE_INTERVAL
-    chargers_api = _setup_apis(config, hass)
+    scan_interval: timedelta = DEFAULT_UPDATE_INTERVAL
+    chargers_api: dict = _setup_apis(hass, config)
 
     hass.data[DOMAIN][INIT_STATE] = {
         CHARGERS_API: chargers_api,
         UNSUB_OPTIONS_UPDATE_LISTENER: {},
     }
 
-    charger_names = list(
+    charger_names: list = list(
         map(lambda charger: charger[0][CONF_NAME], domain_config.get(CONF_CHARGERS, []))
     )
 
     for charger_name in charger_names:
         await _setup_coordinator(
-            StateFetcher,
+            hass,
             scan_interval,
             f"{charger_name}_coordinator",
-            hass,
-        ).async_refresh()
+        ).async_config_entry_first_refresh()
 
     # load all platforms
     for platform in PLATFORMS:

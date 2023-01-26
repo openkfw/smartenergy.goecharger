@@ -1,34 +1,32 @@
 """Support for go-e Charger Cloud custom number inputs."""
 
 from __future__ import annotations
+
 import logging
+from dataclasses import dataclass
 from typing import Callable
 
-from dataclasses import dataclass
-from homeassistant.components.number import (
-    NumberEntity,
-    NumberEntityDescription,
-    DOMAIN as NUMBER_DOMAIN,
-)
+from homeassistant.components.number import DOMAIN as NUMBER_DOMAIN
+from homeassistant.components.number import NumberEntity, NumberEntityDescription
 from homeassistant.helpers.typing import (
     ConfigType,
-    HomeAssistantType,
     DiscoveryInfoType,
+    HomeAssistantType,
 )
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import (
-    DOMAIN,
-    CONF_CHARGERS,
-    MIN_CHARGING_CURRENT_LIMIT,
-    MAX_CHARGING_CURRENT_LIMIT,
     CHARGER_MAX_CURRENT,
+    CONF_CHARGERS,
+    DOMAIN,
+    MAX_CHARGING_CURRENT_LIMIT,
+    MIN_CHARGING_CURRENT_LIMIT,
 )
 from .controller import ChargerController, init_service_data
 
 _LOGGER: logging.Logger = logging.getLogger(__name__)
 
-NUMBER_INPUTS = [
+NUMBER_INPUTS: list[dict[str, str]] = [
     {
         "id": CHARGER_MAX_CURRENT,
         "name": "Set charging speed",
@@ -39,52 +37,61 @@ NUMBER_INPUTS = [
 
 @dataclass
 class BaseNumberDescription(NumberEntityDescription):
-    """Class to describe a Base number input."""
+    """
+    Class to describe a Base number input.
+    """
 
-    press_args = None
+    press_args: None = None
 
 
 # pylint: disable=too-few-public-methods
 class BaseDescriptiveEntity:
-    """Representation of a Base device entity based on a description."""
+    """
+    Representation of a Base device entity based on a description.
+    """
 
-    # pylint: disable=too-many-arguments
     def __init__(
         self,
         hass,
-        coordinator,
         device_id,
         description,
-        input_id,
         input_props,
     ) -> None:
-        """Initialize the device."""
+        """
+        Initialize the device.
+        """
 
-        super().__init__(coordinator)
+        super().__init__(hass.data[DOMAIN][f"{device_id}_coordinator"])
         self.entity_description = description
-        self.entity_id = description.key
-        self._attr_unique_id = description.key
+        self.entity_id: str = description.key
+        self._attr_unique_id: str = description.key
         self._device_id = device_id
-        self._charger_controller = ChargerController(hass)
-        self._attribute = input_id
-        self._min = input_props["min"]
-        self._max = input_props["max"]
-        self._step = input_props["step"]
+        self._charger_controller: ChargerController = ChargerController(hass)
+        self._attribute: str = input_props["id"]
+        self._min: int = input_props["min"]
+        self._max: int = input_props["max"]
+        self._step: int = input_props["step"]
 
 
 class CurrentInputNumber(BaseDescriptiveEntity, CoordinatorEntity, NumberEntity):
-    """Representation of the current number input."""
+    """
+    Representation of the current number input.
+    """
 
     entity_description: BaseNumberDescription = None
 
     @property
     def native_max_value(self) -> float:
-        """Return the maximum available current."""
+        """
+        Return the maximum available current.
+        """
         return self._max
 
     @property
     def native_min_value(self) -> float:
-        """Return the minimum available current."""
+        """
+        Return the minimum available current.
+        """
         return self._min
 
     @property
@@ -93,12 +100,16 @@ class CurrentInputNumber(BaseDescriptiveEntity, CoordinatorEntity, NumberEntity)
 
     @property
     def native_value(self) -> float | None:
-        """Return the value of the entity."""
+        """
+        Return the value of the entity.
+        """
         return self.coordinator.data[self._device_id][self._attribute]
 
     async def async_set_native_value(self, value: float) -> None:
-        """Set the value of the entity."""
-        service_data = init_service_data(
+        """
+        Set the value of the entity.
+        """
+        service_data: dict = init_service_data(
             {"device_name": self._device_id, "charging_power": int(value)}
         )
 
@@ -111,10 +122,10 @@ def _create_input_numbers(
     """
     Create input number sliders for defined entities.
     """
-    number_entities = []
+    number_entities: list[CurrentInputNumber] = []
 
     for charger_name in chargers:
-        data = hass.data[DOMAIN][f"{charger_name}_coordinator"].data[charger_name]
+        data: dict = hass.data[DOMAIN][f"{charger_name}_coordinator"].data[charger_name]
 
         if (
             MIN_CHARGING_CURRENT_LIMIT not in data
@@ -123,8 +134,8 @@ def _create_input_numbers(
             _LOGGER.error("Data not available, won't create number inputs")
             return []
 
-        min_limit = data[MIN_CHARGING_CURRENT_LIMIT]
-        max_limit = data[MAX_CHARGING_CURRENT_LIMIT]
+        min_limit: int = data[MIN_CHARGING_CURRENT_LIMIT]
+        max_limit: int = data[MAX_CHARGING_CURRENT_LIMIT]
 
         if min_limit >= max_limit:
             _LOGGER.error(
@@ -135,15 +146,14 @@ def _create_input_numbers(
                 number_entities.append(
                     CurrentInputNumber(
                         hass,
-                        hass.data[DOMAIN][f"{charger_name}_coordinator"],
                         charger_name,
                         BaseNumberDescription(
                             key=f"{NUMBER_DOMAIN}.{DOMAIN}_{charger_name}_{number_input['id']}",
                             name=number_input["name"],
                             icon=number_input["icon"],
                         ),
-                        number_input["id"],
                         {
+                            "id": number_input["id"],
                             "min": min_limit,
                             "max": max_limit,
                             "step": 1,
@@ -159,9 +169,12 @@ async def async_setup_entry(
     config_entry: dict,
     async_add_entities: Callable,
 ) -> None:
-    """Setup number inputs from a config entry created in the integrations UI."""
-    entry_id = config_entry.entry_id
-    config = hass.data[DOMAIN][entry_id]
+    """
+    Setup number inputs from a config entry created in the integrations UI.
+    """
+
+    entry_id: str = config_entry.entry_id
+    config: dict = hass.data[DOMAIN][entry_id]
     _LOGGER.debug("Setting up the go-e Charger Cloud button for=%s", entry_id)
 
     if config_entry.options:
@@ -180,7 +193,10 @@ async def async_setup_platform(
     async_add_entities: Callable,
     discovery_info: DiscoveryInfoType = None,
 ) -> None:
-    """Set up go-e Charger Cloud number platform."""
+    """
+    Set up go-e Charger Cloud number platform.
+    """
+
     _LOGGER.debug("Setting up the go-e Charger Cloud number platform")
 
     if discovery_info is None:

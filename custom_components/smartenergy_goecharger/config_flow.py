@@ -4,19 +4,19 @@ import re
 from typing import Any, Literal
 
 import voluptuous as vol
+from goechargerv2.goecharger import GoeChargerApi
 from homeassistant.config_entries import ConfigEntry, ConfigFlow, OptionsFlow
 from homeassistant.const import CONF_API_TOKEN, CONF_HOST, CONF_NAME, CONF_SCAN_INTERVAL
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers.typing import HomeAssistantType
-from goechargerv2.goecharger import GoeChargerApi
 
 from .const import DOMAIN
 
 
 def _get_config_values(data_input: dict) -> dict:
-    data = {}
-    config = [CONF_NAME, CONF_HOST, CONF_API_TOKEN, CONF_SCAN_INTERVAL]
+    data: dict = {}
+    config: list[str] = [CONF_NAME, CONF_HOST, CONF_API_TOKEN, CONF_SCAN_INTERVAL]
 
     for config_name in config:
         data[config_name] = data_input.get(config_name)
@@ -35,7 +35,7 @@ def _get_config_schema(default_values: dict) -> dict:
             vol.Optional(
                 CONF_SCAN_INTERVAL,
                 default=default_values.get(CONF_SCAN_INTERVAL, 10),
-            ): vol.All(vol.Coerce(int), vol.Range(1, 60000)),
+            ): vol.All(vol.Coerce(int), vol.Range(10, 60000)),
         }
     )
 
@@ -57,7 +57,7 @@ async def _ping_host(hass: HomeAssistantType, host: str, token: str) -> None:
     """
     Do a simple status request to check if the authentication works properly.
     """
-    api = GoeChargerApi(host, token, wait=True)
+    api: GoeChargerApi = GoeChargerApi(host, token, wait=True)
 
     try:
         await hass.async_add_executor_job(api.request_status)
@@ -69,7 +69,7 @@ async def _validate_user_input(hass: HomeAssistantType, user_input: dict) -> dic
     """
     Execute all types of validations. In case there is an error, set it to the error object.
     """
-    errors = {}
+    errors: dict = {}
 
     try:
         _validate_host(user_input[CONF_HOST])
@@ -81,7 +81,9 @@ async def _validate_user_input(hass: HomeAssistantType, user_input: dict) -> dic
 
 
 class GoeChargerConfigFlow(ConfigFlow, domain=DOMAIN):
-    """Config flow for the go-e Charger Cloud component."""
+    """
+    Config flow for the go-e Charger Cloud component.
+    """
 
     VERSION: Literal[1] = 1
 
@@ -90,16 +92,20 @@ class GoeChargerConfigFlow(ConfigFlow, domain=DOMAIN):
     def async_get_options_flow(
         config_entry: ConfigEntry,
     ) -> OptionsFlow:
-        """Get the options flow for this handler."""
+        """
+        Get the options flow for this handler.
+        """
         return GoeChargerOptionsFlowHandler(config_entry)
 
     async def async_step_user(self, user_input: dict = None) -> FlowResult:
-        """Handle a flow initialized by the user."""
-        errors = {}
-        data_schema = _get_config_schema({CONF_SCAN_INTERVAL: 10})
+        """
+        Handle a flow initialized by the user.
+        """
+        errors: dict = {}
+        data_schema: dict = _get_config_schema({CONF_SCAN_INTERVAL: 10})
 
         if user_input is not None:
-            errors = await _validate_user_input(self.hass, user_input)
+            errors: dict = await _validate_user_input(self.hass, user_input)
             # set default values to the current so the user is still within the same context,
             # otherwise it makes each input empty
             data_schema = _get_config_schema(
@@ -126,17 +132,23 @@ class GoeChargerConfigFlow(ConfigFlow, domain=DOMAIN):
 
 
 class GoeChargerOptionsFlowHandler(OptionsFlow):
-    """Config flow options handler for iss."""
+    """
+    Config flow options handler for the go-e Charger Cloud component.
+    """
 
     def __init__(self, config_entry: ConfigEntry) -> None:
-        """Initialize options flow."""
+        """
+        Initialize options flow.
+        """
         self.config_entry: ConfigEntry = config_entry
         self.options: dict[str, Any] = dict(config_entry.options)
 
     async def async_step_init(self, user_input: dict = None) -> FlowResult:
-        """Manage the options."""
-        errors = {}
-        data_schema = _get_config_schema(
+        """
+        Manage the options.
+        """
+        errors: dict = {}
+        data_schema: dict = _get_config_schema(
             {
                 CONF_NAME: self.config_entry.options.get(CONF_NAME),
                 CONF_HOST: self.config_entry.options.get(CONF_HOST),
@@ -146,10 +158,10 @@ class GoeChargerOptionsFlowHandler(OptionsFlow):
         )
 
         if user_input is not None:
-            errors = await _validate_user_input(self.hass, user_input)
+            errors: dict = await _validate_user_input(self.hass, user_input)
             # set default values to the current so the user is still within the same context,
             # otherwise it makes each input empty
-            data_schema = _get_config_schema(
+            data_schema: dict = _get_config_schema(
                 {
                     CONF_NAME: user_input.get(CONF_NAME),
                     CONF_HOST: user_input.get(CONF_HOST),

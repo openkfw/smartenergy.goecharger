@@ -4,3 +4,4 @@ smart-energy.goecharger-api==0.3.1
 pytest-homeassistant-custom-component==0.12.10
 Flask==2.0.3
 pre-commit==2.20.0
+isort==5.11.4

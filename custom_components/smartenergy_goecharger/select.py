@@ -1,28 +1,26 @@
 """Support for go-e Charger Cloud custom select inputs."""
 
 from __future__ import annotations
+
 import logging
+from dataclasses import dataclass
 from typing import Callable
 
-from dataclasses import dataclass
-from homeassistant.components.select import (
-    SelectEntity,
-    SelectEntityDescription,
-    DOMAIN as SELECT_DOMAIN,
-)
+from homeassistant.components.select import DOMAIN as SELECT_DOMAIN
+from homeassistant.components.select import SelectEntity, SelectEntityDescription
 from homeassistant.helpers.typing import (
     ConfigType,
-    HomeAssistantType,
     DiscoveryInfoType,
+    HomeAssistantType,
 )
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DOMAIN, CONF_CHARGERS, PHASE_SWITCH_MODE
+from .const import CONF_CHARGERS, DOMAIN, PHASE_SWITCH_MODE
 from .controller import ChargerController, init_service_data
 
 _LOGGER: logging.Logger = logging.getLogger(__name__)
 
-SELECT_INPUTS = [
+SELECT_INPUTS: list[dict[str, str | list[str]]] = [
     {
         "id": PHASE_SWITCH_MODE,
         "name": "Set phase mode",
@@ -34,49 +32,55 @@ SELECT_INPUTS = [
 
 @dataclass
 class BaseSelectDescription(SelectEntityDescription):
-    """Class to describe a Base select input."""
+    """
+    Class to describe a Base select input.
+    """
 
-    press_args = None
+    press_args: None = None
 
 
 # pylint: disable=too-few-public-methods
 class BaseDescriptiveEntity:
-    """Representation of a Base device entity based on a description."""
+    """
+    Representation of a Base device entity based on a description.
+    """
 
-    # pylint: disable=too-many-arguments
     def __init__(
         self,
         hass,
-        coordinator,
         device_id,
         description,
-        device_class,
-        input_id,
-        input_options,
-        input_initial_option,
+        input_props,
+        options,
     ) -> None:
-        """Initialize the device."""
+        """
+        Initialize the device.
+        """
 
-        super().__init__(coordinator)
+        super().__init__(hass.data[DOMAIN][f"{device_id}_coordinator"])
         self.entity_description = description
-        self.entity_id = description.key
-        self._attr_unique_id = description.key
+        self.entity_id: str = description.key
+        self._attr_unique_id: str = description.key
         self._device_id = device_id
-        self._charger_controller = ChargerController(hass)
-        self._attribute = input_id
-        self._attr_current_option = input_initial_option
-        self._attr_options = input_options
-        self._attr_device_class = device_class
+        self._charger_controller: ChargerController = ChargerController(hass)
+        self._attribute: str = input_props["id"]
+        self._attr_current_option: str = options["current_option"]
+        self._attr_options: dict = options["regular"]
+        self._attr_device_class: str = input_props["device_class"]
 
 
 class PhaseSelectInput(BaseDescriptiveEntity, CoordinatorEntity, SelectEntity):
-    """Representation of the phase mode select input."""
+    """
+    Representation of the phase mode select input.
+    """
 
     entity_description: BaseSelectDescription = None
 
     async def async_select_option(self, option: str) -> None:
-        """Change the selected option."""
-        service_data = init_service_data(
+        """
+        Change the selected option.
+        """
+        service_data: dict = init_service_data(
             {"device_name": self._device_id, "phase": int(option)}
         )
 
@@ -84,7 +88,9 @@ class PhaseSelectInput(BaseDescriptiveEntity, CoordinatorEntity, SelectEntity):
 
     @property
     def current_option(self) -> str | None:
-        """Return the state of the entity."""
+        """
+        Return the state of the entity.
+        """
         if self._attribute not in self.coordinator.data[self._device_id]:
             return None
 
@@ -97,11 +103,13 @@ def _create_select_inputs(
     """
     Create select inputs for defined entities.
     """
-    select_entities = []
+    select_entities: list[PhaseSelectInput] = []
 
     for charger_name in chargers:
         for select_input in SELECT_INPUTS:
-            data = hass.data[DOMAIN][f"{charger_name}_coordinator"].data[charger_name]
+            data: dict = hass.data[DOMAIN][f"{charger_name}_coordinator"].data[
+                charger_name
+            ]
 
             if PHASE_SWITCH_MODE not in data:
                 _LOGGER.error("Data not available, won't create select inputs")
@@ -110,17 +118,20 @@ def _create_select_inputs(
             select_entities.append(
                 PhaseSelectInput(
                     hass,
-                    hass.data[DOMAIN][f"{charger_name}_coordinator"],
                     charger_name,
                     BaseSelectDescription(
                         key=f"{SELECT_DOMAIN}.{DOMAIN}_{charger_name}_{select_input['id']}",
                         name=select_input["name"],
                         icon=select_input["icon"],
                     ),
-                    f"{DOMAIN}__phase_switch_mode",
-                    select_input["id"],
-                    select_input["options"],
-                    str(data[PHASE_SWITCH_MODE]),
+                    {
+                        "id": select_input["id"],
+                        "device_class": f"{DOMAIN}__phase_switch_mode",
+                    },
+                    {
+                        "current_option": str(data[PHASE_SWITCH_MODE]),
+                        "regular": select_input["options"],
+                    },
                 )
             )
 
@@ -132,9 +143,12 @@ async def async_setup_entry(
     config_entry: dict,
     async_add_entities: Callable,
 ) -> None:
-    """Setup select inputs from a config entry created in the integrations UI."""
-    entry_id = config_entry.entry_id
-    config = hass.data[DOMAIN][entry_id]
+    """
+    Setup select inputs from a config entry created in the integrations UI.
+    """
+
+    entry_id: str = config_entry.entry_id
+    config: dict = hass.data[DOMAIN][entry_id]
     _LOGGER.debug("Setting up the go-e Charger Cloud button for=%s", entry_id)
 
     if config_entry.options:
@@ -153,7 +167,10 @@ async def async_setup_platform(
     async_add_entities: Callable,
     discovery_info: DiscoveryInfoType = None,
 ) -> None:
-    """Set up go-e Charger Cloud select platform."""
+    """
+    Set up go-e Charger Cloud select platform.
+    """
+
     _LOGGER.debug("Setting up the go-e Charger Cloud select platform")
 
     if discovery_info is None:

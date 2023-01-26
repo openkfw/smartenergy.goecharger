@@ -28,6 +28,11 @@ Run:
 
 ```bash
 ./start-dev.sh
+
+# by default the script uses podman, but you can use also other container engines, for example:
+./start-dev.sh docker "docker compose"
+# or
+./start-dev.sh docker docker-compose
 ```
 
 After few minutes, Home Assistant should be running and script should be in the watch mode. Whenever you change a file in the `custom_components/smartenergy_goecharger` folder, it will restart the Home Assistant within a few seconds. Thus, you have a quick development feedback.
@@ -117,6 +122,9 @@ Formatting is done via [Black](https://black.readthedocs.io/en/stable/getting_st
 
 ```
 black custom_components/smartenergy_goecharger
+
+# sort imports
+isort --profile black custom_components
 ```
 
 To have autoformatting in the VSCode, install the extension `ms-python.black-formatter`.

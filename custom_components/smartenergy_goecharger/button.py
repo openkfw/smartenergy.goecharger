@@ -1,29 +1,27 @@
 """Support for go-e Charger Cloud custom buttons."""
 
 from __future__ import annotations
+
 import logging
+from dataclasses import dataclass
 from typing import Callable
 
-from dataclasses import dataclass
-from homeassistant.components.button import (
-    ButtonEntity,
-    ButtonEntityDescription,
-    DOMAIN as BUTTON_DOMAIN,
-)
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from homeassistant.components.button import DOMAIN as BUTTON_DOMAIN
+from homeassistant.components.button import ButtonEntity, ButtonEntityDescription
 from homeassistant.helpers.typing import (
     ConfigType,
-    HomeAssistantType,
     DiscoveryInfoType,
+    HomeAssistantType,
 )
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import (
-    DOMAIN,
-    CONF_CHARGERS,
     CAR_STATUS,
-    STATUS,
-    ONLINE,
+    CONF_CHARGERS,
+    DOMAIN,
     OFFLINE,
+    ONLINE,
+    STATUS,
     WALLBOX_CONTROL,
     CarStatus,
 )
@@ -34,14 +32,18 @@ _LOGGER: logging.Logger = logging.getLogger(__name__)
 
 @dataclass
 class BaseButtonDescription(ButtonEntityDescription):
-    """Class to describe a Base button."""
+    """
+    Class to describe a Base button.
+    """
 
-    press_args = None
+    press_args: None = None
 
 
 # pylint: disable=too-few-public-methods
 class BaseDescriptiveEntity:
-    """Representation of a Base device entity based on a description."""
+    """
+    Representation of a Base device entity based on a description.
+    """
 
     def __init__(
         self,
@@ -50,29 +52,35 @@ class BaseDescriptiveEntity:
         device_id,
         description,
     ) -> None:
-        """Initialize the device."""
+        """
+        Initialize the device.
+        """
         super().__init__(coordinator)
         self.entity_description = description
-        self.entity_id = description.key
-        self._attr_unique_id = description.key
+        self.entity_id: str = description.key
+        self._attr_unique_id: str = description.key
         self._device_id = device_id
-        self._charger_controller = ChargerController(hass)
+        self._charger_controller: ChargerController = ChargerController(hass)
 
 
 class WallboxControlButton(BaseDescriptiveEntity, CoordinatorEntity, ButtonEntity):
-    """Representation of a Charge Button."""
+    """
+    Representation of a Charge Button.
+    """
 
     entity_description: BaseButtonDescription = None
 
     async def async_press(self) -> None:
-        """Handle the button press. Start/stop charging or authenticate the user."""
+        """
+        Handle the button press. Start/stop charging or authenticate the user.
+        """
 
-        data = self.coordinator.data[self._device_id]
+        data: dict = self.coordinator.data[self._device_id]
 
         if data[STATUS] == OFFLINE:
             return False
 
-        service_data = init_service_data({"device_name": self._device_id})
+        service_data: dict = init_service_data({"device_name": self._device_id})
 
         match data[CAR_STATUS]:
             case CarStatus.CAR_CHARGING:
@@ -91,9 +99,11 @@ class WallboxControlButton(BaseDescriptiveEntity, CoordinatorEntity, ButtonEntit
 
     @property
     def name(self) -> str:
-        """Return the name of the sensor."""
+        """
+        Return the name of the sensor.
+        """
 
-        data = self.coordinator.data[self._device_id]
+        data: dict = self.coordinator.data[self._device_id]
 
         if data[STATUS] == OFFLINE:
             return "Wallbox is offline"
@@ -114,9 +124,11 @@ class WallboxControlButton(BaseDescriptiveEntity, CoordinatorEntity, ButtonEntit
 
     @property
     def available(self) -> bool:
-        """Make the button (un)available based on the status."""
+        """
+        Make the button (un)available based on the status.
+        """
 
-        data = self.coordinator.data[self._device_id]
+        data: dict = self.coordinator.data[self._device_id]
 
         return (
             data[STATUS] == ONLINE
@@ -130,7 +142,7 @@ def _create_buttons(
     """
     Create input buttons for authentication.
     """
-    button_entities = []
+    button_entities: list[WallboxControlButton] = []
 
     for charger_name in chargers:
         button_entities.append(
@@ -154,9 +166,12 @@ async def async_setup_entry(
     config_entry: dict,
     async_add_entities: Callable,
 ) -> None:
-    """Setup buttons from a config entry created in the integrations UI."""
-    entry_id = config_entry.entry_id
-    config = hass.data[DOMAIN][entry_id]
+    """
+    Setup buttons from a config entry created in the integrations UI.
+    """
+
+    entry_id: str = config_entry.entry_id
+    config: dict = hass.data[DOMAIN][entry_id]
     _LOGGER.debug("Setting up the go-e Charger Cloud button for=%s", entry_id)
 
     if config_entry.options:
@@ -175,7 +190,10 @@ async def async_setup_platform(
     async_add_entities: Callable,
     discovery_info: DiscoveryInfoType = None,
 ) -> None:
-    """Set up go-e Charger Cloud Button platform."""
+    """
+    Set up go-e Charger Cloud Button platform.
+    """
+
     _LOGGER.debug("Setting up the go-e Charger Cloud button platform")
 
     if discovery_info is None:
