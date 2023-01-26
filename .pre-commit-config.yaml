@@ -5,6 +5,11 @@ repos:
 -   repo: local
     hooks:
     -   id: isort
+        name: isort
+        entry: isort
+        language: system
+        types: [python]
+        require_serial: true
         args: ["--profile", "black", "--filter-files"]
     -   id: black
         name: black
