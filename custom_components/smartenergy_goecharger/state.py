@@ -1,12 +1,11 @@
 """go-e Charger Cloud state (coordinator) management"""
 
 import logging
-import aiohttp
 
+import aiohttp
 from goechargerv2.goecharger import GoeChargerApi
 from homeassistant.const import CONF_NAME
 from homeassistant.helpers.typing import HomeAssistantType
-
 
 from .const import API, CHARGERS_API, DOMAIN, INIT_STATE, OFFLINE, ONLINE, STATUS
 from .controller import fetch_status

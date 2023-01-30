@@ -16,12 +16,12 @@ from homeassistant.helpers.typing import (
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import (
+    CAR_STATUS,
     CONF_CHARGERS,
     DOMAIN,
+    ONLINE,
     PHASE_SWITCH_MODE,
     STATUS,
-    CAR_STATUS,
-    ONLINE,
     CarStatus,
 )
 from .controller import ChargerController, init_service_data
