@@ -1,9 +1,11 @@
 """API controller configuration for go-e Charger Cloud integration"""
 
 import logging
+import aiohttp
 
 from goechargerv2.goecharger import GoeChargerApi
 from homeassistant.helpers.typing import HomeAssistantType, ServiceCallType
+from homeassistant.exceptions import ConfigEntryNotReady
 
 from .const import API, CAR_STATUS, CHARGERS_API, CHARGING_ALLOWED, DOMAIN, INIT_STATE
 
@@ -57,6 +59,20 @@ async def stop_charging(hass: HomeAssistantType, charger_name: str) -> dict:
 
     api: GoeChargerApi = hass.data[DOMAIN][INIT_STATE][CHARGERS_API][charger_name][API]
     await hass.async_add_executor_job(api.set_force_charging, False)
+
+
+async def ping_charger(hass: HomeAssistantType, charger_name: str) -> None:
+    """
+    Make a call to the charger device. If it fails raise an error.
+    """
+
+    try:
+        api: GoeChargerApi = hass.data[DOMAIN][INIT_STATE][CHARGERS_API][charger_name][
+            API
+        ]
+        await hass.async_add_executor_job(api.request_status)
+    except (aiohttp.ClientError, RuntimeError) as ex:
+        raise ConfigEntryNotReady(ex) from ex
 
 
 class ChargerController:

@@ -15,7 +15,15 @@ from homeassistant.helpers.typing import (
 )
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import CONF_CHARGERS, DOMAIN, PHASE_SWITCH_MODE
+from .const import (
+    CONF_CHARGERS,
+    DOMAIN,
+    PHASE_SWITCH_MODE,
+    STATUS,
+    CAR_STATUS,
+    ONLINE,
+    CarStatus,
+)
 from .controller import ChargerController, init_service_data
 
 _LOGGER: logging.Logger = logging.getLogger(__name__)
@@ -95,6 +103,26 @@ class PhaseSelectInput(BaseDescriptiveEntity, CoordinatorEntity, SelectEntity):
             return None
 
         return str(self.coordinator.data[self._device_id][self._attribute])
+
+    @property
+    def unique_id(self) -> str | None:
+        """
+        Return the unique_id of the sensor.
+        """
+        return f"{self._device_id}_{self._attribute}"
+
+    @property
+    def available(self) -> bool:
+        """
+        Make the select input (un)available based on the status.
+        """
+
+        data: dict = self.coordinator.data[self._device_id]
+
+        return (
+            data[STATUS] == ONLINE
+            and data[CAR_STATUS] != CarStatus.CHARGER_READY_NO_CAR
+        )
 
 
 def _create_select_inputs(

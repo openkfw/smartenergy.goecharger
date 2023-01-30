@@ -27,16 +27,15 @@ from .const import (
     MANUFACTURER,
     PHASE_SWITCH_MODE,
     PHASES_NUMBER_CONNECTED,
+    STATUS,
+    ONLINE,
 )
 
 MINUTE_IN_MS: Literal[60000] = 60_000
 
 # Reference: https://developers.home-assistant.io/docs/core/entity/sensor/#long-term-statistics
 AMPERE: Literal["A"] = "A"
-VOLT: Literal["V"] = "V"
-POWER_WATT: Literal["W"] = "W"
 K_WATT_HOUR: Literal["kWh"] = "kWh"
-PERCENT: Literal["%"] = "%"
 TIME_MINUTES: Literal["min"] = "min"
 
 _LOGGER: logging.Logger = logging.getLogger(__name__)
@@ -189,6 +188,16 @@ class ChargerSensor(BaseSensor, CoordinatorEntity, SensorEntity):
 
         return attr_value
 
+    @property
+    def available(self) -> bool:
+        """
+        Make the sensor input (un)available based on the status.
+        """
+
+        data: dict = self.coordinator.data[self._device_id]
+
+        return data[STATUS] == ONLINE
+
 
 def _setup_sensors(
     hass: HomeAssistantType,
@@ -232,7 +241,7 @@ def _setup_sensors(
                     sensor_id,
                     {
                         "name": sensor_name,
-                        "sensor": sensor,
+                        "attribute": sensor,
                         "unit": sensor_unit,
                         "state_class": sensor_state_class,
                         "device_class": sensor_device_class,

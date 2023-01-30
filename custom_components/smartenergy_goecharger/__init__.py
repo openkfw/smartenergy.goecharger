@@ -24,7 +24,7 @@ from .const import (
     INIT_STATE,
     UNSUB_OPTIONS_UPDATE_LISTENER,
 )
-from .controller import ChargerController
+from .controller import ChargerController, ping_charger
 from .state import StateFetcher, init_state
 
 _LOGGER: logging.Logger = logging.getLogger(__name__)
@@ -134,7 +134,7 @@ async def async_setup_entry(hass: HomeAssistantType, config_entry: ConfigEntry) 
     entry_id: str = config_entry.entry_id
 
     _LOGGER.debug(
-        "Setting up a dynamic go-e Charger Cloud charger with id=%s",
+        "Setting up an entry with id=%s",
         entry_id,
     )
 
@@ -146,6 +146,9 @@ async def async_setup_entry(hass: HomeAssistantType, config_entry: ConfigEntry) 
 
     _LOGGER.debug("Configuring API for the charger=%s", entry_id)
     hass.data[DOMAIN][INIT_STATE][CHARGERS_API][entry_id] = init_state(name, url, token)
+
+    # handle platform not ready
+    await ping_charger(hass, entry_id)
 
     await _setup_coordinator(
         hass,
@@ -167,7 +170,7 @@ async def async_setup_entry(hass: HomeAssistantType, config_entry: ConfigEntry) 
         entry_id
     ] = unsub_options_update_listener
 
-    _LOGGER.debug("Setup for the dynamic go-e Charger Cloud charger completed")
+    _LOGGER.debug("Entry setup for %s completed", entry_id)
 
     return True
 
@@ -184,7 +187,7 @@ async def async_unload_entry(
 ) -> bool:
     """Unload a config entry."""
     entry_id: str = config_entry.entry_id
-    _LOGGER.debug("Unloading the charger=%s", entry_id)
+    _LOGGER.debug("Unloading the entry=%s", entry_id)
 
     unloaded_platforms: list[tuple[list, str]] = [
         (
@@ -208,7 +211,7 @@ async def async_unload_entry(
     if unload_ok:
         hass.data[DOMAIN][INIT_STATE][CHARGERS_API].pop(entry_id)
 
-    _LOGGER.debug("Unloaded the charger=%s", entry_id)
+    _LOGGER.debug("Unloaded the entry=%s", entry_id)
 
     return unload_ok
 
@@ -250,6 +253,8 @@ async def async_setup(hass: HomeAssistantType, config: ConfigType) -> bool:
     )
 
     for charger_name in charger_names:
+        # handle platform not ready
+        await ping_charger(hass, charger_name)
         await _setup_coordinator(
             hass,
             scan_interval,

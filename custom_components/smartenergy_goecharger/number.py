@@ -21,6 +21,10 @@ from .const import (
     DOMAIN,
     MAX_CHARGING_CURRENT_LIMIT,
     MIN_CHARGING_CURRENT_LIMIT,
+    STATUS,
+    CAR_STATUS,
+    ONLINE,
+    CarStatus,
 )
 from .controller import ChargerController, init_service_data
 
@@ -114,6 +118,26 @@ class CurrentInputNumber(BaseDescriptiveEntity, CoordinatorEntity, NumberEntity)
         )
 
         await self._charger_controller.change_charging_power(service_data)
+
+    @property
+    def unique_id(self) -> str | None:
+        """
+        Return the unique_id of the sensor.
+        """
+        return f"{self._device_id}_{self._attribute}"
+
+    @property
+    def available(self) -> bool:
+        """
+        Make the number input (un)available based on the status.
+        """
+
+        data: dict = self.coordinator.data[self._device_id]
+
+        return (
+            data[STATUS] == ONLINE
+            and data[CAR_STATUS] != CarStatus.CHARGER_READY_NO_CAR
+        )
 
 
 def _create_input_numbers(

@@ -51,6 +51,7 @@ class BaseDescriptiveEntity:
         coordinator,
         device_id,
         description,
+        attribute,
     ) -> None:
         """
         Initialize the device.
@@ -61,6 +62,7 @@ class BaseDescriptiveEntity:
         self._attr_unique_id: str = description.key
         self._device_id = device_id
         self._charger_controller: ChargerController = ChargerController(hass)
+        self._attribute: str = attribute
 
 
 class WallboxControlButton(BaseDescriptiveEntity, CoordinatorEntity, ButtonEntity):
@@ -135,6 +137,13 @@ class WallboxControlButton(BaseDescriptiveEntity, CoordinatorEntity, ButtonEntit
             and data[CAR_STATUS] != CarStatus.CHARGER_READY_NO_CAR
         )
 
+    @property
+    def unique_id(self) -> str | None:
+        """
+        Return the unique_id of the sensor.
+        """
+        return f"{self._device_id}_{self._attribute}"
+
 
 def _create_buttons(
     hass: HomeAssistantType, chargers: list[str]
@@ -155,6 +164,7 @@ def _create_buttons(
                     name="Wallbox control",
                     icon="mdi:battery-charging",
                 ),
+                WALLBOX_CONTROL,
             )
         )
 

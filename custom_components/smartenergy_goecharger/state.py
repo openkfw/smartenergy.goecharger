@@ -1,10 +1,12 @@
 """go-e Charger Cloud state (coordinator) management"""
 
 import logging
+import aiohttp
 
 from goechargerv2.goecharger import GoeChargerApi
 from homeassistant.const import CONF_NAME
 from homeassistant.helpers.typing import HomeAssistantType
+
 
 from .const import API, CHARGERS_API, DOMAIN, INIT_STATE, OFFLINE, ONLINE, STATUS
 from .controller import fetch_status
@@ -50,23 +52,30 @@ class StateFetcher:
         updated_data: dict = {}
 
         for charger_name in chargers_api.keys():
-            fetched_data: dict = await fetch_status(self._hass, charger_name)
+            try:
+                fetched_data: dict = await fetch_status(self._hass, charger_name)
 
-            if (
-                fetched_data.get("success", None) is False
-                and fetched_data.get("msg", None) == "Wallbox is offline"
-            ):
+                if (
+                    fetched_data.get("success", None) is False
+                    and fetched_data.get("msg", None) == "Wallbox is offline"
+                ):
+                    updated_data[charger_name] = (
+                        current_data if not current_data else current_data[charger_name]
+                    )
+                    updated_data[charger_name][STATUS] = OFFLINE
+                else:
+                    updated_data[charger_name] = fetched_data
+                    updated_data[charger_name][STATUS] = ONLINE
+
+                updated_data[charger_name][CONF_NAME] = chargers_api[charger_name][
+                    CONF_NAME
+                ]
+            except (aiohttp.ClientError, RuntimeError):
+                _LOGGER.error("Can't connect to the device %s", charger_name)
                 updated_data[charger_name] = (
                     current_data if not current_data else current_data[charger_name]
                 )
                 updated_data[charger_name][STATUS] = OFFLINE
-            else:
-                updated_data[charger_name] = fetched_data
-                updated_data[charger_name][STATUS] = ONLINE
-
-            updated_data[charger_name][CONF_NAME] = chargers_api[charger_name][
-                CONF_NAME
-            ]
 
         _LOGGER.debug("Updated go-e Charger Cloud coordinator data=%s", updated_data)
 
