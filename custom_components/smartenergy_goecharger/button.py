@@ -4,15 +4,13 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from typing import Callable
 
 from homeassistant.components.button import DOMAIN as BUTTON_DOMAIN
 from homeassistant.components.button import ButtonEntity, ButtonEntityDescription
-from homeassistant.helpers.typing import (
-    ConfigType,
-    DiscoveryInfoType,
-    HomeAssistantType,
-)
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import (
@@ -146,7 +144,7 @@ class WallboxControlButton(BaseDescriptiveEntity, CoordinatorEntity, ButtonEntit
 
 
 def _create_buttons(
-    hass: HomeAssistantType, chargers: list[str]
+    hass: HomeAssistant, chargers: list[str]
 ) -> list[WallboxControlButton]:
     """
     Create input buttons for authentication.
@@ -172,9 +170,9 @@ def _create_buttons(
 
 
 async def async_setup_entry(
-    hass: HomeAssistantType,
-    config_entry: dict,
-    async_add_entities: Callable,
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
 ) -> None:
     """
     Setup buttons from a config entry created in the integrations UI.
@@ -195,10 +193,10 @@ async def async_setup_entry(
 
 # pylint: disable=unused-argument
 async def async_setup_platform(
-    hass: HomeAssistantType,
+    hass: HomeAssistant,
     config: ConfigType,
-    async_add_entities: Callable,
-    discovery_info: DiscoveryInfoType = None,
+    async_add_entities: AddEntitiesCallback,
+    discovery_info: DiscoveryInfoType | None,
 ) -> None:
     """
     Set up go-e Charger Cloud Button platform.

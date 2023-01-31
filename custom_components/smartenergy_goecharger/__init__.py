@@ -2,8 +2,8 @@
 
 import asyncio
 import logging
+from collections.abc import Callable
 from datetime import timedelta
-from typing import Callable
 
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
@@ -13,8 +13,9 @@ from homeassistant.components.select import DOMAIN as SELECT_DOMAIN
 from homeassistant.components.sensor import DOMAIN as SENSOR_DOMAIN
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_API_TOKEN, CONF_HOST, CONF_NAME, CONF_SCAN_INTERVAL
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.discovery import async_load_platform
-from homeassistant.helpers.typing import ConfigType, HomeAssistantType
+from homeassistant.helpers.typing import ConfigType
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .const import (
@@ -71,7 +72,7 @@ CONFIG_SCHEMA: vol.Schema = vol.Schema(
 
 
 def _setup_coordinator(
-    hass: HomeAssistantType,
+    hass: HomeAssistant,
     scan_interval: timedelta,
     coordinator_name: str,
 ) -> DataUpdateCoordinator:
@@ -91,7 +92,7 @@ def _setup_coordinator(
     return coordinator
 
 
-def _setup_apis(hass: HomeAssistantType, config: ConfigType) -> dict:
+def _setup_apis(hass: HomeAssistant, config: ConfigType) -> dict:
     chargers_api: dict = {}
 
     if DOMAIN in config:
@@ -119,7 +120,7 @@ def _setup_apis(hass: HomeAssistantType, config: ConfigType) -> dict:
     return chargers_api
 
 
-async def async_setup_entry(hass: HomeAssistantType, config_entry: ConfigEntry) -> bool:
+async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     """
     Sets up a charger defined via the UI. This includes:
     - setup of the API
@@ -176,15 +177,13 @@ async def async_setup_entry(hass: HomeAssistantType, config_entry: ConfigEntry) 
 
 
 async def options_update_listener(
-    hass: HomeAssistantType, config_entry: ConfigEntry
+    hass: HomeAssistant, config_entry: ConfigEntry
 ) -> None:
     """Handle options update."""
     await hass.config_entries.async_reload(config_entry.entry_id)
 
 
-async def async_unload_entry(
-    hass: HomeAssistantType, config_entry: ConfigEntry
-) -> bool:
+async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     """Unload a config entry."""
     entry_id: str = config_entry.entry_id
     _LOGGER.debug("Unloading the entry=%s", entry_id)
@@ -216,7 +215,7 @@ async def async_unload_entry(
     return unload_ok
 
 
-async def async_setup(hass: HomeAssistantType, config: ConfigType) -> bool:
+async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Set up go-e Charger Cloud platforms and services."""
 
     _LOGGER.debug("Setting up the go-e Charger Cloud integration")

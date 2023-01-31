@@ -4,15 +4,13 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from typing import Callable
 
 from homeassistant.components.number import DOMAIN as NUMBER_DOMAIN
 from homeassistant.components.number import NumberEntity, NumberEntityDescription
-from homeassistant.helpers.typing import (
-    ConfigType,
-    DiscoveryInfoType,
-    HomeAssistantType,
-)
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import (
@@ -141,7 +139,7 @@ class CurrentInputNumber(BaseDescriptiveEntity, CoordinatorEntity, NumberEntity)
 
 
 def _create_input_numbers(
-    hass: HomeAssistantType, chargers: list[str]
+    hass: HomeAssistant, chargers: list[str]
 ) -> list[CurrentInputNumber]:
     """
     Create input number sliders for defined entities.
@@ -189,9 +187,9 @@ def _create_input_numbers(
 
 
 async def async_setup_entry(
-    hass: HomeAssistantType,
-    config_entry: dict,
-    async_add_entities: Callable,
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
 ) -> None:
     """
     Setup number inputs from a config entry created in the integrations UI.
@@ -212,10 +210,10 @@ async def async_setup_entry(
 
 # pylint: disable=unused-argument
 async def async_setup_platform(
-    hass: HomeAssistantType,
+    hass: HomeAssistant,
     config: ConfigType,
-    async_add_entities: Callable,
-    discovery_info: DiscoveryInfoType = None,
+    async_add_entities: AddEntitiesCallback,
+    discovery_info: DiscoveryInfoType | None,
 ) -> None:
     """
     Set up go-e Charger Cloud number platform.

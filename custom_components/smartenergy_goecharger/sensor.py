@@ -3,16 +3,19 @@
 import logging
 import numbers
 from abc import ABC, abstractmethod
-from typing import Callable, Literal
+from typing import Literal
 
-from homeassistant.components.sensor import DEVICE_CLASS_CURRENT, DEVICE_CLASS_ENERGY
 from homeassistant.components.sensor import DOMAIN as SENSOR_DOMAIN
-from homeassistant.components.sensor import STATE_CLASS_TOTAL, SensorEntity
-from homeassistant.helpers.typing import (
-    ConfigType,
-    DiscoveryInfoType,
-    HomeAssistantType,
+from homeassistant.components.sensor import (
+    SensorDeviceClass,
+    SensorEntity,
+    SensorStateClass,
 )
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers import entity
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import (
@@ -67,15 +70,15 @@ CHARGER_SENSORS_CONFIG: dict = {
         "name": {"unit": "", "name": "Charger name"},
     },
     "state_classes": {
-        CHARGER_MAX_CURRENT: STATE_CLASS_TOTAL,
+        CHARGER_MAX_CURRENT: SensorStateClass.TOTAL,
         ENERGY_SINCE_CAR_CONNECTED: K_WATT_HOUR,
         ENERGY_TOTAL: K_WATT_HOUR,
     },
     "device_classes": {
         CHARGER_ACCESS: f"{DOMAIN}__access_control",
-        CHARGER_MAX_CURRENT: DEVICE_CLASS_CURRENT,
-        ENERGY_SINCE_CAR_CONNECTED: DEVICE_CLASS_ENERGY,
-        ENERGY_TOTAL: DEVICE_CLASS_ENERGY,
+        CHARGER_MAX_CURRENT: SensorDeviceClass.CURRENT,
+        ENERGY_SINCE_CAR_CONNECTED: SensorDeviceClass.ENERGY,
+        ENERGY_TOTAL: SensorDeviceClass.ENERGY,
         CHARGING_ALLOWED: f"{DOMAIN}__allow_charging",
         PHASE_SWITCH_MODE: f"{DOMAIN}__phase_switch_mode",
     },
@@ -149,7 +152,7 @@ class ChargerSensor(BaseSensor, CoordinatorEntity, SensorEntity):
     """
 
     @property
-    def device_info(self) -> dict:
+    def device_info(self) -> entity.DeviceInfo:
         return {
             "identifiers": {(DOMAIN, self._device_id)},
             "name": self._device_id,
@@ -200,7 +203,7 @@ class ChargerSensor(BaseSensor, CoordinatorEntity, SensorEntity):
 
 
 def _setup_sensors(
-    hass: HomeAssistantType,
+    hass: HomeAssistant,
     sensor_ids: list,
     coordinator_name: str,
 ) -> list:
@@ -255,9 +258,9 @@ def _setup_sensors(
 
 
 async def async_setup_entry(
-    hass: HomeAssistantType,
-    config_entry: dict,
-    async_add_entities: Callable,
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
 ) -> None:
     """
     Setup sensors from a config entry created in the integrations UI.
@@ -282,10 +285,10 @@ async def async_setup_entry(
 
 # pylint: disable=unused-argument
 async def async_setup_platform(
-    hass: HomeAssistantType,
+    hass: HomeAssistant,
     config: ConfigType,
-    async_add_entities: Callable,
-    discovery_info: DiscoveryInfoType = None,
+    async_add_entities: AddEntitiesCallback,
+    discovery_info: DiscoveryInfoType | None,
 ) -> None:
     """
     Set up go-e Charger Cloud Sensor platform.

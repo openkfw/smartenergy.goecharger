@@ -42,7 +42,7 @@ class StateFetcher:
         - friendly name of the charger
         """
 
-        _LOGGER.debug("Updating the go-e Charger Cloud coordinator data...")
+        _LOGGER.debug("Updating the go-e Charger Cloud coordinator data")
 
         chargers_api: GoeChargerApi = self._hass.data[DOMAIN][INIT_STATE][CHARGERS_API]
         current_data: dict = self.coordinator.data if self.coordinator.data else {}

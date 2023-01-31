@@ -2,25 +2,24 @@
 
 import json
 from functools import partial
-from unittest.mock import patch, Mock
+from unittest.mock import Mock, patch
 
-from homeassistant.components.number import (
-    ATTR_VALUE,
-    SERVICE_SET_VALUE,
-    DOMAIN as NUMBER_DOMAIN,
-)
+from homeassistant.components.number import ATTR_VALUE
+from homeassistant.components.number import DOMAIN as NUMBER_DOMAIN
+from homeassistant.components.number import SERVICE_SET_VALUE
 from homeassistant.const import ATTR_ENTITY_ID, CONF_NAME
 from homeassistant.helpers.typing import HomeAssistantType
 from pytest_homeassistant_custom_component.common import MockConfigEntry, load_fixture
 
 from custom_components.smartenergy_goecharger import async_setup, async_setup_entry
 from custom_components.smartenergy_goecharger.const import (
-    DOMAIN,
-    CONF_CHARGERS,
     CHARGER_MAX_CURRENT,
+    CONF_CHARGERS,
+    DOMAIN,
     MAX_CHARGING_CURRENT_LIMIT,
     MIN_CHARGING_CURRENT_LIMIT,
 )
+
 from .mock_api import mocked_api_requests
 
 INIT_STATE_WRONG_LIMITS = dict(
