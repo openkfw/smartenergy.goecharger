@@ -1,6 +1,7 @@
 """go-e Charger Cloud config flow and options flow setup"""
 
 import re
+import logging
 from typing import Any, Literal
 
 import voluptuous as vol
@@ -10,8 +11,15 @@ from homeassistant.const import CONF_API_TOKEN, CONF_HOST, CONF_NAME, CONF_SCAN_
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers.typing import HomeAssistantType
+from homeassistant.exceptions import HomeAssistantError
 
 from .const import DOMAIN
+
+_LOGGER: logging.Logger = logging.getLogger(__name__)
+
+
+class InvalidAuth(HomeAssistantError):
+    """Error to indicate there is invalid auth."""
 
 
 def _get_config_values(data_input: dict) -> dict:
@@ -62,7 +70,7 @@ async def _ping_host(hass: HomeAssistantType, host: str, token: str) -> None:
     try:
         await hass.async_add_executor_job(api.request_status)
     except Exception as exc:
-        raise ValueError("invalid_auth") from exc
+        raise InvalidAuth from exc
 
 
 async def _validate_user_input(hass: HomeAssistantType, user_input: dict) -> dict:
@@ -74,8 +82,13 @@ async def _validate_user_input(hass: HomeAssistantType, user_input: dict) -> dic
     try:
         _validate_host(user_input[CONF_HOST])
         await _ping_host(hass, user_input[CONF_HOST], user_input[CONF_API_TOKEN])
+    except InvalidAuth:
+        errors["base"] = "invalid_auth"
     except ValueError as exc:
         errors["base"] = str(exc)
+    except Exception:  # pylint: disable=broad-except
+        _LOGGER.exception("Unexpected exception")
+        errors["base"] = "unknown"
 
     return errors
 
@@ -106,6 +119,14 @@ class GoeChargerConfigFlow(ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             errors: dict = await _validate_user_input(self.hass, user_input)
+
+            if not errors:
+                return self.async_create_entry(
+                    title=user_input.get(CONF_NAME),
+                    data=_get_config_values(user_input),
+                    options=_get_config_values(user_input),
+                )
+
             # set default values to the current so the user is still within the same context,
             # otherwise it makes each input empty
             data_schema = _get_config_schema(
@@ -116,13 +137,6 @@ class GoeChargerConfigFlow(ConfigFlow, domain=DOMAIN):
                     CONF_SCAN_INTERVAL: user_input.get(CONF_SCAN_INTERVAL),
                 }
             )
-
-            if not errors:
-                return self.async_create_entry(
-                    title=user_input.get(CONF_NAME),
-                    data=_get_config_values(user_input),
-                    options=_get_config_values(user_input),
-                )
 
         return self.async_show_form(
             step_id="user",
@@ -159,6 +173,11 @@ class GoeChargerOptionsFlowHandler(OptionsFlow):
 
         if user_input is not None:
             errors: dict = await _validate_user_input(self.hass, user_input)
+
+            if not errors:
+                self.options.update(user_input)
+                return self.async_create_entry(title="", data=self.options)
+
             # set default values to the current so the user is still within the same context,
             # otherwise it makes each input empty
             data_schema: dict = _get_config_schema(
@@ -169,10 +188,6 @@ class GoeChargerOptionsFlowHandler(OptionsFlow):
                     CONF_SCAN_INTERVAL: user_input.get(CONF_SCAN_INTERVAL),
                 }
             )
-
-            if not errors:
-                self.options.update(user_input)
-                return self.async_create_entry(title="", data=self.options)
 
         return self.async_show_form(
             step_id="init",
