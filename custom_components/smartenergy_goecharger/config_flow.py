@@ -4,9 +4,8 @@ import logging
 import re
 from typing import Any, Literal
 
-from goechargerv2.goecharger import GoeChargerApi
 import voluptuous as vol
-
+from goechargerv2.goecharger import GoeChargerApi
 from homeassistant.config_entries import ConfigEntry, ConfigFlow, OptionsFlow
 from homeassistant.const import CONF_API_TOKEN, CONF_HOST, CONF_NAME, CONF_SCAN_INTERVAL
 from homeassistant.core import callback

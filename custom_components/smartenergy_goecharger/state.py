@@ -4,7 +4,6 @@ import logging
 
 import aiohttp
 from goechargerv2.goecharger import GoeChargerApi
-
 from homeassistant.const import CONF_NAME
 from homeassistant.helpers.typing import HomeAssistantType
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator

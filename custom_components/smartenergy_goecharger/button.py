@@ -2,14 +2,11 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 import logging
+from dataclasses import dataclass
 
-from homeassistant.components.button import (
-    DOMAIN as BUTTON_DOMAIN,
-    ButtonEntity,
-    ButtonEntityDescription,
-)
+from homeassistant.components.button import DOMAIN as BUTTON_DOMAIN
+from homeassistant.components.button import ButtonEntity, ButtonEntityDescription
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback

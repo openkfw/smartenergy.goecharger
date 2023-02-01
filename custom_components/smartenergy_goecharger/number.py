@@ -2,14 +2,11 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 import logging
+from dataclasses import dataclass
 
-from homeassistant.components.number import (
-    DOMAIN as NUMBER_DOMAIN,
-    NumberEntity,
-    NumberEntityDescription,
-)
+from homeassistant.components.number import DOMAIN as NUMBER_DOMAIN
+from homeassistant.components.number import NumberEntity, NumberEntityDescription
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback

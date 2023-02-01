@@ -4,7 +4,6 @@ import logging
 
 import aiohttp
 from goechargerv2.goecharger import GoeChargerApi
-
 from homeassistant.core import ServiceCall
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.typing import HomeAssistantType
