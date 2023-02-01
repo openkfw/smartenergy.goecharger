@@ -2,16 +2,20 @@
 
 import json
 from functools import partial
-from unittest.mock import patch, Mock
+from unittest.mock import Mock, patch
 
 import pytest
-
 from homeassistant import config_entries
-from homeassistant.data_entry_flow import FlowResult
-from homeassistant.data_entry_flow import RESULT_TYPE_CREATE_ENTRY, RESULT_TYPE_FORM
+from homeassistant.data_entry_flow import (
+    RESULT_TYPE_CREATE_ENTRY,
+    RESULT_TYPE_FORM,
+    FlowResult,
+)
 from homeassistant.helpers.typing import HomeAssistantType
 from pytest_homeassistant_custom_component.common import MockConfigEntry, load_fixture
+
 from custom_components.smartenergy_goecharger.const import DOMAIN
+
 from .mock_api import mocked_api_requests
 
 GO_E_CHARGER_MOCK_REFERENCE = f"custom_components.{DOMAIN}.config_flow.GoeChargerApi"
@@ -136,7 +140,7 @@ async def test_config_flow_invalid_scan_interval(hass: HomeAssistantType) -> Non
         result_init["flow_id"],
         CHARGER_INVALID_INTERVAL_MIN,
         hass.config_entries.flow.async_configure,
-        "value must be at least 1 for dictionary value @ data['scan_interval']",
+        "value must be at least 10 for dictionary value @ data['scan_interval']",
     )
     # max is 60000
     await _assert_invalid_scan_interval(
@@ -200,7 +204,7 @@ async def test_options_flow_invalid_scan_interval(hass: HomeAssistantType) -> No
         result_init["flow_id"],
         CHARGER_INVALID_INTERVAL_MIN,
         hass.config_entries.options.async_configure,
-        "value must be at least 1 for dictionary value @ data['scan_interval']",
+        "value must be at least 10 for dictionary value @ data['scan_interval']",
     )
     # max is 60000
     await _assert_invalid_scan_interval(

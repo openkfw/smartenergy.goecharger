@@ -16,14 +16,17 @@ classifiers = [
 dependencies = ["smart-energy.goecharger-api"]
 description = "This is an integration for the Home Assistant for the go-e Charger Cloud wallbox (API v2)."
 keywords = ["goecharger", "kfw", "homeassistant", "cloud"]
-name = "homeassistant_goechargerv2"
+name = "smartenergy.goecharger"
 readme = "README.md"
 requires-python = ">=3.7"
-version = "0.3.0"
+version = "0.4.0"
 
 [project.optional-dependencies]
-dev = ["black", "pylint", "pytest-homeassistant-custom-component", "Flask", "pre-commit"]
+dev = ["black", "pylint", "pytest-homeassistant-custom-component", "Flask", "pre-commit", "isort"]
 
 [project.urls]
-"Bug Tracker" = "https://github.com/openkfw/homeassistant_goechargerv2/issues"
-"Homepage" = "https://github.com/openkfw/homeassistant_goechargerv2"
+"Bug Tracker" = "https://github.com/openkfw/smartenergy.goecharger/issues"
+"Homepage" = "https://github.com/openkfw/smartenergy.goecharger"
+
+[tool.isort]
+profile = "black"

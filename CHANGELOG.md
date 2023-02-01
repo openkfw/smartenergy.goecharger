@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 0.4.0
+
+### Changed
+
+- Updated types
+- Updated setup to use isort
+- Updated local dev setup
+- Updated platforms to have available option and unique IDs
+
 ## 0.3.0
 
 ### Changed

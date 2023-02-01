@@ -9,6 +9,7 @@ from custom_components.smartenergy_goecharger.const import (
     TRANSACTION,
 )
 
+
 # pylint: disable=unused-argument
 def mocked_api_requests(*args, **kwargs) -> dict | int:
     """Module handling mocked API requests."""

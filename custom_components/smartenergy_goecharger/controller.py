@@ -1,30 +1,22 @@
-"""API controller configuration for go-e Charger Cloud integration"""
+"""API controller configuration for go-e Charger Cloud integration."""
 
 import logging
 
-from homeassistant.helpers.typing import HomeAssistantType, ServiceCallType
+import aiohttp
+from goechargerv2.goecharger import GoeChargerApi
+from homeassistant.core import ServiceCall
+from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.helpers.typing import HomeAssistantType
 
-from .const import API, CHARGERS_API, DOMAIN, INIT_STATE, CAR_STATUS, CHARGING_ALLOWED
+from .const import API, CAR_STATUS, CHARGERS_API, CHARGING_ALLOWED, DOMAIN, INIT_STATE
 
 _LOGGER: logging.Logger = logging.getLogger(__name__)
 
 
-class DictObj(dict):
-    """
-    Simple dict class to be able to have data attribute and direct access via dot notation.
-    """
+def init_service_data(data: dict, service: str) -> ServiceCall:
+    """Initialize Home Assistant service call dict with data attribute and initial values."""
 
-    def __init__(self):
-        self.data = {}
-
-
-def init_service_data(data: dict) -> DictObj:
-    """
-    Initialize Home Assistant service call dict with data attribute and initial values.
-    """
-
-    service_data = DictObj()
-    service_data.data = data
+    service_data: ServiceCall = ServiceCall(domain=DOMAIN, service=service, data=data)
 
     return service_data
 
@@ -32,37 +24,50 @@ def init_service_data(data: dict) -> DictObj:
 async def fetch_status(hass: HomeAssistantType, charger_name: str) -> dict:
     """Fetch go-e Charger Cloud car status via API."""
 
-    api = hass.data[DOMAIN][INIT_STATE][CHARGERS_API][charger_name][API]
-    fetched_status = await hass.async_add_executor_job(api.request_status)
+    api: GoeChargerApi = hass.data[DOMAIN][INIT_STATE][CHARGERS_API][charger_name][API]
+    fetched_status: dict = await hass.async_add_executor_job(api.request_status)
 
     return fetched_status
 
 
-async def start_charging(hass: HomeAssistantType, charger_name: str) -> dict:
+async def start_charging(hass: HomeAssistantType, charger_name: str) -> None:
     """Start charging of a car via API, no state refresh."""
 
-    api = hass.data[DOMAIN][INIT_STATE][CHARGERS_API][charger_name][API]
+    api: GoeChargerApi = hass.data[DOMAIN][INIT_STATE][CHARGERS_API][charger_name][API]
     await hass.async_add_executor_job(api.set_force_charging, True)
 
 
-async def stop_charging(hass: HomeAssistantType, charger_name: str) -> dict:
+async def stop_charging(hass: HomeAssistantType, charger_name: str) -> None:
     """Stop charging of a car via API, no state refresh."""
 
-    api = hass.data[DOMAIN][INIT_STATE][CHARGERS_API][charger_name][API]
+    api: GoeChargerApi = hass.data[DOMAIN][INIT_STATE][CHARGERS_API][charger_name][API]
     await hass.async_add_executor_job(api.set_force_charging, False)
+
+
+async def ping_charger(hass: HomeAssistantType, charger_name: str) -> None:
+    """Make a call to the charger device. If it fails raise an error."""
+
+    try:
+        api: GoeChargerApi = hass.data[DOMAIN][INIT_STATE][CHARGERS_API][charger_name][
+            API
+        ]
+        await hass.async_add_executor_job(api.request_status)
+    except (aiohttp.ClientError, RuntimeError) as ex:
+        raise ConfigEntryNotReady(ex) from ex
 
 
 class ChargerController:
     """Represents go-e Charger Cloud controller, abstracting API calls into methods."""
 
     def __init__(self, hass: HomeAssistantType) -> None:
-        self._hass = hass
+        """Construct controller with hass property."""
+        self._hass: HomeAssistantType = hass
 
     def _is_charging_allowed(self, charger_name: str) -> bool:
-        """
-        Check if charging is allowed. If not, log an error and return False, otherwise return True
-        """
-        data = self._hass.data[DOMAIN][f"{charger_name}_coordinator"].data[charger_name]
+        """Check if charging is allowed. If not, log an error and return False, otherwise True."""
+        data: dict = self._hass.data[DOMAIN][f"{charger_name}_coordinator"].data[
+            charger_name
+        ]
 
         if (
             data[CHARGING_ALLOWED] == "off"
@@ -77,13 +82,18 @@ class ChargerController:
 
         return True
 
-    async def start_charging(self, call: ServiceCallType) -> None:
-        """Get name and assigned power from the service call and call the API accordingly.
-        In case charging is not allowed, log a warning and early escape."""
+    async def start_charging(self, call: ServiceCall) -> None:
+        """
+        Get name and assigned power from the service call and call the API accordingly.
 
-        charger_name = call.data.get("device_name", None)
-        charging_power = call.data.get("charging_power", None)
-        api = self._hass.data[DOMAIN][INIT_STATE][CHARGERS_API][charger_name][API]
+        In case charging is not allowed, log a warning and early escape.
+        """
+
+        charger_name: str | None = call.data.get("device_name", None)
+        charging_power: int | None = call.data.get("charging_power", None)
+        api: GoeChargerApi = self._hass.data[DOMAIN][INIT_STATE][CHARGERS_API][
+            charger_name
+        ][API]
 
         _LOGGER.debug(
             "Starting charging for the device=%s with power=%s",
@@ -97,25 +107,35 @@ class ChargerController:
         await self._hass.async_add_executor_job(api.set_force_charging, True)
         await self._hass.data[DOMAIN][f"{charger_name}_coordinator"].async_refresh()
 
-    async def stop_charging(self, call: ServiceCallType) -> None:
-        """Get name and assigned power from the service call and call the API accordingly.
-        In case charging is not allowed, log a warning and early escape."""
+    async def stop_charging(self, call: ServiceCall) -> None:
+        """
+        Get name and assigned power from the service call and call the API accordingly.
 
-        charger_name = call.data.get("device_name", None)
-        api = self._hass.data[DOMAIN][INIT_STATE][CHARGERS_API][charger_name][API]
+        In case charging is not allowed, log a warning and early escape.
+        """
+
+        charger_name: str | None = call.data.get("device_name", None)
+        api: GoeChargerApi = self._hass.data[DOMAIN][INIT_STATE][CHARGERS_API][
+            charger_name
+        ][API]
 
         _LOGGER.debug("Stopping charging for the device=%s", charger_name)
 
         await self._hass.async_add_executor_job(api.set_force_charging, False)
         await self._hass.data[DOMAIN][f"{charger_name}_coordinator"].async_refresh()
 
-    async def change_charging_power(self, call: ServiceCallType) -> None:
-        """Get name and power from the service call and call the API accordingly.
-        In case charging is not allowed, log an error and early escape."""
+    async def change_charging_power(self, call: ServiceCall) -> None:
+        """
+        Get name and power from the service call and call the API accordingly.
 
-        charger_name = call.data.get("device_name", None)
-        charging_power = call.data.get("charging_power", None)
-        api = self._hass.data[DOMAIN][INIT_STATE][CHARGERS_API][charger_name][API]
+        In case charging is not allowed, log an error and early escape.
+        """
+
+        charger_name: str | None = call.data.get("device_name", None)
+        charging_power: int | None = call.data.get("charging_power", None)
+        api: GoeChargerApi = self._hass.data[DOMAIN][INIT_STATE][CHARGERS_API][
+            charger_name
+        ][API]
 
         _LOGGER.debug(
             "Changing charging power for the device=%s to power=%s",
@@ -126,15 +146,19 @@ class ChargerController:
         await self._hass.async_add_executor_job(api.set_max_current, charging_power)
         await self._hass.data[DOMAIN][f"{charger_name}_coordinator"].async_refresh()
 
-    async def set_phase(self, call: ServiceCallType) -> None:
-        """Get name and phase from the service call and call the API accordingly.
+    async def set_phase(self, call: ServiceCall) -> None:
+        """
+        Get name and phase from the service call and call the API accordingly.
+
         In case the phase value is not set correctly, log an error and early escape.
-        Possible phase values: 0 (Auto), 1 (1-phased), 2 (3-phased)
+        Possible phase values: 0 (Auto), 1 (1-phased), 2 (3-phased).
         """
 
-        charger_name = call.data.get("device_name", None)
-        phase = call.data.get("phase", None)
-        api = self._hass.data[DOMAIN][INIT_STATE][CHARGERS_API][charger_name][API]
+        charger_name: str | None = call.data.get("device_name", None)
+        phase: int | None = call.data.get("phase", None)
+        api: GoeChargerApi = self._hass.data[DOMAIN][INIT_STATE][CHARGERS_API][
+            charger_name
+        ][API]
 
         if not phase in [0, 1, 2]:
             return
@@ -148,17 +172,21 @@ class ChargerController:
         await self._hass.async_add_executor_job(api.set_phase, phase)
         await self._hass.data[DOMAIN][f"{charger_name}_coordinator"].async_refresh()
 
-    async def set_transaction(self, call: ServiceCallType) -> None:
-        """Get name and status from the service call and call the API accordingly.
+    async def set_transaction(self, call: ServiceCall) -> None:
+        """
+        Get name and status from the service call and call the API accordingly.
+
         In case the status value is not set correctly, log an error and early escape.
         Set wallbox transaction with possible values:
         - None (no transaction)
-        - 0 (authenticate all users)
+        - 0 (authenticate all users).
         """
 
-        charger_name = call.data.get("device_name", None)
-        status = call.data.get("status", None)
-        api = self._hass.data[DOMAIN][INIT_STATE][CHARGERS_API][charger_name][API]
+        charger_name: str | None = call.data.get("device_name", None)
+        status: int | None = call.data.get("status", None)
+        api: GoeChargerApi = self._hass.data[DOMAIN][INIT_STATE][CHARGERS_API][
+            charger_name
+        ][API]
 
         if not status in [None, 0]:
             return

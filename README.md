@@ -44,12 +44,8 @@ TBD
 | eto       | energy_total               | Total energy used in kWh.                                      |
 | psm       | phase_switch_mode          | Phase switch mode - auto/1/3.                                  |
 | pnp       | phases_number_connected    | Number of connected phases - relates to the phase_switch_mode. |
-
-### Switches
-
-| Parameter | Name                   | Description              |
-| --------- | ---------------------- | ------------------------ |
-| frc       | charger_force_charging | Enable/disable charging. |
+| acs       | charger_access             | Access controll for the device - 0/1.                          |
+| N/A       | name                       | Friendly name of the device.                                   |
 
 ### Buttons
 

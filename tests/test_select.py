@@ -2,25 +2,23 @@
 
 import json
 from functools import partial
-from unittest.mock import patch, Mock
+from unittest.mock import Mock, patch
 
-from homeassistant.components.select import (
-    ATTR_OPTION,
-    SERVICE_SELECT_OPTION,
-    DOMAIN as SELECT_DOMAIN,
-)
+from homeassistant.components.select import ATTR_OPTION
+from homeassistant.components.select import DOMAIN as SELECT_DOMAIN
+from homeassistant.components.select import SERVICE_SELECT_OPTION
 from homeassistant.const import ATTR_ENTITY_ID, CONF_NAME
 from homeassistant.helpers.typing import HomeAssistantType
 from pytest_homeassistant_custom_component.common import MockConfigEntry, load_fixture
 
 from custom_components.smartenergy_goecharger import async_setup, async_setup_entry
 from custom_components.smartenergy_goecharger.const import (
-    DOMAIN,
     CONF_CHARGERS,
+    DOMAIN,
     PHASE_SWITCH_MODE,
 )
-from .mock_api import mocked_api_requests
 
+from .mock_api import mocked_api_requests
 
 GO_E_CHARGER_MOCK_REFERENCE = f"custom_components.{DOMAIN}.state.GoeChargerApi"
 CHARGER_1: dict = json.loads(load_fixture("charger.json"))[0]
