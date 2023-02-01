@@ -1,11 +1,13 @@
-"""go-e Charger Cloud state (coordinator) management"""
+"""go-e Charger Cloud state (coordinator) management."""
 
 import logging
 
 import aiohttp
 from goechargerv2.goecharger import GoeChargerApi
+
 from homeassistant.const import CONF_NAME
 from homeassistant.helpers.typing import HomeAssistantType
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .const import API, CHARGERS_API, DOMAIN, INIT_STATE, OFFLINE, ONLINE, STATUS
 from .controller import fetch_status
@@ -14,9 +16,7 @@ _LOGGER: logging.Logger = logging.getLogger(__name__)
 
 
 def init_state(name: str, url: str, token: str) -> dict:
-    """
-    Initialize the state with go-e Charger Cloud API and static values.
-    """
+    """Initialize the state with go-e Charger Cloud API and static values."""
 
     return {
         CONF_NAME: name,
@@ -26,20 +26,23 @@ def init_state(name: str, url: str, token: str) -> dict:
 
 class StateFetcher:
     """
-    Representation of the coordinator state handling. Whenever the coordinator is triggered,
-    it will call the APIs and update status data.
+    Representation of the coordinator state handling.
+
+    Whenever the coordinator is triggered, it will call the APIs and update status data.
     """
 
-    coordinator: None = None
+    coordinator: DataUpdateCoordinator
 
     def __init__(self, hass: HomeAssistantType) -> None:
+        """Construct controller with hass property."""
         self._hass: HomeAssistantType = hass
 
     async def fetch_states(self) -> dict:
         """
         Fetch go-e Charger Cloud car status via API.
+
         Fetched data will be enhanced with the:
-        - friendly name of the charger
+        - friendly name of the charger.
         """
 
         _LOGGER.debug("Updating the go-e Charger Cloud coordinator data")

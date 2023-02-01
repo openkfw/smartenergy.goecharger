@@ -1,4 +1,4 @@
-"""Constants re-used across different files"""
+"""Constants re-used across different files."""
 
 from enum import Enum
 
@@ -36,9 +36,7 @@ WALLBOX_CONTROL = "wallbox_control"
 
 
 class CarStatus(str, Enum):
-    """
-    List of possible car status values.
-    """
+    """List of possible car status values."""
 
     # 1
     CHARGER_READY_NO_CAR = "Charger ready, no car connected"

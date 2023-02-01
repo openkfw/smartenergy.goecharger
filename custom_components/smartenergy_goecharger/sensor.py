@@ -1,12 +1,11 @@
-"""Sensor platform configuration for go-e Charger Cloud"""
+"""Sensor platform configuration for go-e Charger Cloud."""
 
 import logging
 import numbers
-from abc import ABC, abstractmethod
 from typing import Literal
 
-from homeassistant.components.sensor import DOMAIN as SENSOR_DOMAIN
 from homeassistant.components.sensor import (
+    DOMAIN as SENSOR_DOMAIN,
     SensorDeviceClass,
     SensorEntity,
     SensorStateClass,
@@ -85,10 +84,8 @@ CHARGER_SENSORS_CONFIG: dict = {
 }
 
 
-class BaseSensor(ABC):
-    """
-    Representation of a Base sensor.
-    """
+class ChargerSensor(CoordinatorEntity, SensorEntity):
+    """Representation of a sensor for the go-e Charger Cloud."""
 
     def __init__(
         self,
@@ -97,9 +94,7 @@ class BaseSensor(ABC):
         device_id,
         attributes,
     ) -> None:
-        """
-        Initialize the Base sensor.
-        """
+        """Initialize the Base sensor."""
 
         super().__init__(coordinator)
         self._device_id = device_id
@@ -107,52 +102,12 @@ class BaseSensor(ABC):
         self._name: str = attributes["name"]
         self._attribute: str = attributes["attribute"]
         self._unit: str = attributes["unit"]
-        self._attr_state_class: str = attributes["state_class"]
-        self._attr_device_class: str = attributes["device_class"]
-
-    @property
-    @abstractmethod
-    def device_info(self) -> None:
-        """
-        Return the info about the device.
-        """
-
-    @property
-    def name(self) -> str:
-        """
-        Return the name of the sensor.
-        """
-        return self._name
-
-    @property
-    def unique_id(self) -> str:
-        """
-        Return the unique_id of the sensor.
-        """
-        return f"{self._device_id}_{self._attribute}"
-
-    @property
-    @abstractmethod
-    def state(self) -> None:
-        """
-        Return the state of the sensor.
-        """
-
-    @property
-    def unit_of_measurement(self) -> str:
-        """
-        Return the unit of measurement.
-        """
-        return self._unit
-
-
-class ChargerSensor(BaseSensor, CoordinatorEntity, SensorEntity):
-    """
-    Representation of a sensor for the go-e Charger Cloud.
-    """
+        self._attr_state_class = attributes["state_class"]
+        self._attr_device_class = attributes["device_class"]
 
     @property
     def device_info(self) -> entity.DeviceInfo:
+        """Return the device information."""
         return {
             "identifiers": {(DOMAIN, self._device_id)},
             "name": self._device_id,
@@ -161,14 +116,19 @@ class ChargerSensor(BaseSensor, CoordinatorEntity, SensorEntity):
         }
 
     @property
-    def state(self) -> str:
-        """
-        Return the state of the sensor.
-        """
+    def native_unit_of_measurement(self) -> str | None:
+        """Return the unit of measurement of the sensor, if any."""
+        return self._unit
+
+    @property
+    def native_value(self) -> float | str | int | None:
+        """Return the state of the sensor."""
         if self._attribute not in self.coordinator.data[self._device_id]:
             return None
 
-        attr_value: str = self.coordinator.data[self._device_id][self._attribute]
+        attr_value: float | str = self.coordinator.data[self._device_id][
+            self._attribute
+        ]
 
         # if charging is not allowed, show current as 0
         if (
@@ -179,23 +139,21 @@ class ChargerSensor(BaseSensor, CoordinatorEntity, SensorEntity):
 
         # convert Wh to kWh and round to 2 decimal positions
         if self._unit == K_WATT_HOUR and isinstance(attr_value, numbers.Number):
-            attr_value: str = round(attr_value / 1000, 2)
+            attr_value = round(float(attr_value) / 1000, 2)
 
         # if attribute is a number and larger than 0, convert it to minutes
         if (
             self.state_class == TIME_MINUTES
             and isinstance(attr_value, numbers.Number)
-            and attr_value > 0
+            and float(attr_value) > 0
         ):
-            return round(attr_value / MINUTE_IN_MS, 2)
+            return round(float(attr_value) / MINUTE_IN_MS, 2)
 
         return attr_value
 
     @property
     def available(self) -> bool:
-        """
-        Make the sensor input (un)available based on the status.
-        """
+        """Make the sensor input (un)available based on the status."""
 
         data: dict = self.coordinator.data[self._device_id]
 
@@ -213,27 +171,27 @@ def _setup_sensors(
         sensors: list[ChargerSensor] = []
         _LOGGER.debug("Creating sensors for the %s=%s", DOMAIN, sensor_id)
 
-        for sensor in CHARGER_SENSORS_CONFIG.get("sensors"):
+        for sensor in CHARGER_SENSORS_CONFIG.get("sensors", []):
             _LOGGER.debug("Adding sensor=%s for the %s=%s", sensor, DOMAIN, sensor_id)
 
             sensor_unit: str = (
-                CHARGER_SENSORS_CONFIG.get("units").get(sensor).get("unit")
-                if CHARGER_SENSORS_CONFIG.get("units").get(sensor)
+                CHARGER_SENSORS_CONFIG.get("units", {}).get(sensor).get("unit")
+                if CHARGER_SENSORS_CONFIG.get("units", {}).get(sensor)
                 else ""
             )
             sensor_name: str = (
-                CHARGER_SENSORS_CONFIG.get("units").get(sensor).get("name")
-                if CHARGER_SENSORS_CONFIG.get("units").get(sensor)
+                CHARGER_SENSORS_CONFIG.get("units", {}).get(sensor).get("name")
+                if CHARGER_SENSORS_CONFIG.get("units", {}).get(sensor)
                 else sensor
             )
             sensor_state_class: str = (
-                CHARGER_SENSORS_CONFIG.get("state_classes")[sensor]
-                if sensor in CHARGER_SENSORS_CONFIG.get("state_classes")
+                CHARGER_SENSORS_CONFIG.get("state_classes", {})[sensor]
+                if sensor in CHARGER_SENSORS_CONFIG.get("state_classes", {})
                 else ""
             )
             sensor_device_class: str = (
-                CHARGER_SENSORS_CONFIG.get("device_classes")[sensor]
-                if sensor in CHARGER_SENSORS_CONFIG.get("device_classes")
+                CHARGER_SENSORS_CONFIG.get("device_classes", {})[sensor]
+                if sensor in CHARGER_SENSORS_CONFIG.get("device_classes", {})
                 else ""
             )
 
@@ -262,9 +220,7 @@ async def async_setup_entry(
     config_entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """
-    Setup sensors from a config entry created in the integrations UI.
-    """
+    """Set sensors from a config entry created in the integrations UI."""
 
     entry_id: str = config_entry.entry_id
     config: dict = hass.data[DOMAIN][entry_id]
@@ -290,9 +246,7 @@ async def async_setup_platform(
     async_add_entities: AddEntitiesCallback,
     discovery_info: DiscoveryInfoType | None,
 ) -> None:
-    """
-    Set up go-e Charger Cloud Sensor platform.
-    """
+    """Set up go-e Charger Cloud Sensor platform."""
 
     _LOGGER.debug("Setting up the go-e Charger Cloud sensor platform")
 

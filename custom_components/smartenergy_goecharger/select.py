@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
-import logging
 from dataclasses import dataclass
+import logging
+from typing import Any
 
-from homeassistant.components.select import DOMAIN as SELECT_DOMAIN
-from homeassistant.components.select import SelectEntity, SelectEntityDescription
+from homeassistant.components.select import (
+    DOMAIN as SELECT_DOMAIN,
+    SelectEntity,
+    SelectEntityDescription,
+)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -26,7 +30,7 @@ from .controller import ChargerController, init_service_data
 
 _LOGGER: logging.Logger = logging.getLogger(__name__)
 
-SELECT_INPUTS: list[dict[str, str | list[str]]] = [
+SELECT_INPUTS: list[dict[str, Any]] = [
     {
         "id": PHASE_SWITCH_MODE,
         "name": "Set phase mode",
@@ -38,18 +42,13 @@ SELECT_INPUTS: list[dict[str, str | list[str]]] = [
 
 @dataclass
 class BaseSelectDescription(SelectEntityDescription):
-    """
-    Class to describe a Base select input.
-    """
+    """Class to describe a Base select input."""
 
     press_args: None = None
 
 
-# pylint: disable=too-few-public-methods
-class BaseDescriptiveEntity:
-    """
-    Representation of a Base device entity based on a description.
-    """
+class PhaseSelectInput(CoordinatorEntity, SelectEntity):
+    """Representation of the phase mode select input."""
 
     def __init__(
         self,
@@ -59,44 +58,30 @@ class BaseDescriptiveEntity:
         input_props,
         options,
     ) -> None:
-        """
-        Initialize the device.
-        """
+        """Initialize the device."""
 
         super().__init__(hass.data[DOMAIN][f"{device_id}_coordinator"])
         self.entity_description = description
-        self.entity_id: str = description.key
-        self._attr_unique_id: str = description.key
+        self.entity_id = description.key
+        self._attr_unique_id = description.key
         self._device_id = device_id
         self._charger_controller: ChargerController = ChargerController(hass)
-        self._attribute: str = input_props["id"]
-        self._attr_current_option: str = options["current_option"]
-        self._attr_options: dict = options["regular"]
-        self._attr_device_class: str = input_props["device_class"]
-
-
-class PhaseSelectInput(BaseDescriptiveEntity, CoordinatorEntity, SelectEntity):
-    """
-    Representation of the phase mode select input.
-    """
-
-    entity_description: BaseSelectDescription = None
+        self._attribute = input_props["id"]
+        self._attr_current_option = options["current_option"]
+        self._attr_options = options["regular"]
+        self._attr_device_class = input_props["device_class"]
 
     async def async_select_option(self, option: str) -> None:
-        """
-        Change the selected option.
-        """
-        service_data: dict = init_service_data(
-            {"device_name": self._device_id, "phase": int(option)}
+        """Change the selected option."""
+        service_data = init_service_data(
+            {"device_name": self._device_id, "phase": int(option)}, "set_phase"
         )
 
         await self._charger_controller.set_phase(service_data)
 
     @property
     def current_option(self) -> str | None:
-        """
-        Return the state of the entity.
-        """
+        """Return the state of the entity."""
         if self._attribute not in self.coordinator.data[self._device_id]:
             return None
 
@@ -104,16 +89,12 @@ class PhaseSelectInput(BaseDescriptiveEntity, CoordinatorEntity, SelectEntity):
 
     @property
     def unique_id(self) -> str | None:
-        """
-        Return the unique_id of the sensor.
-        """
+        """Return the unique_id of the sensor."""
         return f"{self._device_id}_{self._attribute}"
 
     @property
     def available(self) -> bool:
-        """
-        Make the select input (un)available based on the status.
-        """
+        """Make the select input (un)available based on the status."""
 
         data: dict = self.coordinator.data[self._device_id]
 
@@ -126,9 +107,7 @@ class PhaseSelectInput(BaseDescriptiveEntity, CoordinatorEntity, SelectEntity):
 def _create_select_inputs(
     hass: HomeAssistant, chargers: list[str]
 ) -> list[PhaseSelectInput]:
-    """
-    Create select inputs for defined entities.
-    """
+    """Create select inputs for defined entities."""
     select_entities: list[PhaseSelectInput] = []
 
     for charger_name in chargers:
@@ -169,9 +148,7 @@ async def async_setup_entry(
     config_entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """
-    Setup select inputs from a config entry created in the integrations UI.
-    """
+    """Set select inputs from a config entry created in the integrations UI."""
 
     entry_id: str = config_entry.entry_id
     config: dict = hass.data[DOMAIN][entry_id]
@@ -193,9 +170,7 @@ async def async_setup_platform(
     async_add_entities: AddEntitiesCallback,
     discovery_info: DiscoveryInfoType | None,
 ) -> None:
-    """
-    Set up go-e Charger Cloud select platform.
-    """
+    """Set up go-e Charger Cloud select platform."""
 
     _LOGGER.debug("Setting up the go-e Charger Cloud select platform")
 

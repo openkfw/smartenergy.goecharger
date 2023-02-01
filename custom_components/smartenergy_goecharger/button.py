@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
-import logging
 from dataclasses import dataclass
+import logging
 
-from homeassistant.components.button import DOMAIN as BUTTON_DOMAIN
-from homeassistant.components.button import ButtonEntity, ButtonEntityDescription
+from homeassistant.components.button import (
+    DOMAIN as BUTTON_DOMAIN,
+    ButtonEntity,
+    ButtonEntityDescription,
+)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -30,18 +33,13 @@ _LOGGER: logging.Logger = logging.getLogger(__name__)
 
 @dataclass
 class BaseButtonDescription(ButtonEntityDescription):
-    """
-    Class to describe a Base button.
-    """
+    """Class to describe a Base button."""
 
     press_args: None = None
 
 
-# pylint: disable=too-few-public-methods
-class BaseDescriptiveEntity:
-    """
-    Representation of a Base device entity based on a description.
-    """
+class WallboxControlButton(CoordinatorEntity, ButtonEntity):
+    """Representation of a Charge Button."""
 
     def __init__(
         self,
@@ -51,82 +49,70 @@ class BaseDescriptiveEntity:
         description,
         attribute,
     ) -> None:
-        """
-        Initialize the device.
-        """
+        """Initialize the device."""
         super().__init__(coordinator)
         self.entity_description = description
-        self.entity_id: str = description.key
-        self._attr_unique_id: str = description.key
+        self.entity_id = description.key
+        self._attr_unique_id = description.key
         self._device_id = device_id
         self._charger_controller: ChargerController = ChargerController(hass)
-        self._attribute: str = attribute
-
-
-class WallboxControlButton(BaseDescriptiveEntity, CoordinatorEntity, ButtonEntity):
-    """
-    Representation of a Charge Button.
-    """
-
-    entity_description: BaseButtonDescription = None
+        self._attribute = attribute
 
     async def async_press(self) -> None:
-        """
-        Handle the button press. Start/stop charging or authenticate the user.
-        """
+        """Handle the button press. Start/stop charging or authenticate the user."""
 
         data: dict = self.coordinator.data[self._device_id]
 
         if data[STATUS] == OFFLINE:
-            return False
+            return
 
-        service_data: dict = init_service_data({"device_name": self._device_id})
+        # service_data = init_service_data({"device_name": self._device_id})
 
-        match data[CAR_STATUS]:
-            case CarStatus.CAR_CHARGING:
-                # car status is 2 - stop charging
-                await self._charger_controller.stop_charging(service_data)
-            case CarStatus.CAR_CONNECTED_AUTH_REQUIRED:
-                # car status is 3 - authenticate
-                service_data.data["status"] = 0
-                await self._charger_controller.set_transaction(service_data)
-            case CarStatus.CHARGING_FINISHED_DISCONNECT:
-                # car status is 4 - start charging
-                await self._charger_controller.start_charging(service_data)
-            case _:
-                # car status is 1 - do nothing
-                pass
+        if data[CAR_STATUS] == CarStatus.CAR_CHARGING:
+            # car status is 2 - stop charging
+            await self._charger_controller.stop_charging(
+                init_service_data({"device_name": self._device_id}, "stop_charging")
+            )
+        elif data[CAR_STATUS] == CarStatus.CAR_CONNECTED_AUTH_REQUIRED:
+            # car status is 3 - authenticate
+            service_data = init_service_data(
+                {"device_name": self._device_id, "status": 0}, "set_transaction"
+            )
+            await self._charger_controller.set_transaction(service_data)
+        elif data[CAR_STATUS] == CarStatus.CHARGING_FINISHED_DISCONNECT:
+            # car status is 4 - start charging
+            await self._charger_controller.start_charging(
+                init_service_data({"device_name": self._device_id}, "start_charging")
+            )
+        else:
+            # car status is 1 - do nothing
+            pass
 
     @property
     def name(self) -> str:
-        """
-        Return the name of the sensor.
-        """
+        """Return the name of the sensor."""
 
         data: dict = self.coordinator.data[self._device_id]
 
         if data[STATUS] == OFFLINE:
             return "Wallbox is offline"
 
-        match data[CAR_STATUS]:
-            case CarStatus.CAR_CHARGING:
-                # car status is 2 - stop charging
-                return "Stop charging"
-            case CarStatus.CAR_CONNECTED_AUTH_REQUIRED:
-                # car status is 3 - authenticate
-                return "Authenticate car"
-            case CarStatus.CHARGING_FINISHED_DISCONNECT:
-                # car status is 4 - start charging
-                return "Start charging"
-            case _:
-                # car status is 1 - do nothing
-                return "Please connect car"
+        if data[CAR_STATUS] == CarStatus.CAR_CHARGING:
+            # car status is 2 - stop charging
+            return "Stop charging"
+        if data[CAR_STATUS] == CarStatus.CAR_CONNECTED_AUTH_REQUIRED:
+            # car status is 3 - authenticate
+            return "Authenticate car"
+        if data[CAR_STATUS] == CarStatus.CHARGING_FINISHED_DISCONNECT:
+            # car status is 4 - start charging
+            return "Start charging"
+
+        # car status is 1 - do nothing
+        return "Please connect car"
 
     @property
     def available(self) -> bool:
-        """
-        Make the button (un)available based on the status.
-        """
+        """Make the button (un)available based on the status."""
 
         data: dict = self.coordinator.data[self._device_id]
 
@@ -137,18 +123,14 @@ class WallboxControlButton(BaseDescriptiveEntity, CoordinatorEntity, ButtonEntit
 
     @property
     def unique_id(self) -> str | None:
-        """
-        Return the unique_id of the sensor.
-        """
+        """Return the unique_id of the sensor."""
         return f"{self._device_id}_{self._attribute}"
 
 
 def _create_buttons(
     hass: HomeAssistant, chargers: list[str]
 ) -> list[WallboxControlButton]:
-    """
-    Create input buttons for authentication.
-    """
+    """Create input buttons for authentication."""
     button_entities: list[WallboxControlButton] = []
 
     for charger_name in chargers:
@@ -174,9 +156,7 @@ async def async_setup_entry(
     config_entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """
-    Setup buttons from a config entry created in the integrations UI.
-    """
+    """Set buttons from a config entry created in the integrations UI."""
 
     entry_id: str = config_entry.entry_id
     config: dict = hass.data[DOMAIN][entry_id]
@@ -198,9 +178,7 @@ async def async_setup_platform(
     async_add_entities: AddEntitiesCallback,
     discovery_info: DiscoveryInfoType | None,
 ) -> None:
-    """
-    Set up go-e Charger Cloud Button platform.
-    """
+    """Set up go-e Charger Cloud Button platform."""
 
     _LOGGER.debug("Setting up the go-e Charger Cloud button platform")
 
