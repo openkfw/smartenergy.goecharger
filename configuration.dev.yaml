@@ -11,8 +11,7 @@ logger:
 sensor:
   - platform: time_date
     display_options:
-      - 'date_time'
-
+      - "date_time"
 smartenergy_goecharger:
   chargers:
     - name: charger1
