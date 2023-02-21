@@ -22,16 +22,6 @@ class InvalidAuth(HomeAssistantError):
     """Error to indicate there is invalid auth."""
 
 
-def _get_config_values(data_input: dict) -> dict:
-    data: dict = {}
-    config: list[str] = [CONF_NAME, CONF_HOST, CONF_API_TOKEN, CONF_SCAN_INTERVAL]
-
-    for config_name in config:
-        data[config_name] = data_input.get(config_name)
-
-    return data
-
-
 def _get_config_schema(default_values: dict) -> dict:
     return vol.Schema(
         {
@@ -127,8 +117,8 @@ class GoeChargerConfigFlow(ConfigFlow, domain=DOMAIN):
             if not errors:
                 return self.async_create_entry(
                     title=user_input.get(CONF_NAME, ""),
-                    data=_get_config_values(user_input),
-                    options=_get_config_values(user_input),
+                    data=user_input,
+                    options=user_input,
                 )
 
         return self.async_show_form(
