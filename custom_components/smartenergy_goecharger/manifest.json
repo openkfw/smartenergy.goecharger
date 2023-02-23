@@ -1,15 +1,15 @@
 {
   "domain": "smartenergy_goecharger",
   "name": "go-e Charger Cloud",
-  "version": "0.5.0",
-  "documentation": "https://github.com/openkfw/smartenergy.goecharger",
-  "issue_tracker": "https://github.com/openkfw/smartenergy.goecharger/issues",
-  "iot_class": "cloud_polling",
-  "config_flow": true,
   "codeowners": [
     "@openkfw"
   ],
+  "config_flow": true,
+  "documentation": "https://github.com/openkfw/smartenergy.goecharger",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/openkfw/smartenergy.goecharger/issues",
   "requirements": [
     "smart-energy.goecharger-api==0.3.1"
-  ]
+  ],
+  "version": "0.5.0"
 }
