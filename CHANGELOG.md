@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 0.6.0
+
+### Changed
+
+- Updated setup to be closer to the Home Assistant setup
+
 ## 0.5.0
 
 ### Changed

@@ -8,7 +8,7 @@ from homeassistant.components.number import ATTR_VALUE
 from homeassistant.components.number import DOMAIN as NUMBER_DOMAIN
 from homeassistant.components.number import SERVICE_SET_VALUE
 from homeassistant.const import ATTR_ENTITY_ID, CONF_NAME
-from homeassistant.helpers.typing import HomeAssistantType
+from homeassistant.core import HomeAssistant
 from pytest_homeassistant_custom_component.common import MockConfigEntry, load_fixture
 
 from custom_components.smartenergy_goecharger import async_setup, async_setup_entry
@@ -40,7 +40,7 @@ CHARGER_1: dict = json.loads(load_fixture("charger.json"))[0]
         )
     ),
 )
-async def test_number_input_max_current_change(hass: HomeAssistantType) -> None:
+async def test_number_input_max_current_change(hass: HomeAssistant) -> None:
     """Test if changing of the max current number input works."""
     charger_name = CHARGER_1[CONF_NAME]
     coordinator_name = f"{charger_name}_coordinator"
@@ -77,10 +77,9 @@ async def test_number_input_max_current_change(hass: HomeAssistantType) -> None:
     ),
 )
 async def test_number_input_max_current_change_wrong_limits(
-    hass: HomeAssistantType,
+    hass: HomeAssistant,
 ) -> None:
-    """Test if changing of the max current number doesn't work if limits are set incorrectly.
-    Min is greater than Max."""
+    """Test if changing of the max current number doesn't work if min greater than Max."""
     charger_name = CHARGER_1[CONF_NAME]
     coordinator_name = f"{charger_name}_coordinator"
     assert await async_setup(hass, {DOMAIN: {CONF_CHARGERS: [[CHARGER_1]]}})
@@ -121,10 +120,9 @@ async def test_number_input_max_current_change_wrong_limits(
     ),
 )
 async def test_number_input_max_current_change_config_entry(
-    hass: HomeAssistantType,
+    hass: HomeAssistant,
 ) -> None:
-    """Test if changing of the max current number input works
-    if configured via the config entry."""
+    """Test if changing of the max current number input works - configured via the config entry."""
     charger_name = "test"
     coordinator_name = f"{charger_name}_coordinator"
     config_entry = MockConfigEntry(

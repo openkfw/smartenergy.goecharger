@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
+from typing import Any
 
 from homeassistant.components.button import DOMAIN as BUTTON_DOMAIN
 from homeassistant.components.button import ButtonEntity, ButtonEntityDescription
@@ -11,7 +12,10 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from homeassistant.helpers.update_coordinator import (
+    CoordinatorEntity,
+    DataUpdateCoordinator,
+)
 
 from .const import (
     CAR_STATUS,
@@ -40,11 +44,11 @@ class WallboxControlButton(CoordinatorEntity, ButtonEntity):
 
     def __init__(
         self,
-        hass,
-        coordinator,
-        device_id,
-        description,
-        attribute,
+        hass: HomeAssistant,
+        coordinator: DataUpdateCoordinator,
+        device_id: str,
+        description: BaseButtonDescription,
+        attribute: str,
     ) -> None:
         """Initialize the device."""
         super().__init__(coordinator)
@@ -108,7 +112,7 @@ class WallboxControlButton(CoordinatorEntity, ButtonEntity):
         return "Please connect car"
 
     @property
-    def available(self) -> bool:
+    def available(self) -> Any:
         """Make the button (un)available based on the status."""
 
         data: dict = self.coordinator.data[self._device_id]

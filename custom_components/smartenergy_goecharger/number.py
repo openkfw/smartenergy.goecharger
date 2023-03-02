@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
+from typing import Any
 
 from homeassistant.components.number import DOMAIN as NUMBER_DOMAIN
 from homeassistant.components.number import NumberEntity, NumberEntityDescription
@@ -49,10 +50,10 @@ class CurrentInputNumber(CoordinatorEntity, NumberEntity):
 
     def __init__(
         self,
-        hass,
-        device_id,
-        description,
-        input_props,
+        hass: HomeAssistant,
+        device_id: str,
+        description: BaseNumberDescription,
+        input_props: dict,
     ) -> None:
         """Initialize the device."""
 
@@ -83,7 +84,7 @@ class CurrentInputNumber(CoordinatorEntity, NumberEntity):
         return self._step
 
     @property
-    def native_value(self) -> float | None:
+    def native_value(self) -> Any:
         """Return the value of the entity."""
         return self.coordinator.data[self._device_id][self._attribute]
 
@@ -102,7 +103,7 @@ class CurrentInputNumber(CoordinatorEntity, NumberEntity):
         return f"{self._device_id}_{self._attribute}"
 
     @property
-    def available(self) -> bool:
+    def available(self) -> Any:
         """Make the number input (un)available based on the status."""
 
         data: dict = self.coordinator.data[self._device_id]

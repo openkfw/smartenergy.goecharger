@@ -4,9 +4,8 @@ import logging
 
 import aiohttp
 from goechargerv2.goecharger import GoeChargerApi
-from homeassistant.core import ServiceCall
+from homeassistant.core import ServiceCall, HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
-from homeassistant.helpers.typing import HomeAssistantType
 
 from .const import API, CAR_STATUS, CHARGERS_API, CHARGING_ALLOWED, DOMAIN, INIT_STATE
 
@@ -21,7 +20,7 @@ def init_service_data(data: dict, service: str) -> ServiceCall:
     return service_data
 
 
-async def fetch_status(hass: HomeAssistantType, charger_name: str) -> dict:
+async def fetch_status(hass: HomeAssistant, charger_name: str) -> dict:
     """Fetch go-e Charger Cloud car status via API."""
 
     api: GoeChargerApi = hass.data[DOMAIN][INIT_STATE][CHARGERS_API][charger_name][API]
@@ -30,21 +29,21 @@ async def fetch_status(hass: HomeAssistantType, charger_name: str) -> dict:
     return fetched_status
 
 
-async def start_charging(hass: HomeAssistantType, charger_name: str) -> None:
+async def start_charging(hass: HomeAssistant, charger_name: str) -> None:
     """Start charging of a car via API, no state refresh."""
 
     api: GoeChargerApi = hass.data[DOMAIN][INIT_STATE][CHARGERS_API][charger_name][API]
     await hass.async_add_executor_job(api.set_force_charging, True)
 
 
-async def stop_charging(hass: HomeAssistantType, charger_name: str) -> None:
+async def stop_charging(hass: HomeAssistant, charger_name: str) -> None:
     """Stop charging of a car via API, no state refresh."""
 
     api: GoeChargerApi = hass.data[DOMAIN][INIT_STATE][CHARGERS_API][charger_name][API]
     await hass.async_add_executor_job(api.set_force_charging, False)
 
 
-async def ping_charger(hass: HomeAssistantType, charger_name: str) -> None:
+async def ping_charger(hass: HomeAssistant, charger_name: str) -> None:
     """Make a call to the charger device. If it fails raise an error."""
 
     try:
@@ -59,9 +58,9 @@ async def ping_charger(hass: HomeAssistantType, charger_name: str) -> None:
 class ChargerController:
     """Represents go-e Charger Cloud controller, abstracting API calls into methods."""
 
-    def __init__(self, hass: HomeAssistantType) -> None:
+    def __init__(self, hass: HomeAssistant) -> None:
         """Construct controller with hass property."""
-        self._hass: HomeAssistantType = hass
+        self._hass: HomeAssistant = hass
 
     def _is_charging_allowed(self, charger_name: str) -> bool:
         """Check if charging is allowed. If not, log an error and return False, otherwise True."""

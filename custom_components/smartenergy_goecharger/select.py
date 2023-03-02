@@ -49,11 +49,11 @@ class PhaseSelectInput(CoordinatorEntity, SelectEntity):
 
     def __init__(
         self,
-        hass,
-        device_id,
-        description,
-        input_props,
-        options,
+        hass: HomeAssistant,
+        device_id: str,
+        description: BaseSelectDescription,
+        input_props: dict,
+        options: dict,
     ) -> None:
         """Initialize the device."""
 
@@ -90,7 +90,7 @@ class PhaseSelectInput(CoordinatorEntity, SelectEntity):
         return f"{self._device_id}_{self._attribute}"
 
     @property
-    def available(self) -> bool:
+    def available(self) -> Any:
         """Make the select input (un)available based on the status."""
 
         data: dict = self.coordinator.data[self._device_id]
