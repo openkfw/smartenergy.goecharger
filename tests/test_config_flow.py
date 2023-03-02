@@ -1,8 +1,8 @@
 """Test the go-e Charger Cloud config flow and options flow."""
 
+from collections.abc import Callable
 from functools import partial
 import json
-from collections.abc import Callable
 from unittest.mock import Mock, patch
 
 import pytest
