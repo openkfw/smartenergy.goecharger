@@ -1,11 +1,14 @@
 """Test the go-e Charger Cloud config flow and options flow."""
 
-import json
 from functools import partial
-from typing import Callable
+import json
+from collections.abc import Callable
 from unittest.mock import Mock, patch
 
 import pytest
+from pytest_homeassistant_custom_component.common import MockConfigEntry, load_fixture
+
+from custom_components.smartenergy_goecharger.const import DOMAIN
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import (
@@ -13,9 +16,6 @@ from homeassistant.data_entry_flow import (
     RESULT_TYPE_FORM,
     FlowResult,
 )
-from pytest_homeassistant_custom_component.common import MockConfigEntry, load_fixture
-
-from custom_components.smartenergy_goecharger.const import DOMAIN
 
 from .mock_api import mocked_api_requests
 

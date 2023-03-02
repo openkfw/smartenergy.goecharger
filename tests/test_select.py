@@ -1,14 +1,9 @@
 """Test go-e Charger Cloud select inputs."""
 
-import json
 from functools import partial
+import json
 from unittest.mock import Mock, patch
 
-from homeassistant.components.select import ATTR_OPTION
-from homeassistant.components.select import DOMAIN as SELECT_DOMAIN
-from homeassistant.components.select import SERVICE_SELECT_OPTION
-from homeassistant.const import ATTR_ENTITY_ID, CONF_NAME
-from homeassistant.core import HomeAssistant
 from pytest_homeassistant_custom_component.common import MockConfigEntry, load_fixture
 
 from custom_components.smartenergy_goecharger import async_setup, async_setup_entry
@@ -17,6 +12,13 @@ from custom_components.smartenergy_goecharger.const import (
     DOMAIN,
     PHASE_SWITCH_MODE,
 )
+from homeassistant.components.select import (
+    ATTR_OPTION,
+    DOMAIN as SELECT_DOMAIN,
+    SERVICE_SELECT_OPTION,
+)
+from homeassistant.const import ATTR_ENTITY_ID, CONF_NAME
+from homeassistant.core import HomeAssistant
 
 from .mock_api import mocked_api_requests
 

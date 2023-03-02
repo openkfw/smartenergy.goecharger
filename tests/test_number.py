@@ -1,14 +1,9 @@
 """Test go-e Charger Cloud number inputs."""
 
-import json
 from functools import partial
+import json
 from unittest.mock import Mock, patch
 
-from homeassistant.components.number import ATTR_VALUE
-from homeassistant.components.number import DOMAIN as NUMBER_DOMAIN
-from homeassistant.components.number import SERVICE_SET_VALUE
-from homeassistant.const import ATTR_ENTITY_ID, CONF_NAME
-from homeassistant.core import HomeAssistant
 from pytest_homeassistant_custom_component.common import MockConfigEntry, load_fixture
 
 from custom_components.smartenergy_goecharger import async_setup, async_setup_entry
@@ -19,6 +14,13 @@ from custom_components.smartenergy_goecharger.const import (
     MAX_CHARGING_CURRENT_LIMIT,
     MIN_CHARGING_CURRENT_LIMIT,
 )
+from homeassistant.components.number import (
+    ATTR_VALUE,
+    DOMAIN as NUMBER_DOMAIN,
+    SERVICE_SET_VALUE,
+)
+from homeassistant.const import ATTR_ENTITY_ID, CONF_NAME
+from homeassistant.core import HomeAssistant
 
 from .mock_api import mocked_api_requests
 
