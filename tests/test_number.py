@@ -1,14 +1,9 @@
 """Test go-e Charger Cloud number inputs."""
 
-import json
 from functools import partial
+import json
 from unittest.mock import Mock, patch
 
-from homeassistant.components.number import ATTR_VALUE
-from homeassistant.components.number import DOMAIN as NUMBER_DOMAIN
-from homeassistant.components.number import SERVICE_SET_VALUE
-from homeassistant.const import ATTR_ENTITY_ID, CONF_NAME
-from homeassistant.helpers.typing import HomeAssistantType
 from pytest_homeassistant_custom_component.common import MockConfigEntry, load_fixture
 
 from custom_components.smartenergy_goecharger import async_setup, async_setup_entry
@@ -19,6 +14,13 @@ from custom_components.smartenergy_goecharger.const import (
     MAX_CHARGING_CURRENT_LIMIT,
     MIN_CHARGING_CURRENT_LIMIT,
 )
+from homeassistant.components.number import (
+    ATTR_VALUE,
+    DOMAIN as NUMBER_DOMAIN,
+    SERVICE_SET_VALUE,
+)
+from homeassistant.const import ATTR_ENTITY_ID, CONF_NAME
+from homeassistant.core import HomeAssistant
 
 from .mock_api import mocked_api_requests
 
@@ -40,7 +42,7 @@ CHARGER_1: dict = json.loads(load_fixture("charger.json"))[0]
         )
     ),
 )
-async def test_number_input_max_current_change(hass: HomeAssistantType) -> None:
+async def test_number_input_max_current_change(hass: HomeAssistant) -> None:
     """Test if changing of the max current number input works."""
     charger_name = CHARGER_1[CONF_NAME]
     coordinator_name = f"{charger_name}_coordinator"
@@ -77,10 +79,9 @@ async def test_number_input_max_current_change(hass: HomeAssistantType) -> None:
     ),
 )
 async def test_number_input_max_current_change_wrong_limits(
-    hass: HomeAssistantType,
+    hass: HomeAssistant,
 ) -> None:
-    """Test if changing of the max current number doesn't work if limits are set incorrectly.
-    Min is greater than Max."""
+    """Test if changing of the max current number doesn't work if min greater than Max."""
     charger_name = CHARGER_1[CONF_NAME]
     coordinator_name = f"{charger_name}_coordinator"
     assert await async_setup(hass, {DOMAIN: {CONF_CHARGERS: [[CHARGER_1]]}})
@@ -121,10 +122,9 @@ async def test_number_input_max_current_change_wrong_limits(
     ),
 )
 async def test_number_input_max_current_change_config_entry(
-    hass: HomeAssistantType,
+    hass: HomeAssistant,
 ) -> None:
-    """Test if changing of the max current number input works
-    if configured via the config entry."""
+    """Test if changing of the max current number input works - configured via the config entry."""
     charger_name = "test"
     coordinator_name = f"{charger_name}_coordinator"
     config_entry = MockConfigEntry(

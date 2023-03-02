@@ -1,14 +1,9 @@
 """Test go-e Charger Cloud select inputs."""
 
-import json
 from functools import partial
+import json
 from unittest.mock import Mock, patch
 
-from homeassistant.components.select import ATTR_OPTION
-from homeassistant.components.select import DOMAIN as SELECT_DOMAIN
-from homeassistant.components.select import SERVICE_SELECT_OPTION
-from homeassistant.const import ATTR_ENTITY_ID, CONF_NAME
-from homeassistant.helpers.typing import HomeAssistantType
 from pytest_homeassistant_custom_component.common import MockConfigEntry, load_fixture
 
 from custom_components.smartenergy_goecharger import async_setup, async_setup_entry
@@ -17,6 +12,13 @@ from custom_components.smartenergy_goecharger.const import (
     DOMAIN,
     PHASE_SWITCH_MODE,
 )
+from homeassistant.components.select import (
+    ATTR_OPTION,
+    DOMAIN as SELECT_DOMAIN,
+    SERVICE_SELECT_OPTION,
+)
+from homeassistant.const import ATTR_ENTITY_ID, CONF_NAME
+from homeassistant.core import HomeAssistant
 
 from .mock_api import mocked_api_requests
 
@@ -33,7 +35,7 @@ CHARGER_1: dict = json.loads(load_fixture("charger.json"))[0]
         )
     ),
 )
-async def test_select_input_set_phase(hass: HomeAssistantType) -> None:
+async def test_select_input_set_phase(hass: HomeAssistant) -> None:
     """Test if setting of the set phase select input works."""
     charger_name = CHARGER_1[CONF_NAME]
     coordinator_name = f"{charger_name}_coordinator"
@@ -70,10 +72,9 @@ async def test_select_input_set_phase(hass: HomeAssistantType) -> None:
     ),
 )
 async def test_select_input_set_phase_config_entry(
-    hass: HomeAssistantType,
+    hass: HomeAssistant,
 ) -> None:
-    """Test if setting of the set phase select input works
-    if configured via the config entry."""
+    """Test if setting of the set phase select input works - configured via the config entry."""
     charger_name = "test"
     coordinator_name = f"{charger_name}_coordinator"
     config_entry = MockConfigEntry(

@@ -2,28 +2,52 @@
 # See https://pre-commit.com/hooks.html for more hooks
 default_stages: [push]
 repos:
--   repo: local
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.0.237
     hooks:
-    -   id: isort
-        name: isort
-        entry: isort
-        language: system
-        types: [python]
-        require_serial: true
-        args: ["--profile", "black", "--filter-files"]
-    -   id: black
+      - id: ruff
+        args:
+          - --fix
+  - repo: https://github.com/PyCQA/flake8
+    rev: 6.0.0
+    hooks:
+      - id: flake8
+        additional_dependencies:
+          - pycodestyle==2.10.0
+          - pyflakes==3.0.1
+          - flake8-docstrings==1.6.0
+          - pydocstyle==6.2.3
+          - flake8-comprehensions==3.10.1
+          - flake8-noqa==1.3.0
+          - mccabe==0.7.0
+        stages: [manual]
+  - repo: local
+    hooks:
+      - id: black
         name: black
         entry: black
         language: system
         types: [python]
         require_serial: true
-    -   id: pylint
+      - id: isort
+        name: isort
+        entry: isort
+        language: system
+        types: [python]
+        require_serial: true
+      - id: mypy
+        name: mypy
+        entry: mypy
+        language: system
+        types: [python]
+        require_serial: true
+      - id: pylint
         name: pylint
         entry: pylint
         language: system
         types: [python]
         require_serial: true
-    -   id: pytest
+      - id: pytest
         name: pytest
         entry: pytest
         language: system

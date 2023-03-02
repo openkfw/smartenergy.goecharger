@@ -1,13 +1,9 @@
 """Test go-e Charger Cloud button inputs."""
 
-import json
 from functools import partial
+import json
 from unittest.mock import Mock, patch
 
-from homeassistant.components.button import DOMAIN as BUTTON_DOMAIN
-from homeassistant.components.button import SERVICE_PRESS
-from homeassistant.const import ATTR_ENTITY_ID, CONF_NAME
-from homeassistant.helpers.typing import HomeAssistantType
 from pytest_homeassistant_custom_component.common import MockConfigEntry, load_fixture
 
 from custom_components.smartenergy_goecharger import async_setup, async_setup_entry
@@ -22,6 +18,9 @@ from custom_components.smartenergy_goecharger.const import (
     WALLBOX_CONTROL,
     CarStatus,
 )
+from homeassistant.components.button import DOMAIN as BUTTON_DOMAIN, SERVICE_PRESS
+from homeassistant.const import ATTR_ENTITY_ID, CONF_NAME
+from homeassistant.core import HomeAssistant
 
 from .mock_api import mocked_api_requests
 
@@ -50,7 +49,7 @@ CHARGER_CAR_STATUS_4 = dict(
         )
     ),
 )
-async def test_button_wallbox_charge_stop(hass: HomeAssistantType) -> None:
+async def test_button_wallbox_charge_stop(hass: HomeAssistant) -> None:
     """Test if pressing the button stops the charging."""
     charger_name = CHARGER_1[CONF_NAME]
     coordinator_name = f"{charger_name}_coordinator"
@@ -87,7 +86,7 @@ async def test_button_wallbox_charge_stop(hass: HomeAssistantType) -> None:
         )
     ),
 )
-async def test_button_wallbox_auth(hass: HomeAssistantType) -> None:
+async def test_button_wallbox_auth(hass: HomeAssistant) -> None:
     """Test if pressing the button enables the device authentication."""
     charger_name = CHARGER_1[CONF_NAME]
     coordinator_name = f"{charger_name}_coordinator"
@@ -118,7 +117,7 @@ async def test_button_wallbox_auth(hass: HomeAssistantType) -> None:
         )
     ),
 )
-async def test_button_wallbox_charge_start(hass: HomeAssistantType) -> None:
+async def test_button_wallbox_charge_start(hass: HomeAssistant) -> None:
     """Test if pressing the button starts the charging."""
     charger_name = CHARGER_1[CONF_NAME]
     coordinator_name = f"{charger_name}_coordinator"
@@ -155,7 +154,7 @@ async def test_button_wallbox_charge_start(hass: HomeAssistantType) -> None:
         )
     ),
 )
-async def test_button_wallbox_disabled(hass: HomeAssistantType) -> None:
+async def test_button_wallbox_disabled(hass: HomeAssistant) -> None:
     """Test if pressing of the button is disabled when car is not connected."""
     charger_name = CHARGER_1[CONF_NAME]
     coordinator_name = f"{charger_name}_coordinator"
@@ -196,7 +195,7 @@ async def test_button_wallbox_disabled(hass: HomeAssistantType) -> None:
         )
     ),
 )
-async def test_button_wallbox_offline(hass: HomeAssistantType) -> None:
+async def test_button_wallbox_offline(hass: HomeAssistant) -> None:
     """Test if wallbox is set to the offline mode when wallbox itself is offline."""
     charger_name = CHARGER_1[CONF_NAME]
     coordinator_name = f"{charger_name}_coordinator"
@@ -216,9 +215,8 @@ async def test_button_wallbox_offline(hass: HomeAssistantType) -> None:
         )
     ),
 )
-async def test_button_wallbox_charge_stop_config_entry(hass: HomeAssistantType) -> None:
-    """Test if pressing the button stops the charging,
-    if configured via the config entry."""
+async def test_button_wallbox_charge_stop_config_entry(hass: HomeAssistant) -> None:
+    """Test if pressing the button stops the charging - configured via the config entry."""
     charger_name = "test"
     coordinator_name = f"{charger_name}_coordinator"
     config_entry = MockConfigEntry(

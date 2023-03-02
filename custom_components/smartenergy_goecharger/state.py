@@ -4,8 +4,9 @@ import logging
 
 import aiohttp
 from goechargerv2.goecharger import GoeChargerApi
+
 from homeassistant.const import CONF_NAME
-from homeassistant.helpers.typing import HomeAssistantType
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .const import API, CHARGERS_API, DOMAIN, INIT_STATE, OFFLINE, ONLINE, STATUS
@@ -32,9 +33,9 @@ class StateFetcher:
 
     coordinator: DataUpdateCoordinator
 
-    def __init__(self, hass: HomeAssistantType) -> None:
+    def __init__(self, hass: HomeAssistant) -> None:
         """Construct controller with hass property."""
-        self._hass: HomeAssistantType = hass
+        self._hass: HomeAssistant = hass
 
     async def fetch_states(self) -> dict:
         """

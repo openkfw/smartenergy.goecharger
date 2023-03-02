@@ -2,10 +2,10 @@
 
 import logging
 import numbers
-from typing import Literal
+from typing import Any, Literal
 
-from homeassistant.components.sensor import DOMAIN as SENSOR_DOMAIN
 from homeassistant.components.sensor import (
+    DOMAIN as SENSOR_DOMAIN,
     SensorDeviceClass,
     SensorEntity,
     SensorStateClass,
@@ -15,7 +15,10 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from homeassistant.helpers.update_coordinator import (
+    CoordinatorEntity,
+    DataUpdateCoordinator,
+)
 
 from .const import (
     CAR_STATUS,
@@ -89,10 +92,10 @@ class ChargerSensor(CoordinatorEntity, SensorEntity):
 
     def __init__(
         self,
-        coordinator,
-        entity_id,
-        device_id,
-        attributes,
+        coordinator: DataUpdateCoordinator,
+        entity_id: str,
+        device_id: str,
+        attributes: dict,
     ) -> None:
         """Initialize the Base sensor."""
 
@@ -152,7 +155,7 @@ class ChargerSensor(CoordinatorEntity, SensorEntity):
         return attr_value
 
     @property
-    def available(self) -> bool:
+    def available(self) -> Any:
         """Make the sensor input (un)available based on the status."""
 
         data: dict = self.coordinator.data[self._device_id]

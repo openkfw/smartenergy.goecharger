@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
-import logging
 from dataclasses import dataclass
+import logging
 from typing import Any
 
-from homeassistant.components.select import DOMAIN as SELECT_DOMAIN
-from homeassistant.components.select import SelectEntity, SelectEntityDescription
+from homeassistant.components.select import (
+    DOMAIN as SELECT_DOMAIN,
+    SelectEntity,
+    SelectEntityDescription,
+)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -49,11 +52,11 @@ class PhaseSelectInput(CoordinatorEntity, SelectEntity):
 
     def __init__(
         self,
-        hass,
-        device_id,
-        description,
-        input_props,
-        options,
+        hass: HomeAssistant,
+        device_id: str,
+        description: BaseSelectDescription,
+        input_props: dict,
+        options: dict,
     ) -> None:
         """Initialize the device."""
 
@@ -90,7 +93,7 @@ class PhaseSelectInput(CoordinatorEntity, SelectEntity):
         return f"{self._device_id}_{self._attribute}"
 
     @property
-    def available(self) -> bool:
+    def available(self) -> Any:
         """Make the select input (un)available based on the status."""
 
         data: dict = self.coordinator.data[self._device_id]
