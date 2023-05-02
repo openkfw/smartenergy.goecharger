@@ -2,7 +2,7 @@ black==22.10.0
 pylint==2.15.3
 smart-energy.goecharger-api==0.3.1
 pytest-homeassistant-custom-component==0.12.10
-Flask==2.0.3
+Flask==2.3.2
 pre-commit==2.20.0
 isort==5.11.4
 mypy==0.991
